@@ -1,0 +1,113 @@
+{
+    "lineWidth": 80,
+    "newLineKind": "lf",
+    "indentWidth": 4,
+    "useTabs": false,
+    "excludes": [
+        "**/*-lock.json",
+        "**/node_modules",
+        "vendor/**"
+    ],
+    "json": {
+        "lineWidth": 120,
+        "commentLine.forceSpaceAfterSlashes": true,
+        "trailingCommas": "maintain",
+        "jsonTrailingCommaFiles": ["**/tsconfig.json", "**/.vscode/*.json"]
+    },
+    "markdown": {
+    },
+    "toml": {
+        "lineWidth": 120,
+        "comment.forceLeadingSpace": true,
+        "cargo.applyConventions": true
+    },
+    "dockerfile": {},
+    "prettier": {
+        "arrowParens": "always",
+        "semi": true,
+        "bracketSameLine": true,
+        "overrides": [
+            {
+                "files": [
+                    "devcontainer.json",
+                    "tsconfig.json",
+                    "package.json",
+                    "*.jsonc"
+                ],
+                "options": {
+                    "trailingComma": "none"
+                }
+            }
+        ],
+        "singleQuote": false
+    },
+    //
+    "ruff": {
+        "indentStyle": "space",
+        "lineLength": 80,
+        "quoteStyle": "double",
+        "lineEnding": "lf"
+    },
+    /* ====================================================
+    ====================== EXECS ==========================
+    ==================================================== */
+    "exec": {
+        // "cwd": "${configDir}",
+        "commands": [
+            {
+                "command": "rustfmt --edition 2021",
+                "exts": ["rs"]
+            },
+            {
+                "command": "gofmt",
+                "exts": ["go"]
+            },
+            // {
+            //     "command": "clang-format -style=file:./global-clang-format.yaml --assume-filename=file.c",
+            //     "exts": ["c"],
+            //     "stdin": true
+            // },
+            // {
+            //     "command": "clang-format -style=file:./proto-clang-format.yaml --assume-filename=file.proto",
+            //     "exts": ["proto"],
+            //     "stdin": true
+            // },
+            {
+                // install it with go install mvdan.cc/sh/v3/cmd/shfmt@latest
+                "command": "shfmt -i {{indent_width}}",
+                "exts": ["sh"],
+                "stdin": true
+            },
+            {
+                "command": "ocamlformat --enable-outside-detected-project --config=profile=default,break-cases=toplevel,break-collection-expressions=wrap,if-then-else=k-r,function-indent=4,extension-indent=4,indent-after-in=0,let-binding-indent=4,match-indent=2,match-indent-nested=always,cases-exp-indent=4,margin=60 --name=file.ml -",
+                "exts": ["ml"],
+                "stdin": true
+            },
+            {
+                "command": "typstyle",
+                "exts": ["typ"],
+                "stdin": true
+            },
+            {
+                "command": "stylua --indent-width={{indent_width}} --indent-type=Spaces --quote-style=AutoPreferDouble --sort-requires --column-width={{line_width}} -",
+                "exts": ["lua"],
+                "stdin": true
+            }
+        ]
+    },
+    /* ====================================================
+    ====================== PLUGINS ==========================
+    ==================================================== */
+    "plugins": [
+        "https://plugins.dprint.dev/json-0.19.4.wasm",
+        "https://plugins.dprint.dev/markdown-0.17.8.wasm",
+        "https://plugins.dprint.dev/toml-0.6.3.wasm",
+        "https://plugins.dprint.dev/dockerfile-0.3.2.wasm",
+        "https://plugins.dprint.dev/exec-0.5.0.json@8d9972eee71fa1590e04873540421f3eda7674d0f1aae3d7c788615e7b7413d0",
+        "https://plugins.dprint.dev/ruff-0.3.9.wasm",
+        "https://plugins.dprint.dev/jupyter-0.1.5.wasm",
+        //
+        "https://plugins.dprint.dev/prettier-0.46.1.json@e5bd083088a8dfc6e5ce2d3c9bee81489b065bd5345ef55b59f5d96627928b7a"
+        //
+    ]
+}
