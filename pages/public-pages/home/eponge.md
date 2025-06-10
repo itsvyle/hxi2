@@ -11,7 +11,7 @@ Vous retouverez [ici](https://github.com/Saskcwatch/Eponge/releases/latest/downl
 énoncées des problèmes. Sont aussi disponible un document avec des [indications](https://github.com/Saskcwatch/Eponge/releases/latest/download/eponge-indications.pdf)
 ainsi qu'une [correction](https://github.com/Saskcwatch/Eponge/releases/latest/download/eponge-correction.pdf) partielle.
 
-Il est important de noté que le receuil, disponible sur [github](https://github.com/Saskcwatch/Eponge), n'est pour l'instant absolument pas finis,
-les contributions, notament pour rédigerdes corrections, sont les bienvenues.
+Il est important de noté que le receuil, disponible sur [github](https://github.com/Saskcwatch/Eponge), n'est pour l'instant absolument pas fini,
+les contributions, notament pour rédiger des corrections, sont les bienvenues.
 
 
