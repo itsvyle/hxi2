@@ -1,0 +1,21 @@
+@use "./mixins-variables.scss" as *;
+.dvd-overlay {
+    z-index: $z-index-dvd;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    overflow: hidden;
+
+    &.active {
+        display: block;
+    }
+
+    img {
+        position: absolute;
+        width: 150px;
+        height: auto;
+    }
+}

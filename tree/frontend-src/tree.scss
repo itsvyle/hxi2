@@ -1,0 +1,108 @@
+@use "../../global-frontend-dependencies/global";
+@use "../../global-frontend-dependencies/mixins-variables" as *;
+@use "../../global-frontend-dependencies/ui_fuzzy_input" as *;
+
+body {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+}
+
+#sidebar {
+    height: 200px;
+    width: 250px;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 1;
+    background-color: $background-secondary;
+    border-radius: $border-radius;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 2;
+    align-items: center;
+
+    transition:
+        height 0.2s ease-in-out,
+        width 0.2s ease-in-out;
+
+    &.hidden {
+        height: 58px;
+        @media (max-width: $mobile-width) {
+            width: 58px;
+
+            #sidebar-header {
+                h3,
+                #menu-button {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    #sidebar-header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 0.25rem 1rem;
+        height: 58px;
+        width: 100%;
+        flex-shrink: 0;
+
+        h3 {
+            font-size: 1.1em;
+            flex: 1;
+            text-align: center;
+        }
+
+        #sidebar-header-toggle {
+            @include cancelButtonStyles();
+            @include buttonIcon();
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            justify-content: center;
+            border-radius: 50%;
+            &:hover {
+                background-color: var(--background-secondary-hover);
+            }
+        }
+    }
+
+    #add-button {
+        @include buttonIcon();
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #search-user {
+        max-width: 190px;
+    }
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex: 1;
+}
+
+#main-tree-container {
+    height: 100%;
+    width: 100%;
+}
+
+ui-tabs {
+    z-index: 1;
+}
+
+.student-tab {
+    display: none;
+    height: 100%;
+    &.visible {
+        display: block;
+    }
+}

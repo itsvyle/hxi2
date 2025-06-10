@@ -1,0 +1,22 @@
+{{ $data := .Inner | transform.Unmarshal }}
+<div class="image-gallery-container">
+    <div class="image-main-view">
+        {{ range $data }}
+            {{ if .sep }}
+                <div class="image-section-divider"></div>
+            {{ else }}
+                <div class="image-container">
+                    {{with .title}}<span>{{ . }}</span>{{ end }}
+                    <a href="{{(default .image .real_image) | safeURL}}" target="_blank">
+                        <img
+                            src="{{.image | safeURL}}"
+                            {{with .title}}alt="Pulls {{.}}"{{ end }}
+                            style="{{with .bg}}background-color: {{.}};{{end}}{{with .border_radius}}border-radius: {{.}};{{end}}"
+                            />
+                    </a>
+                    {{if .author}}<figcaption {{if .author_color}}style="color: {{.author_color}};"{{ end }}>Par: {{.author}}</figcaption>{{ end }}
+                </div>
+            {{ end }}
+        {{ end }}
+    </div>
+</div>

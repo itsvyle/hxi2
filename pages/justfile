@@ -1,0 +1,72 @@
+import "../utils.just"
+HUGO_CONTENT := justfile_directory() / "hugo-content"
+default:
+    just --list
+
+# Initialize the workspace
+init $INIT_PAGES="1": 
+    @just _utils-check-program "hugo" 1
+    @just _utils-check-program "volta" 0
+    cd ../global-frontend-dependencies/ && pnpm install
+    # Make sure to build the static files, so that they are accessible by the dev server
+    -just --justfile=../static/justfile init build-html
+    pnpm install
+
+
+[linux,macos]
+dev:
+    #!/usr/bin/env bash
+    if [[ -n "$TMUX" ]]; then
+        tmux split-window -d -h "just hugo-watch"
+        pnpm serve
+    else
+        pnpm serve --hugo
+    fi
+
+[windows]
+dev:
+    pnpm serve --hugo
+
+hugo-build:
+    hugo --logLevel debug
+
+hugo-watch:
+    hugo --logLevel debug --watch
+
+frontend-build:
+    hugo --logLevel debug
+    pnpm build
+
+[no-cd, linux, macos]
+create-page name section=trim_start_match(invocation_directory(),justfile_directory() + "/"):
+    #!/usr/bin/env bash
+    set -euo pipefail
+    command -v jq >/dev/null 2>&1 || { echo >&2 "jq is required but not installed. Aborting."; exit 1; }
+    if [[ "$(pwd)" == "{{justfile_directory()}}" ]]; then
+        echo "{{ style("error") }}You must not run this command from the pages directory - please go into public-pages, or hxi2-private-pages" && exit 1
+    elif [[ "$(pwd)" == "{{HUGO_CONTENT}}/"* ]]; then
+        echo "{{ style("error") }}You must not run this command from the hugo-content directory" && exit 1
+    elif [[ "$(pwd)" == "{{justfile_directory()}}/"* ]]; then
+        echo "" > /dev/null
+    else
+        echo "{{ style("error") }}You must run this command from the pages directory - please go into public-pages, or hxi2-private-pages" && exit 1
+    fi
+    if [[ -z "{{section}}" ]]; then echo "{{ style("error") }}You must provide a section name" && exit 1; fi
+    if [[ -f "{{name}}.ts" ]]; then echo "{{ style("error") }}File {{name}}.ts already exists" && exit 1; fi
+    if [[ -f "{{name}}.scss" ]]; then echo "{{ style("error") }}File {{name}}.scss already exists" && exit 1; fi
+    if [[ -f "{{name}}.html" ]]; then echo "{{ style("error") }}File {{name}}.html already exists" && exit 1; fi
+    # {{HUGO_CONTENT}}/{{section}}/
+    hugo_file="{{name}}.md" 
+    if [[ -f "$hugo_file" ]]; then echo "{{ style("error") }}File $hugo_file already exists" && exit 1; fi
+    echo "{{ GREEN }}Creating {{name}}.ts, {{name}}.scss, and $hugo_file in section {{section}}{{ NORMAL }}"
+    touch "{{name}}.ts" "{{name}}.scss" "$hugo_file"
+    echo "{{ GREEN }}Updating sections.json {{ NORMAL }}"
+    \cat <<< $(jq '.["{{section}}"] = (.["{{section}}"] // {}) + {"{{name}}": "{{name}}.ts"}' {{justfile_directory()}}/sections.json) > {{justfile_directory()}}/sections.json
+    touch .gitignore
+    echo -e "\n{{name}}.html" >> ".gitignore"
+    echo 'import "./{{file_name(name)}}.scss";' > "{{name}}.ts"
+    echo '---' > "$hugo_file"
+    echo "title: \"Titre dans la barre\"" >> "$hugo_file"
+    echo "MainTitle: \"Titre visible en haut de la page\"" >> "$hugo_file"
+    echo "subtitle: \"\"" >> "$hugo_file"
+    echo "---" >> "$hugo_file"

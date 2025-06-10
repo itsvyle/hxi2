@@ -1,0 +1,37 @@
+import "../utils.just"
+
+set dotenv-load
+CONFIG_DB_PATH := "test_db.sqlite3"
+HXI2_PROJECT_API_KEY := "dkljsadkljaskldjqwklejqwklehqwjlkehqwqweqwe"
+
+
+default: 
+    just --list  
+
+init: 
+    @just _utils-check-program "go" 1
+    @just _utils-check-program "volta" 0
+    cd ../global-frontend-dependencies/ && pnpm install
+    pnpm install
+    go mod download
+
+[linux,macos]
+dev:
+    #!/usr/bin/env bash
+    if [[ -n "$TMUX" ]]; then
+        tmux split-window -d -h "just frontend-dev"
+        just test-run
+    else
+        echo "{{ style("error") }}You must run this command in a tmux session to use the split-window feature{{ NORMAL }}"
+        echo "{{ style("error") }}Instead, you should run "just frontend-dev" and "just test-run" in separate terminals{{ NORMAL }}"
+    fi
+
+
+frontend-dev:
+    pnpm run dev_serve
+
+frontend-build:
+    pnpm run build
+
+test-run $HXI2_AUTH_URL="http://localhost:42001" $HXI2_AUTH_ENDPOINT="http://localhost:42001" $HXI2_COOKIES_DOMAIN=".localhost" $CONFIG_DB_PATH=CONFIG_DB_PATH: 
+    CGO_ENABLED=1 go run .

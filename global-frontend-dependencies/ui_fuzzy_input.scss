@@ -1,0 +1,51 @@
+@use "./mixins-variables.scss" as *;
+
+._fuzzy-results {
+    display: none;
+    position: absolute;
+    z-index: $z-index-dialog + 1;
+    background-color: var(--background-primary-active);
+    border-bottom-right-radius: $border-radius;
+    border-bottom-left-radius: $border-radius;
+    border: 1px solid var(--border-color);
+    min-height: 100px;
+
+    flex-direction: column;
+    max-height: 300px;
+    overflow-y: auto;
+
+    &.visible {
+        display: flex;
+    }
+
+    .no-results {
+        display: none;
+        justify-content: center;
+        align-items: center;
+
+        height: 100%;
+        width: 100%;
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+    }
+
+    &.no-results {
+        .no-results {
+            display: flex;
+            text-align: center;
+        }
+        justify-content: center;
+        align-items: center;
+    }
+
+    .fuzzy-result {
+        padding: 10px 10px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background 0.3s;
+        &:hover {
+            background-color: var(--background-secondary-hover);
+        }
+        border-bottom: 1px solid var(--border-color);
+    }
+}

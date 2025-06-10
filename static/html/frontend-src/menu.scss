@@ -1,0 +1,529 @@
+@use "sass:color";
+@use "../../../global-frontend-dependencies/mixins-variables" as vars;
+$menu-bg: black;
+$menu-fg: white;
+$menu-border: #ccc;
+$menu-appear-transition-duration: 0.3s;
+$mobile-width: 600px;
+$z-ind: vars.$z-index-navbar;
+
+$extended-menu-width: vars.$extended-menu-width;
+$sidebar-width: vars.$sidebar-width;
+
+/* #region  utils */
+$hover-change: vars.$hover-change;
+$menu-bg-hover: color.adjust($menu-bg, $lightness: 10%);
+$menu-bg-active: color.adjust($menu-bg, $lightness: 20%);
+$menu-fg-hover: color.adjust($menu-fg, $lightness: $hover-change);
+$translate-button: 0.05em;
+
+@mixin iconButton($wi, $fo) {
+    width: $wi;
+    height: $wi;
+    font-size: $fo;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 50%;
+    &:hover {
+        background-color: $menu-bg-hover;
+    }
+}
+
+@mixin scrollable() {
+    // scrollbar-width: thin;
+    // scrollbar-color: $menu-bg-active $menu-bg-hover; /* thumb color, track color */
+
+    &::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: $menu-bg;
+        border-radius: 5px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: $menu-bg;
+        border-radius: 5px;
+        border: 1px solid $menu-fg;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+        background-color: $menu-bg-active;
+    }
+}
+
+/* #endregion */
+
+/* body {
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+    height: 100%;
+    main {
+        flex: 1;
+        background-color: orange;
+    }
+} */
+
+#menu-button,
+#menu-container {
+    a,
+    div,
+    span,
+    button,
+    aside {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-weight: inherit;
+        font-style: inherit;
+        font-family: inherit;
+        font-size: 100%;
+        vertical-align: baseline;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 16px;
+}
+
+#menu-button {
+    position: fixed;
+    top: 0.5em;
+    left: 5px;
+    z-index: $z-ind - 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: $menu-fg;
+
+    &.integrated {
+        position: unset;
+        top: 0;
+        left: 0;
+    }
+
+    background-color: $menu-bg;
+    border-radius: 5px;
+    padding: 7px !important;
+
+    &:hover {
+        background-color: $menu-bg-hover;
+    }
+
+    iconify-icon {
+        font-size: 30px;
+        transform: translateY(-$translate-button);
+    }
+}
+
+// Displays a constant black bar on the left side of the screen
+// Make sure to give it the same default-visible as the menu-container
+#menu-button-bar {
+    width: 48px;
+    padding-left: 2px;
+    padding-right: 2px;
+    background-color: $menu-bg;
+    transition: width $menu-appear-transition-duration ease-in-out;
+
+    /* @media (max-width: $mobile-width) {
+        width: 0;
+        overflow: hidden;
+        padding: 0;
+    } */
+
+    @mixin hid() {
+        width: 0;
+        overflow: hidden;
+        padding: 0;
+    }
+
+    &.hidden {
+        @include hid();
+    }
+
+    // If the menu-container is default visible, we want us to be hidden, to not proc a resizing
+    @for $i from 4 through 15 {
+        $w: $i * 100;
+        @media (min-width: #{$w}px) {
+            &.default-visible-#{$w} {
+                @include hid();
+            }
+        }
+    }
+    @media (min-width: $mobile-width) {
+        &.default-visible {
+            @include hid();
+        }
+    }
+
+    #menu-button {
+        left: 2px;
+    }
+}
+
+#menu-container {
+    z-index: $z-ind;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: $menu-bg;
+    color: $menu-fg;
+    height: 100dvh;
+    transition:
+        width $menu-appear-transition-duration ease-in-out,
+        visibility $menu-appear-transition-duration ease-in-out;
+    width: 0;
+    visibility: collapse;
+    user-select: none;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    padding-top: 0.5em;
+
+    @mixin default-visible() {
+        width: $extended-menu-width !important;
+        visibility: visible;
+
+        .menu-elements,
+        .menu-account {
+            visibility: visible;
+        }
+    }
+
+    // default-visible-xx makes the menu visible by default if the window is at least xx pixels wide
+    @for $i from 4 through 15 {
+        $w: $i * 100;
+        @media (min-width: #{$w}px) {
+            &.default-visible-#{$w} {
+                @include default-visible();
+            }
+        }
+    }
+    @media (min-width: $mobile-width) {
+        &.default-visible {
+            @include default-visible();
+        }
+    }
+
+    .menu-head {
+        width: 100%;
+        height: 45px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 0 5px;
+        margin-bottom: 0.5em;
+
+        .close-button {
+            @include iconButton(40px, 30px);
+            width: unset;
+            height: unset;
+            border-radius: 5px;
+            padding: 7px;
+
+            iconify-icon {
+                transition: transform 0.3s ease-in-out;
+                transform: translateY($translate-button);
+            }
+        }
+    }
+    &.visible > .menu-head > .close-button {
+        iconify-icon {
+            transform: translateY(-$translate-button) rotate(180deg);
+        }
+    }
+
+    .menu-elements {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        padding-left: 5px;
+        visibility: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
+        flex: 1;
+        position: relative;
+        @include scrollable();
+        transition: visibility $menu-appear-transition-duration ease-in-out;
+
+        .menu-element,
+        .menu-section {
+            color: $menu-fg;
+            text-decoration: none !important;
+            border: none !important;
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            align-items: center;
+            border-radius: 5px;
+            font-size: 1.1em;
+            position: relative;
+        }
+
+        .menu-element {
+            padding-left: 15px;
+            padding-top: 0.5em;
+            padding-bottom: 0.5em;
+            cursor: pointer;
+            overflow: hidden;
+
+            &:hover {
+                background-color: $menu-bg-active;
+            }
+
+            span {
+                width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-size: inherit;
+            }
+
+            .menu-section-enter {
+                width: 2.5em;
+            }
+
+            &.as-section {
+                padding-left: 5px;
+                font-size: 1.21em;
+                border-top-left-radius: 5px;
+                border-bottom-left-radius: 5px;
+                padding-right: 10px;
+
+                span {
+                    font-size: 1.1em;
+                }
+            }
+
+            &.selected::before {
+                content: "";
+                display: inline-block;
+                width: 7px; /* Size of the dot */
+                height: 7px;
+                background-color: white;
+                border-radius: 50%; /* Makes it a circle */
+                position: absolute;
+                left: 5px;
+                top: 50%;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .menu-section {
+            flex-direction: column;
+            overflow: hidden;
+
+            .menu-section-title {
+                padding-top: 0.5em;
+                padding-bottom: 0.5em;
+                cursor: pointer;
+                width: 100%;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                font-size: 1.1em;
+                padding-right: 10px;
+                padding-left: 5px;
+                border-top-left-radius: 5px;
+                border-bottom-left-radius: 5px;
+
+                span {
+                    width: 100%;
+                }
+
+                &:hover {
+                    background-color: $menu-bg-hover;
+                }
+            }
+            &.visible > .menu-section-title {
+                position: sticky;
+                top: 0;
+                background-color: inherit;
+                z-index: 1;
+            }
+
+            .menu-section-content {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                padding-left: 5px;
+                transition: height $menu-appear-transition-duration ease-in-out;
+            }
+            &.visible {
+                background-color: $menu-bg-hover;
+            }
+            &.visible > .menu-section-content {
+                display: flex;
+            }
+
+            .menu-section-expand-less {
+                display: none;
+            }
+            &.visible {
+                .menu-section-expand-more {
+                    display: none;
+                }
+                .menu-section-expand-less {
+                    display: block;
+                }
+            }
+        }
+    }
+
+    .menu-account {
+        height: 75px;
+        padding-bottom: 0.25em;
+        width: 100%;
+        display: flex;
+        border-top: 1px solid $menu-border;
+        display: flex;
+        align-items: center;
+        padding-right: 5px;
+        padding-left: 5px;
+        // visibility: hidden;
+        overflow: hidden;
+        transition: border-top $menu-appear-transition-duration ease-in-out;
+        .menu-account-avatar {
+            border-radius: 50%;
+            background-color: $menu-bg-active;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            flex-shrink: 0;
+
+            img {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+            }
+        }
+
+        .menu-account-name {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+
+            .menu-account-first-name {
+                font-size: 1.1em;
+                font-weight: bold;
+            }
+
+            .menu-account-username {
+                font-size: 0.9em;
+                font-style: italic;
+            }
+
+            span {
+                width: 100%;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+                display: block;
+            }
+        }
+
+        .menu-account-logout {
+            @include iconButton(40px, 30px);
+            border-radius: 5px;
+            padding: 7px;
+            flex-shrink: 0;
+            color: $menu-fg;
+
+            iconify-icon {
+                transition: transform 0.3s ease-in-out;
+                transform: translateY(0px);
+            }
+        }
+
+        .menu-account-connect {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            padding: 0.75em 0.5em;
+            border-radius: 5px;
+            color: $menu-fg;
+            text-decoration: none !important;
+            text-wrap: nowrap;
+
+            &:hover {
+                background-color: $menu-bg-active;
+            }
+
+            span {
+                font-size: 1.1em;
+                margin-left: 5px;
+                width: 100%;
+            }
+
+            iconify-icon {
+                font-size: 30px;
+                transform: translateY(-$translate-button);
+            }
+        }
+    }
+
+    // integrated makes it so that the menu is a part of the page, not just an overlay
+    @media (min-width: $mobile-width) {
+        &.integrated,
+        &.integrated-bar {
+            & + #menu-integrated-widener {
+                width: $sidebar-width;
+            }
+            &.visible + #menu-integrated-widener {
+                width: $extended-menu-width;
+            }
+        }
+        &.integrated-bar {
+            visibility: visible;
+            width: $sidebar-width;
+            #menu-button {
+                visibility: hidden;
+            }
+            &:not(.visible) {
+                .menu-elements,
+                .menu-account {
+                    width: $sidebar-width;
+                    border-top: none;
+                    padding-left: $sidebar-width * 1.5;
+                }
+            }
+        }
+    }
+    @media (max-width: $mobile-width) {
+        &.integrated-bar #menu-button {
+            visibility: visible;
+        }
+        &.visible.integrated-bar #menu-button {
+            visibility: hidden;
+        }
+    }
+
+    &.visible {
+        width: $extended-menu-width;
+        visibility: visible;
+
+        .menu-elements,
+        .menu-account {
+            visibility: visible;
+        }
+    }
+    @media (max-width: $mobile-width) {
+        &.visible {
+            width: 100%;
+        }
+    }
+}
+
+#menu-integrated-widener {
+    transition: width $menu-appear-transition-duration ease-in-out;
+    width: 0;
+    flex-shrink: 0;
+}

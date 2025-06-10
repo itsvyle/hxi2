@@ -1,0 +1,91 @@
+@use "../../global-frontend-dependencies/global";
+@use "../../global-frontend-dependencies/mixins-variables" as *;
+@use "../../global-frontend-dependencies/ui_fuzzy_input" as *;
+
+h1 {
+    text-align: center;
+}
+
+nav {
+    display: flex;
+    width: calc(100% - 20px);
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+    border-radius: $border-radius;
+
+    align-items: center;
+
+    button {
+        @include buttonIcon();
+        border: 1px white solid;
+        color: white;
+    }
+}
+
+main {
+    width: 100%;
+    max-width: 1000px;
+    margin-right: auto;
+    margin-left: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+#select-my-user-container {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: center;
+    font-size: 1.2rem;
+    border: 1px solid var(--foreground-primary);
+    padding: 1rem;
+    border-radius: $border-radius;
+    input {
+        margin-top: 0;
+    }
+
+    button {
+        @include backgroundColorButton($bccent-color);
+    }
+}
+
+.current-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    > :first-child {
+        border-top: 1px solid var(--border-color);
+    }
+
+    .current-relation {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        gap: 0.5rem;
+        padding: 0.25rem;
+        font-size: 1.2rem;
+        border-bottom: 1px solid var(--border-color);
+
+        .name {
+            flex-basis: 100%;
+            flex-shrink: 1;
+            text-wrap: wrap;
+            user-select: none;
+        }
+        .option {
+            @include outlineIconAsButton();
+        }
+    }
+}
+
+.add-button {
+    @include buttonIcon();
+    margin-top: 1rem;
+    color: white;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 1rem;
+}

@@ -1,0 +1,1 @@
+import "./obtaining-email.scss";

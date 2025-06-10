@@ -1,0 +1,37 @@
+baseURL = 'https://hxi2.fr'
+languageCode = 'fr-FR'
+title = 'hxi2.fr'
+uglyURLs = true
+publishDir = "."
+
+archetypeDir = "hugo-archetypes"
+layoutDir = "hugo-layouts"
+ignoreFiles = ["README\\.md", "DEV\\.md", "\\.(html|ts|js|scss|sass|css)$"]
+
+disableKinds = [
+    "home",
+    "taxonomy",
+    "term",
+    "rss",
+    "sitemap",
+    "robotstxt",
+    "section",
+    "404",
+]
+
+[minify]
+disableHTML = true
+tdewolff.html.keepComments = true
+tdewolff.html.keepConditionalComments = true
+
+[module]
+[[module.mounts]]
+source = "public-pages"
+target = "content/public-pages"
+
+[[module.mounts]]
+source = "hxi2-private-pages"
+target = "content/hxi2-private-pages"
+
+[markup.goldmark.renderer]
+unsafe = true

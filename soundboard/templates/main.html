@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lol</title>
+    <style>
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #121212;
+}
+
+.container {
+    width: min(95vw, 720px);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    align-content: flex-start;
+}
+
+.square {
+  height: min(20vw, 100px);
+  width: min(20vw, 100px);
+  margin: min(2vw, 5px);
+  margin-bottom: min(4vw, 10px);
+  position: relative;
+}
+.image {
+  height: min(20vw, 100px);
+  width: min(20vw, 100px);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.pause_icon {
+  height: min(20vw, 100px);
+  width: min(20vw, 100px);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% for meme in memes %}
+            <div class="square">
+                <img src="memes/img/{{ meme }}.png" class="image" onclick="playsound('{{ meme }}')"></img>
+                <img src="memes/pause_icon.png" id="pause-{{ meme }}" class="pause_icon" style="visibility: hidden;" onclick="playsound('{{ meme }}')"></img>
+            </div>
+        {% endfor %}
+    </div>
+<script>
+audio_objs = {}
+
+function stopsound(meme) {
+    audio_objs[meme].pause();
+    delete audio_objs[meme];
+    document.getElementById("pause-" + meme).style = "visibility: hidden;";
+}
+
+function playsound(meme) {
+    if (audio_objs[meme]) {
+        stopsound(meme);
+    } else {
+        let a = new Audio("memes/sound/" + meme + ".mp3");
+        a.addEventListener("ended", function() {
+            stopsound(meme);
+        })
+        a.play();
+        audio_objs[meme] = a;
+        document.getElementById("pause-" + meme).style = "visibility: visible;"
+    }
+}
+</script>
+</body>
+</html>

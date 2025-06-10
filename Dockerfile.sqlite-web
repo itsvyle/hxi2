@@ -1,0 +1,39 @@
+FROM golang:1.24-alpine3.20 AS backend
+
+WORKDIR /app
+
+COPY /sqlite-web /app/sqlite-web
+COPY /global-go-utils /app/global-go-utils
+
+WORKDIR /app/sqlite-web
+
+RUN go env -w GOCACHE=/go-cache
+
+RUN go mod download && go mod verify
+
+RUN --mount=type=cache,target=/go-cache \
+    go build -o /app/sqlite-web/out_exe .
+
+FROM alpine:3.20 AS runner
+
+RUN apk add python3~=3.12
+
+WORKDIR /app
+
+COPY --from=backend /app/sqlite-web/out_exe /app/sqlite-web
+COPY --from=backend /app/sqlite-web/backup.py /app/backup.py
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+
+ARG USER_ID=4242
+ARG GROUP_ID=4242
+ARG DOCKER_USER=hxi2dbadmin
+RUN addgroup -g $GROUP_ID -S $DOCKER_USER && adduser -D -u $USER_ID -G $DOCKER_USER -S $DOCKER_USER
+RUN chown -R $DOCKER_USER:$DOCKER_USER /app
+USER $DOCKER_USER
+
+ENV PATH=/home/$DOCKER_USER/.local/bin:$PATH
+RUN uv tool install sqlite-web
+RUN uv run /app/backup.py --help
+
+CMD ["/app/sqlite-web"]

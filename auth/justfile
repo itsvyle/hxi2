@@ -1,0 +1,43 @@
+import "../utils.just"
+
+set dotenv-load
+CONFIG_DB_PATH := "test_db.sqlite3"
+test_private_key := "-----BEGIN PRIVATE KEY-----
+MHcCAQEEIFifhojIdejCYVspLU9ImA26ufbfVaQpZXKitW9MHDOzoAoGCCqGSM49AwEHoUQDQgAERk2GiHcfLKogD1N9eDst1Ehyws9iBXvanurtWhz3Hon7Kn3jtJF0jS1UiznsMT6YsWvNeSueZgoC3sxiWpuDeA==
+-----END PRIVATE KEY-----"
+export HXI2_TLD := "hxi2.fr"
+export LOCAL_DEBUG_INSTANCE := "1"
+
+default:
+    just --list
+
+init: 
+    @just _utils-check-program "go" 1
+    @just _utils-check-program "volta" 0
+    cd ../global-frontend-dependencies/ && pnpm install
+    pnpm install
+    go mod download
+
+[linux,macos]
+dev:
+    #!/usr/bin/env bash
+    if [[ -n "$TMUX" ]]; then
+        tmux split-window -d -h "just frontend-dev"
+        just test-run
+    else
+        echo "{{ style("error") }}You must run this command in a tmux session to use the split-window feature{{ NORMAL }}"
+        echo "{{ style("error") }}Instead, you should run "just frontend-dev" and "just test-run" in separate terminals{{ NORMAL }}"
+    fi
+
+test-run $HXI2_AUTH_URL="http://localhost:8080" $HXI2_AUTH_ENDPOINT="http://localhost:8080" $CONFIG_JWT_PRIVATE_KEY=test_private_key $CONFIG_DB_PATH=CONFIG_DB_PATH:
+    CGO_ENABLED=1 go run .
+
+frontend-build:
+    pnpm build
+
+frontend-dev:
+    pnpm serve
+
+# Run as a backend in development mode at port 42001
+run-as-local-backend $HXI2_AUTH_URL="http://localhost:42001" $HXI2_AUTH_ENDPOINT="http://localhost:42001" $CONFIG_RUNNING_PORT="42001" $CONFIG_JWT_PRIVATE_KEY=test_private_key $CONFIG_DB_PATH=CONFIG_DB_PATH: frontend-build
+    CGO_ENABLED=1 go run .

@@ -1,0 +1,11 @@
+{{ $data := .Inner | transform.Unmarshal }}
+<ul>
+{{ range $data }}
+<li>
+    <div class="pulls-couleurs">
+        <div class="couleur" style="background-color: {{.color}};"></div>
+        <span>{{.title}}{{with .details}} {{.}}{{end}}</span>
+    </div>
+</li>
+{{ end }}
+</ul>

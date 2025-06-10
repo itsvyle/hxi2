@@ -1,0 +1,65 @@
+ui-tabs {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    user-select: none;
+    height: 38px;
+    flex-shrink: 0;
+
+    transition: height 0.2s ease-in-out;
+
+    &.hidden {
+        height: 0;
+    }
+
+    ui-tabs-tab {
+        font-size: 1.25rem;
+        border-top-left-radius: 13px;
+        border-top-right-radius: 13px;
+        padding: 0.5rem 1rem;
+        border-style: solid;
+        border-color: var(--foreground-primary);
+        border-width: 1px;
+        max-width: 160px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-overflow: " [..]";
+        white-space: nowrap;
+
+        iconify-icon {
+            font-size: 1rem;
+            border-radius: 50%;
+            border: 1px solid var(--foreground-primary-hover);
+            color: var(--foreground-primary-hover);
+            transition: all 0.2s ease-in-out;
+
+            &:hover {
+                color: var(--foreground-primary);
+                border-color: var(--foreground-primary);
+                transform: scale(1.1);
+            }
+        }
+
+        &.selected {
+            background-color: var(--foreground-primary);
+            color: var(--background-primary);
+
+            iconify-icon {
+                color: var(--background-primary);
+                border-color: var(--background-primary-hover);
+
+                &:hover {
+                    color: var(--background-primary);
+                    border-color: var(--background-primary-hover);
+                }
+            }
+        }
+    }
+}

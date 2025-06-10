@@ -1,0 +1,6 @@
+node_modules
+!.vscode
+__debug_bin*
+_build-asset-inserter.js
+.wrangler
+dist/

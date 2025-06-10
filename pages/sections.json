@@ -1,0 +1,11 @@
+{
+    "public-pages/home": {
+        "template": "template.ts",
+        "main": "main.ts",
+        "pulls": "pulls.ts",
+        "obtaining-email": "obtaining-email.ts"
+    },
+    "hxi2-private-pages": {
+        "accepte": "accepte.ts"
+    }
+}

@@ -1,0 +1,3 @@
+[submodule "pages/hxi2-private-pages"]
+	path = pages/hxi2-private-pages
+	url = https://github.com/itsvyle/hxi2-private-pages.git

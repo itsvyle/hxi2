@@ -1,0 +1,24 @@
+{
+    "name": "auth",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "docker_build": "esbuild ../global-frontend-dependencies/_build-asset-inserter.ts --outfile=../global-frontend-dependencies/_build-asset-inserter.js --platform=node --format=cjs && pnpm build",
+        "build": "webpack --mode production",
+        "serve": "pnpm webpack serve --open --mode development"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "ts-node": "^10.9.2",
+        "webpack": "^5.98.0",
+        "webpack-cli": "^6.0.1",
+        "webpack-dev-server": "^5.2.0"
+    },
+    "volta": {
+        "node": "22.15.0",
+        "pnpm": "10.11.0"
+    }
+}

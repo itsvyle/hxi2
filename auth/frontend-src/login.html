@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>HXI² - Login</title>
+        <script type="text/javascript" src="/dist/login.bundle.js"></script>
+        <link rel="stylesheet" href="/dist/login.bundle.css" />
+        <!-- favicon -->
+        <!-- iconify-import -->
+    </head>
+    <body>
+        <div class="main-container">
+            <div class="header">
+                <p style="font-size: 1.2rem; margin-bottom: 15px">
+                    Ce site est protégé par Dodu. Connectez-vous pour continuer.
+                </p>
+                <img
+                    alt="dodu protege ce site internet"
+                    src="static:dodu-protege.jpg" />
+            </div>
+            <div class="login-options-container">
+                <a href="/api/login" class="connect"
+                    ><iconify-icon
+                        icon="ion:logo-discord"
+                        style="font-size: 1.2em"></iconify-icon>
+                    Se connecter avec Discord</a
+                >
+                <span>-- Ou --</span>
+                <form method="POST">
+                    <label for="code"
+                        >Entrez un code à usage unique, obtenu sur le Discord
+                        parrains-bizuths en faisant <b>/login</b> dans n'importe
+                        quel salon</label
+                    >
+                    <input
+                        type="text"
+                        id="code"
+                        name="code"
+                        placeholder="Code à usage unique" />
+                    <button type="submit">Se connecter</button>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

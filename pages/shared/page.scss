@@ -1,0 +1,110 @@
+@use "../../global-frontend-dependencies/mixins-variables.scss" as *;
+
+main {
+    display: flex;
+    flex-direction: row;
+
+    & > article {
+        flex: 1;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        width: 100%;
+        max-width: var(--max-article-width);
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 100px;
+
+        @at-root {
+            @media (min-width: $mobile-width) {
+                #menu-container {
+                    &.integrated,
+                    &.integrated-bar {
+                        & + #menu-integrated-widener + article {
+                            width: calc(100% - $sidebar-width);
+                        }
+                        &.visible + #menu-integrated-widener + article {
+                            width: calc(100% - $extended-menu-width);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+h1.title {
+    text-align: center;
+}
+
+p {
+    margin-bottom: 1rem;
+
+    &[role="doc-subtitle"] {
+        text-align: center;
+        font-style: italic;
+        margin-bottom: 3rem;
+    }
+}
+
+ul {
+    padding-left: 1rem;
+    list-style: initial;
+}
+ol {
+    padding-left: 1rem;
+    list-style: decimal;
+}
+
+strong {
+    font-weight: bold;
+}
+em {
+    font-style: italic;
+}
+
+.figure-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+
+    figcaption {
+        text-align: center;
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+
+    img {
+        width: 50%;
+        border-radius: 5px;
+
+        @media (max-width: $mobile-width) {
+            width: 80%;
+        }
+    }
+}
+
+details {
+    display: inline-block;
+
+    &[open] {
+        display: block;
+    }
+
+    .details-content {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    & summary {
+        background-color: var(--bccent-color);
+        &:hover {
+            background-color: var(--bccent-color-hover);
+        }
+    }
+}

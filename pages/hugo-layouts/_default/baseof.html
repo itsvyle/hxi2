@@ -1,0 +1,35 @@
+{{"<!-- THIS FILE WAS AUTO-GENERATED: DO NOT EDIT DIRECTLY -->" | safeHTML }}
+<!doctype html>
+<html lang="{{ .Site.LanguageCode }}">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>
+            {{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} | {{
+            .Site.Title }}{{ end }}
+        </title>
+        {{ block "head_pre" . }}{{ end }}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta property="og:title" content="{{ .Title }}" />
+        <meta property="og:description" content="hxi2.fr - Le site internet des élèves de la MP2I du Lycée du Parc" />
+        <meta property="og:image" content="static:favicon.webp" />
+        {{if .Params.noIndex}}
+        <meta name="robots" content="noindex, nofollow" />
+        <meta name="googlebot" content="noindex"/>
+        {{end}}
+        <script
+            type="text/javascript"
+            src="<!-- dist-path -->/{{ .File.BaseFileName }}.bundle.js"></script>
+        <link
+            rel="stylesheet"
+            href="<!-- dist-path -->/{{ .File.BaseFileName }}.bundle.css" />
+        {{"<!-- favicon -->" | safeHTML }} 
+        {{"<!-- iconify-import -->" | safeHTML }}
+        {{ block "head_extra" . }}{{ end }}
+    </head>
+    <body>
+        {{ block "main" . }}{{ end }}
+        {{"<!-- menu-import -->" | safeHTML }}
+    </body>
+</html>
+{{"<!-- THIS FILE WAS AUTO-GENERATED: DO NOT EDIT DIRECTLY -->" | safeHTML }}

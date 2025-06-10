@@ -1,0 +1,15 @@
+import "../utils.just"
+
+set dotenv-load
+CONFIG_DB_PATH := "test_db.sqlite3"
+
+
+default: 
+    just --list  
+
+init: 
+    @just _utils-check-program "go" 1
+    go mod download
+
+test-run $HXI2_AUTH_URL="http://localhost:42001" $HXI2_AUTH_ENDPOINT="http://localhost:42001" $HXI2_COOKIES_DOMAIN=".localhost" $CONFIG_DB_PATH=CONFIG_DB_PATH:
+    go run .

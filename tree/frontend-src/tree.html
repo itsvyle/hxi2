@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>HXI² -Tree</title>
+        <script type="text/javascript" src="/dist/tree.bundle.js"></script>
+        <link rel="stylesheet" href="/dist/tree.bundle.css" />
+        <!-- favicon -->
+        <!-- iconify-import -->
+    </head>
+    <body>
+        <aside id="menu-container"></aside>
+        <!-- menu-import -->
+        <section id="sidebar">
+            <div id="sidebar-header">
+                <div id="menu-button" class="integrated"></div>
+                <h3>Tree</h3>
+                <button
+                    id="sidebar-header-toggle"
+                    role="button"
+                    title="Toggle Sidebar">
+                    <iconify-icon
+                        icon="mdi:arrow-bottom-drop-circle"
+                        width="24"
+                        height="24"></iconify-icon>
+                </button>
+            </div>
+            <button id="add-button">
+                <span>Modifier</span>
+                <iconify-icon icon="mdi:arrow-forward"></iconify-icon>
+            </button>
+            <input type="text" id="search-user" placeholder="Recherche:" />
+        </section>
+        <main id="main-view">
+            <ui-tabs id="main-tabs" hideIfSingleTab="true" appendHistory="true">
+                <ui-tabs-tab
+                    elementId="main-tree-container"
+                    title="Arbre Global"
+                    selected></ui-tabs-tab>
+            </ui-tabs>
+            <div id="main-tree-container">
+                <div id="main-tree"></div>
+            </div>
+        </main>
+    </body>
+</html>

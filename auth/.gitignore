@@ -1,0 +1,5 @@
+test_db.sqlite3
+private_*.pem
+public_*.pem
+dist
+.env

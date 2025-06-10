@@ -1,0 +1,197 @@
+@use "sass:color";
+//#region VARIABLES
+$border-radius: 20px;
+$hover-change: -6%;
+$active-change: -12%;
+$transparent-change: 0.5;
+
+$theme: "dark";
+
+$foreground-primary: #ffffff;
+$foreground-inverted: #07080a;
+$background-primary: #292929;
+$background-secondary: color.adjust($background-primary, $lightness: 10%);
+
+@if $theme == "light" {
+    $foreground-primary: #000000;
+    $foreground-inverted: #ffffff;
+    $background-primary: #ffffff;
+    $background-secondary: color.adjust($background-primary, $lightness: -10%);
+}
+$border-color: color.adjust($background-primary, $lightness: -20%);
+
+$accent-color: #e20f18; // fire-red
+$bccent-color: #4d0b8c;
+
+$red-color: #b71c1c;
+$pink-color: #880e4f;
+$purple-color: #4a148c;
+$blue-color: #1a237e;
+$green-color: #1b5e20;
+$lime-color: #23b323;
+$yellow-color: #ffff00;
+$orange-color: #e65100;
+$brown-color: #3e2723;
+$black-color: #000000;
+$white-color: #ffffff;
+$bright-pink-color: #fe019a;
+
+$link-color-fallback: hsl(213.077 calc(1 * 81.25%) 62.353% / 1);
+$link-color: color-mix(
+    in oklab,
+    $link-color-fallback 100%,
+    var(--foreground-primary, #000) 0%
+); // Stolen from discord
+// Fallback to: hsl(213.077 calc(1*81.25%) 62.353% / 1)
+
+$z-index-navbar: 100;
+$z-index-loading: 101;
+$z-index-dialog: 110; // leaving spaces in between for other modals
+$z-index-max: 99; // for everything else this is the max
+$z-index-dvd: 9; // for the dvd screensaver
+
+$extended-menu-width: 250px;
+$sidebar-width: 52px;
+
+$mobile-width: 600px;
+//#endregion
+
+//#region MIXINS
+@mixin generateColorStates($base, $name) {
+    --#{$name}: #{$base};
+    --#{$name}-hover: #{color.adjust($base, $lightness: $hover-change)};
+    --#{$name}-active: #{color.adjust($base, $lightness: $active-change)};
+    --#{$name}-transparent: #{color.change($base, $alpha: $transparent-change)};
+}
+@mixin backgroundColorButton($color, $changeRatio: 1) {
+    background-color: $color;
+    &:hover {
+        background-color: color.adjust(
+            $color,
+            $lightness: $hover-change * $changeRatio
+        );
+    }
+    &:active {
+        background-color: color.adjust(
+            $color,
+            $lightness: $active-change * $changeRatio
+        );
+        box-shadow: 0px 0px 0px 3px #{color.change(
+                $color,
+                $alpha: $transparent-change
+            )};
+        transition: 0.1s ease-out;
+    }
+    &:disabled:hover,
+    &:disabled:active,
+    &:disabled:focus-visible {
+        background-color: var(--background-secondary-active);
+        box-shadow: none;
+    }
+    &:disabled,
+    &[disabled] {
+        background-color: var(--background-secondary-active);
+        opacity: 0.8;
+        cursor: no-drop;
+    }
+}
+
+@mixin outlinedButton($color, $changeRatio: 1) {
+    @include cancelButtonStyles();
+    outline: 1px solid $color;
+    color: $color;
+    @at-root html.dark-mode & {
+        color: var(--foreground-primary);
+        background-color: var(--background-secondary);
+    }
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition:
+        background 0.3s,
+        transform 0.3s,
+        border 0s;
+    padding: 10px;
+
+    &:hover {
+        background-color: var(--background-secondary-hover) !important;
+    }
+    &:active {
+        background-color: var(--background-secondary-active) !important;
+        box-shadow: 0px 0px 0px 3px #{color.change(
+                $color,
+                $alpha: $transparent-change
+            )};
+    }
+    &:disabled:hover,
+    &:disabled:active,
+    &:disabled:focus-visible {
+        background-color: var(--background-secondary-active) !important;
+        box-shadow: none;
+    }
+    &:disabled,
+    &[disabled] {
+        background-color: var(--background-secondary-active) !important;
+        opacity: 0.8;
+        cursor: no-drop;
+    }
+}
+
+@mixin cancelButtonStyles() {
+    background-color: initial;
+    border: none;
+    color: inherit;
+    border-radius: initial;
+    padding: initial;
+    font-size: inherit;
+    &:hover,
+    &:active {
+        background-color: initial;
+        box-shadow: initial;
+    }
+}
+
+@mixin buttonIcon($gap: 0.3rem) {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    gap: $gap;
+    line-height: 1em;
+}
+
+@mixin outlineIconAsButton() {
+    font-size: 1.5em;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-basis: 50px;
+    flex-shrink: 0;
+    &:hover {
+        background-color: var(--background-secondary-hover);
+    }
+    &:active {
+        background-color: var(--background-secondary-active);
+    }
+}
+
+// applies the button styles to a link; you will need to use a @include backgroundColorButton before using this
+@mixin linkButton() {
+    display: block;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    padding: 10px;
+    cursor: pointer;
+    transition:
+        background 0.3s,
+        transform 0.3s,
+        border 0s;
+    font-size: 1rem;
+    touch-action: manipulation;
+    user-select: none;
+}
+//#endregion

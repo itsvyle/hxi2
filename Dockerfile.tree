@@ -1,0 +1,81 @@
+# syntax=docker/dockerfile:1.7-labs
+FROM debian:bookworm-slim AS frontend
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y curl ca-certificates --no-install-recommends
+ENV VOLTA_HOME="/root/.volta"
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$VOLTA_HOME/bin:$PNPM_HOME:$PATH"
+ENV VOLTA_FEATURE_PNPM=1
+RUN \ 
+  --mount=type=cache,id=volta-cache,target=${VOLTA_HOME} \
+  curl -sSLf https://get.volta.sh | bash -s -- --skip-setup --version 2.0.2
+# Copy only the package.json files to only update volta if required versions potentially change
+COPY /tree/package.json /tree/pnpm* /app/tree/
+COPY /global-frontend-dependencies/package.json /global-frontend-dependencies/pnpm*  /app/global-frontend-dependencies/
+COPY tsconfig.json .
+
+RUN \
+  --mount=type=cache,id=volta-cache,target=${VOLTA_HOME} \
+  cd global-frontend-dependencies && volta which node && volta which pnpm && cd .. \
+  && cd tree && volta which node && volta which pnpm && cd .. 
+
+WORKDIR /app/global-frontend-dependencies
+RUN \ 
+  --mount=type=cache,id=pnpm,target=/pnpm/store \
+  --mount=type=cache,id=volta-cache,target=${VOLTA_HOME} \
+  pnpm install --frozen-lockfile
+
+WORKDIR /app/tree
+RUN \ 
+  --mount=type=cache,id=pnpm,target=/pnpm/store \
+  --mount=type=cache,id=volta-cache,target=${VOLTA_HOME} \
+  pnpm install --frozen-lockfile
+
+COPY \
+  --exclude=*.go \
+  --exclude=*.mod \
+  --exclude=*.sum \
+  /tree /app/tree
+COPY /global-frontend-dependencies /app/global-frontend-dependencies
+
+WORKDIR /app/tree
+RUN \ 
+  --mount=type=cache,id=pnpm,target=/pnpm/store \
+  --mount=type=cache,id=volta-cache,target=${VOLTA_HOME} \
+  pnpm run build
+
+
+FROM golang:1.23.2 AS backend
+
+WORKDIR /app
+
+COPY /tree /app/tree
+COPY /global-go-utils /app/global-go-utils
+COPY --from=frontend /app/tree/dist /app/tree/dist
+
+WORKDIR /app/tree
+
+ENV CGO_ENABLED=1
+RUN go env -w GOCACHE=/go-cache
+
+RUN go mod download && go mod verify
+
+RUN --mount=type=cache,target=/go-cache \
+    go build -o /app/tree/out_exe .
+
+# To run as unprivileged user, follow instructions at https://github.com/chromedp/docker-headless-shell
+FROM docker.io/chromedp/headless-shell:latest AS runner
+COPY --from=backend /app/tree/out_exe /app/tree_exe
+
+WORKDIR /app
+
+ARG USER_ID=4202
+ARG GROUP_ID=4202
+ARG DOCKER_USER=hxi2tree
+RUN groupadd -g $GROUP_ID --system $DOCKER_USER && useradd -u $USER_ID -g $DOCKER_USER --system --no-create-home $DOCKER_USER
+RUN chown -R $DOCKER_USER:$DOCKER_USER /app
+USER $DOCKER_USER
+
+ENTRYPOINT ["/app/tree_exe"]

@@ -5,8 +5,12 @@
     "useTabs": false,
     "excludes": [
         "**/*-lock.json",
+        "**/*-lock.yaml",
         "**/node_modules",
-        "vendor/**"
+        "vendor/**",
+        "**/*.min.js",
+        "**/dist/**",
+        "pages/hugo-layouts/**"
     ],
     "json": {
         "lineWidth": 120,

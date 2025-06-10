@@ -1,0 +1,26 @@
+default:
+    just --list
+
+compile-static-page:
+    #!/usr/bin/env bash
+    set -e
+    compress_file() {
+        local file="$1"
+        if [ -f "$file" ] && [[ ! "$file" =~ \.(gz|br)$ ]]; then 
+            gzip -c "$file" > "$file.gz" 
+            command -v brotli &> /dev/null && brotli -c "$file" > "$file.br"
+            echo "Compressed $file"
+        fi
+    }
+
+    uv run main.py --no-server
+    compress_file main-out.html
+    compress_file memes/pause_icon.png
+    for dir in memes/sound memes/img; do 
+        for file in "$dir"/*; do 
+            compress_file "$file"
+        done
+    done
+
+prod: compile-static-page
+    CGO_ENABLED=0 GOOS=linux go build -o soundboard.exe .

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>HXI² -Input Tests</title>
+        <script type="text/javascript" src="/dist/input.bundle.js"></script>
+        <link rel="stylesheet" href="/dist/input.bundle.css" />
+        <!-- favicon -->
+        <!-- iconify-import -->
+    </head>
+    <body>
+        <ui-tabs hideIfSingleTab="true">
+            <ui-tabs-tab elementId="tab1" title="Tab 1" selected></ui-tabs-tab>
+            <ui-tabs-tab elementId="tab2" title="Tab 2"></ui-tabs-tab>
+        </ui-tabs>
+        <div
+            id="tab1"
+            style="width: 100px; height: 100px; background-color: blue"></div>
+        <div
+            id="tab2"
+            style="
+                width: 100px;
+                height: 100px;
+                background-color: orange;
+                display: none;
+            "></div>
+        <div id="app">
+            <input id="input" type="text" />
+        </div>
+    </body>
+</html>

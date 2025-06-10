@@ -1,0 +1,7 @@
+{
+    "files.exclude": {
+        "**/pages/**/*.html": {
+            "when": "$(basename).md"
+        },
+    }
+}

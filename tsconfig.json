@@ -1,0 +1,41 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "target": "ES6",
+        "module": "ES2022",
+        "moduleResolution": "bundler",
+        "lib": ["ES2022", "DOM"],
+        "declaration": false,
+        "removeComments": true,
+        "experimentalDecorators": true,
+
+        // Type checking:
+        "strict": false, // todo: make true
+        "noImplicitAny": false, // todo: make true
+        "checkJs": true,
+
+        "noEmitOnError": false,
+        "baseUrl": "/",
+        "paths": {
+            "statics": ["statics/*"]
+        }
+    },
+    "exclude": [
+        "node_modules",
+        "node_modules/**",
+        "wwwroot",
+        ".vs",
+        ".git",
+        "dist/**",
+        "**/dist/**",
+        "**/node_modules/**"
+    ],
+    "ts-node": {
+        "compilerOptions": {
+            "module": "CommonJS",
+            "allowSyntheticDefaultImports": true,
+            "allowImportingTsExtensions": true,
+            "esModuleInterop": true
+        }
+    }
+}

@@ -1,0 +1,6 @@
+<div class="figure-container">
+    <img src="{{ .Get "src" | safeURL }}" alt="{{ .Get "alt" }}" title="{{ .Get "title" }}">
+    {{ with .Get "caption" }}
+    <figcaption>{{ . }}</figcaption>
+    {{ end }}
+</div>

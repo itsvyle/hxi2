@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>HXI² - Ajout relation</title>
+        <script type="text/javascript" src="/dist/add.bundle.js"></script>
+        <link rel="stylesheet" href="/dist/add.bundle.css" />
+        <!-- favicon -->
+        <!-- iconify-import -->
+    </head>
+    <body>
+        <nav>
+            <button id="back">
+                <iconify-icon icon="mdi:arrow-back"></iconify-icon>
+                Retour
+            </button>
+        </nav>
+        <main>
+            <h1>Ajout relation bizuth</h1>
+
+            <div id="select-my-user-container" style="display: none">
+                <label for="my-user">(admin) Prétendre etre:</label>
+                <input
+                    type="text"
+                    id="my-user"
+                    placeholder="Prénom/nom d'utilisateur:" />
+                <button id="select-my-user">Voir</button>
+                <button id="reset-my-user">Réinitialiser</button>
+            </div>
+
+            <h2 id="title-parrains">Mes Parrains</h2>
+            <div id="current-list-parrains" class="current-list"></div>
+            <button id="add-parrain" class="add-button">
+                <iconify-icon icon="mdi:add"></iconify-icon>
+                Ajouter un parrain
+            </button>
+
+            <h2 id="title-filleuls">Mes Bizuths</h2>
+            <div id="current-list-filleuls" class="current-list"></div>
+            <button id="add-filleul" class="add-button">
+                <iconify-icon icon="mdi:add"></iconify-icon>
+                Ajouter un bizuth
+            </button>
+        </main>
+    </body>
+</html>

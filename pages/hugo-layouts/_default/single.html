@@ -1,0 +1,29 @@
+{{ define "main" }}
+<main>
+    <aside id="menu-container" class="integrated-bar"></aside>
+    <article>
+        <h1 class="title">{{ default .Title .Params.MainTitle }}</h1>
+        {{ with .Params.subtitle }}
+        <p role="doc-subtitle">{{ . }}</p>
+        {{ end }} {{ .Content }}
+    </article>
+</main>
+{{ if .Params.DVDImage }}
+<div id="dvd-overlay" class="dvd-overlay">
+    <img src="{{.Params.DVDImage | safeURL}}" alt="Bouncing Logo" />
+</div>
+{{ end }}
+{{ end }}
+{{ define "head_pre" }}
+<link rel="stylesheet" href="static:dist/base-styles.bundle.css" />
+<link rel="stylesheet" href="static:dist/page.bundle.css" />
+{{ $w := default "1000px" .Params.MaxWidth }}
+{{ with $w }}
+<style>
+    :root {
+        --max-article-width: {{ . }};
+    }
+</style>
+{{ end }}
+{{ end }}
+{{ define "head_extra" }}{{ end }}

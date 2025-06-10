@@ -1,0 +1,7 @@
+@use "../../global-frontend-dependencies/global";
+@use "../../global-frontend-dependencies/mixins-variables" as *;
+@use "../../global-frontend-dependencies/ui_fuzzy_input" as *;
+
+#app {
+    margin: 5rem;
+}

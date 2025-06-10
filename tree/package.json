@@ -1,0 +1,33 @@
+{
+    "name": "tree",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "build": "webpack --mode production",
+        "dev_serve": "pnpm webpack serve --open --mode development",
+        "bundle_mermaid": "esbuild mermaid-entry.js --bundle --minify --outfile=mermaid.min.js --format=iife --global-name=mermaidBundle --platform=browser"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@faker-js/faker": "^9.4.0",
+        "esbuild": "^0.25.5",
+        "ts-node": "^10.9.2",
+        "webpack": "^5.98.0",
+        "webpack-cli": "^6.0.1",
+        "webpack-dev-server": "^5.2.0"
+    },
+    "dependencies": {
+        "@mermaid-js/layout-elk": "^0.1.7",
+        "@panzoom/panzoom": "^4.6.0",
+        "lit": "^3.2.1",
+        "lit-element": "^4.1.1",
+        "mermaid": "^11.4.1"
+    },
+    "volta": {
+        "node": "22.15.0",
+        "pnpm": "10.11.0"
+    }
+}
