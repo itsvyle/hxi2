@@ -27,17 +27,23 @@ build-html: bundle-html
     @shopt -s globstar && rm -f assets/dist/**/*.br assets/dist/**/*.gz
     {{ if env("INIT_PAGES","0") == "1" {"exit 1"} else {""} }}
     @mkdir -p assets/dist/public-pages/home
+
     cp ../pages/dist/public-pages/home/main.* assets/dist/public-pages/home/
     cp ../pages/dist/public-pages/home/obtaining-email.* assets/dist/public-pages/home/
     cp ../pages/dist/public-pages/home/pulls.* assets/dist/public-pages/home/
+    cp ../pages/dist/public-pages/home/eponge.* assets/dist/public-pages/home/
+    
     @if [ -d "../pages/dist/hxi2-private-pages" ]; then \
         mkdir -p assets/dist/hxi2-private-pages; \
         cp -r ../pages/dist/hxi2-private-pages/* assets/dist/hxi2-private-pages/; \
     fi
     @shopt -s globstar && rm -f assets/dist/**/*.br assets/dist/**/*.gz
+
     @mv assets/dist/public-pages/home/main.html assets/index.html
     @mv assets/dist/public-pages/home/pulls.html assets/pulls.html
+    @mv assets/dist/public-pages/home/eponge.html assets/eponge.html
     @mv assets/dist/public-pages/home/obtaining-email.html assets/obtaining-email.html
+
     @if [ -d "../pages/dist/hxi2-private-pages" ]; then \
         mv assets/dist/hxi2-private-pages/accepte.html assets/accepte.html; \
     fi
