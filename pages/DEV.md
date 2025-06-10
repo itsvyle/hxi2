@@ -25,9 +25,9 @@ Chaque page dispose d'un fichier typescrip et d'un fichier scss associés, afin 
 
 Afin de contribuer aux pages, vous aurez besoin:
 
-- d'avoir la CLI `just` installé sur votre système
-- d'avoir la CLI `hugo` installée sur votre système
-- d'avoir la CLI `volta` installée sur votre système
+- d'avoir la CLI `just` installé sur votre système (https://github.com/casey/just)
+- d'avoir la CLI `hugo` installée sur votre système (https://gohugo.io/installation/)
+- d'avoir la CLI `volta` installée sur votre système (https://docs.volta.sh/guide/getting-started)
   - Alternativement, vous pouvez avoir juste `node` et `pnpm`
 
 **Une fois les outils installés**, il vous faudra éxecuter au moins une fois la commande `just init` dans le dossier `HXI2_REPO/pages`
