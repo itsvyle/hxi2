@@ -2,10 +2,12 @@
 
 Ce dépot centralise les multiples projets qui vivent sous l'écosystème et le site interne hxi2.fr.
 
-Chaque sous-projet doit comporter un fichier `DEV.md`, qui indique les instructions de développement pour ce projet.
+Chaque sous-projet doit comporter un fichier `DEV.md`, qui indique les instructions de développement pour ce projet: s'y référer pour les détails de chaque projet.
 
 ## Dépendances
 La grande dépendance de tous les projets sera d'avoir [just](https://github.com/casey/just), un nouvel équivalent à `make`, qui permet de faire des scripts de construction et d'installation.
+
+Chaque projet comprend une commande `just init`, qui a comme role d'initialiser le projet, en installant les dépendances nécessaires, et en vérifiant que les outils nécessaires sont installés.
 
 ## Architecture d'authentification
 
