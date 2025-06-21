@@ -4,3 +4,4 @@ __debug_bin*
 _build-asset-inserter.js
 .wrangler
 dist/
+scripts/cdp-crawler/cookies.py
