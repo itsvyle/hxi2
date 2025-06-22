@@ -3,7 +3,7 @@ title: "Eponge"
 MainTitle: "Eponge"
 url: "/public-pages/home/eponge.html"
 subtitle: " Exercices et Problèmes Obscures Nécessitant une Gamberge Excessive "
-MaxWidth: false
+MaxWidth: 1000px
 ---
 
 L'Eponge est une compilation de problèmes et exercices étant soit mathématiquement intéressants soit simplement amusants.
