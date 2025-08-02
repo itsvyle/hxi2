@@ -26,3 +26,27 @@ export function listUsers(): Promise<Record<number, MainUser>> {
         .then(checkAuthentication)
         .then((res) => res.json());
 }
+
+export function getMyself(): Promise<MainUser> {
+    return fetch(`/api/me`, { cache: "no-cache" })
+        .catch((error) => {
+            throw error;
+        })
+        .then(checkAuthentication)
+        .then((res) => res.json());
+}
+
+export function updateMyself(data: MainUser): Promise<MainUser> {
+    return fetch(`/api/me`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    })
+        .catch((error) => {
+            throw error;
+        })
+        .then(checkAuthentication)
+        .then((res) => res.json());
+}

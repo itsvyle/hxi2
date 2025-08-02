@@ -47,6 +47,11 @@ h1 {
     justify-content: center; // also consider space-even
     row-gap: 2rem;
     column-gap: 2rem;
+
+    user-card {
+        max-height: 550px;
+        overflow-y: auto;
+    }
 }
 
 #edit-button {

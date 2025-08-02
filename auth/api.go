@@ -200,6 +200,20 @@ func HandleDiscordCallback(w http.ResponseWriter, r *http.Request) {
 		LoginError(w, r, "Failed to get user by discord ID")
 		return
 	}
+	if dbUser == nil {
+		slog.With("discordID", dai.ID).Info("dbUser is nil, but no error thrown")
+		LoginError(w, r, "User not found")
+		return
+	}
+
+	if dai.Username != dbUser.Username {
+		dbUser.Username = dai.Username
+		err = DB.UpdateUser(dbUser)
+		if err != nil {
+			slog.With("error", err, "discordID", dai.ID, "newUsername", dai.Username).Error("Failed to update username on login")
+			return
+		}
+	}
 
 	if !setAuthCookies(w, r, dbUser) {
 		return
