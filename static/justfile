@@ -17,7 +17,7 @@ dev:
 bundle-html:
     {{if env("INIT_PAGES","0") == "0" {"cd ../pages && just frontend-build"} else { "" } }}
     cd html && pnpm build
-
+# Builds html for push to static.hxi2.fr
 build-html: bundle-html
     @rm -rf assets/dist
     @mkdir -p assets/dist
@@ -48,9 +48,10 @@ build-html: bundle-html
         mv assets/dist/hxi2-private-pages/accepte.html assets/accepte.html; \
     fi
 
+# Builds and pushes the html to the static.hxi2.fr
 push: compile-thumbnails build-html
     {{wrangler}} deploy
-
+# Compiles the images thumbnails
 compile-thumbnails:
     @just _utils-check-program "cwebp" 2
     @just _utils-check-program "fd" 2
