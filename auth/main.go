@@ -259,14 +259,26 @@ func main() {
 		}
 		{
 			if code != "" {
+				tryQuickRedirect := func() bool {
+					redirectTo := r.URL.Query().Get("redirectTo")
+					if redirectTo == "" {
+						return false
+					}
+					http.Redirect(w, r, redirectTo, http.StatusFound)
+					return true
+				}
 				code := strings.TrimSpace(code)
 				if len(code) != OneTimeCodeLength {
-					LoginError(w, r, "Invalid one-time code")
+					if !tryQuickRedirect() {
+						LoginError(w, r, "Invalid one-time code")
+					}
 					return
 				}
 				userID, err := DB.CheckOneTimeCode(code)
 				if err != nil {
-					LoginError(w, r, "Invalid one-time code")
+					if !tryQuickRedirect() {
+						LoginError(w, r, "Invalid one-time code")
+					}
 					return
 				}
 				dbUser, err := DB.GetDBUserByID(userID)
