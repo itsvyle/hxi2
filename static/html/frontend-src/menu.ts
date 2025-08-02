@@ -288,6 +288,7 @@ function initButton() {
 function initMenu() {
     fillWindowUserData();
     let t = window.localStorage.getItem("menuVisible");
+    if (window.innerWidth < 600) t = "false"; // Force menu to be hidden on small screens on initial load
     const wasMenuVisible: boolean | null = t === null ? null : t === "true";
 
     menuContainer = document.getElementById(
