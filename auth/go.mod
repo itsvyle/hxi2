@@ -4,7 +4,7 @@ go 1.23.2
 
 require (
 	github.com/cristalhq/jwt/v5 v5.4.0
-	github.com/itsvyle/hxi2/global-go-utils v0.0.0
+	github.com/itsvyle/hxi2/global-go/utils v0.0.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lmittmann/tint v1.0.6
 	github.com/mattn/go-sqlite3 v1.14.24
@@ -19,4 +19,4 @@ require (
 	golang.org/x/sys v0.33.0 // indirect
 )
 
-replace github.com/itsvyle/hxi2/global-go-utils => ../global-go-utils
+replace github.com/itsvyle/hxi2/global-go/utils => ../global-go/utils

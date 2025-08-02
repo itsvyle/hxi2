@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	ggu "github.com/itsvyle/hxi2/global-go-utils"
+	ggu "github.com/itsvyle/hxi2/global-go/utils"
 )
 
 var authManager *ggu.AuthManager

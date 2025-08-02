@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	ggu "github.com/itsvyle/hxi2/global-go-utils"
+	ggu "github.com/itsvyle/hxi2/global-go/utils"
 )
 
 func checkProjectApiAuth(w http.ResponseWriter, r *http.Request, necessaryPerms int) bool {
