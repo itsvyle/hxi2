@@ -1,0 +1,86 @@
+# syntax=docker/dockerfile:1.7-labs
+FROM debian:bookworm-slim AS frontend
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y curl ca-certificates --no-install-recommends
+ENV VOLTA_HOME="/root/.volta"
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$VOLTA_HOME/bin:$PNPM_HOME:$PATH"
+ENV VOLTA_FEATURE_PNPM=1
+RUN \ 
+  --mount=type=cache,id=volta-cache,target=${VOLTA_HOME} \
+  curl -sSLf https://get.volta.sh | bash -s -- --skip-setup --version 2.0.2
+# Copy only the package.json files to only update volta if required versions potentially change
+COPY /parrainsup/package.json /parrainsup/pnpm* /app/parrainsup/
+COPY /global-frontend-dependencies/package.json /global-frontend-dependencies/pnpm*  /app/global-frontend-dependencies/
+COPY tsconfig.json .
+
+RUN \
+  --mount=type=cache,id=volta-cache,target=${VOLTA_HOME} \
+  cd global-frontend-dependencies && volta which node && volta which pnpm && cd .. \
+  && cd parrainsup && volta which node && volta which pnpm && cd .. 
+
+WORKDIR /app/global-frontend-dependencies
+RUN \ 
+  --mount=type=cache,id=pnpm,target=/pnpm/store \
+  --mount=type=cache,id=volta-cache,target=${VOLTA_HOME} \
+  pnpm install --frozen-lockfile
+
+WORKDIR /app/parrainsup
+RUN \ 
+  --mount=type=cache,id=pnpm,target=/pnpm/store \
+  --mount=type=cache,id=volta-cache,target=${VOLTA_HOME} \
+  pnpm install --frozen-lockfile
+
+COPY \
+  --exclude=*.go \
+  --exclude=*.mod \
+  --exclude=*.sum \
+  /parrainsup /app/parrainsup
+COPY /global-frontend-dependencies /app/global-frontend-dependencies
+
+WORKDIR /app/parrainsup
+RUN \ 
+  --mount=type=cache,id=volta-cache,target=${VOLTA_HOME} \
+  --mount=type=cache,id=pnpm,target=/pnpm/store \
+  pnpm run build
+
+FROM golang:1.24.5 AS backend
+
+WORKDIR /app
+
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive \
+    apt-get install --no-install-recommends --assume-yes \
+      build-essential \
+      libsqlite3-dev
+
+COPY /parrainsup /app/parrainsup
+COPY /global-go/utils /app/global-go/utils
+COPY --from=frontend /app/parrainsup/dist /app/parrainsup/dist
+
+WORKDIR /app/parrainsup
+
+ENV CGO_ENABLED=1
+RUN go env -w GOCACHE=/go-cache
+
+RUN go mod download && go mod verify
+
+RUN --mount=type=cache,target=/go-cache \
+    go build -o /app/parrainsup/out_exe -ldflags '-extldflags "-static"' .
+
+FROM alpine:3.21.2 AS runner
+
+COPY --from=backend /app/parrainsup/out_exe /app/parrainsup_exe
+
+ARG USER_ID=4205
+ARG GROUP_ID=4205
+ARG DOCKER_USER=hxi2parrainsup
+RUN addgroup -g $GROUP_ID -S $DOCKER_USER && adduser -D -u $USER_ID -G $DOCKER_USER -S $DOCKER_USER
+RUN chown -R $DOCKER_USER:$DOCKER_USER /app
+USER $DOCKER_USER
+
+WORKDIR /app
+
+CMD ["/app/parrainsup_exe"]
