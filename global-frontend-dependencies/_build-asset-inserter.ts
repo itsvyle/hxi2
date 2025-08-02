@@ -19,6 +19,10 @@ function getHyperlinkRegex() {
     return /<a(?:(?!\s*\/?>)[^>])*?\shref\s*=\s*["']([^"']*)["'](?:(?!\s*\/?>)[^>])*\s*\/?>/g;
 }
 
+function getMetaContentRegex() {
+    return /<meta\s+(?:name|property)=["'][^"']+["']\s+content=["']([^"']+)["']\s*\/?>/g;
+}
+
 function hashContent(content: string): string {
     // just do a md5 hash
     const hash = crypto.createHash("md5");
@@ -173,24 +177,16 @@ class BuildAssetInserter {
             }
         };
 
-        if (getImgRegex().test(source)) {
-            const imgRegex = getImgRegex();
-            const matches = [];
-            let match;
-            while ((match = imgRegex.exec(source))) {
-                matches.push([match[0], match[1]]);
+        for (let f of [getImgRegex, getHyperlinkRegex, getMetaContentRegex]) {
+            if (f().test(source)) {
+                const reg = f();
+                const matches = [];
+                let match;
+                while ((match = reg.exec(source))) {
+                    matches.push([match[0], match[1]]);
+                }
+                applyStaticReplacements(matches);
             }
-            applyStaticReplacements(matches);
-        }
-
-        if (getHyperlinkRegex().test(source)) {
-            const hyperlinkRegex = getHyperlinkRegex();
-            const matches = [];
-            let match;
-            while ((match = hyperlinkRegex.exec(source))) {
-                matches.push([match[0], match[1]]);
-            }
-            applyStaticReplacements(matches);
         }
 
         for (let [expr, replaceWith] of this.customReplacement) {
