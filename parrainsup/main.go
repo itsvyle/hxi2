@@ -60,7 +60,7 @@ func init() {
 var staticsFS embed.FS
 
 func main() {
-	slog.Info("Starting tree-backend")
+	slog.Info("Starting parrainsup-backend")
 	router := http.NewServeMux()
 
 	server := &http.Server{
@@ -76,6 +76,20 @@ func main() {
 	)
 
 	staticsManager.RegisterChunkHandlers(router)
+
+	treeHTML, treeJS, treeCSS := staticsManager.WholeRouteHandlers("main")
+	router.Handle("/dist/main.bundle.js", treeJS)
+	if treeCSS != nil {
+		router.Handle("/dist/main.bundle.css", treeCSS)
+	}
+
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		c, err := authManager.AuthenticateHTTPRequest(w, r, false)
+		if err != nil || !c.CheckPermHTTP(w, ggu.RoleStudent) {
+			return
+		}
+		treeHTML.ServeHTTP(w, r)
+	})
 
 	/* addHTML, addJS, addCSS := staticsManager.WholeRouteHandlers("add")
 	router.Handle("/dist/add.bundle.js", addJS)
