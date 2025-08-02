@@ -17,6 +17,11 @@ export const menuSections: Record<string, MenuSection> = {
         path: "//tree.hxi2.fr/tree",
         requirePerms: Perms.Student | Perms.Admin,
     },
+    parrainsup: {
+        label: "Parrainsup",
+        path: "//parrainsup.hxi2.fr/",
+        requirePerms: Perms.Student | Perms.Admin,
+    },
 };
 
 export const menuSectionChildren: Record<string, Array<MenuItem>> = {};
