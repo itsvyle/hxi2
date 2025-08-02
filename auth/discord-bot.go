@@ -189,7 +189,7 @@ func (discordBot *DiscordBot) addCommandParrainsup() {
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
 				Flags:   discordgo.MessageFlagsEphemeral,
-				Content: "Cliquer sur le bouton ci-dessous pour ouvrir Parrainsup",
+				Content: "Cliquer sur le bouton ci-dessous pour ouvrir Parrainsup\n**Attention: Ce lien vous est strictement personnel, car il vous identifie sur hxi2.fr.**",
 				Components: []discordgo.MessageComponent{
 					discordgo.ActionsRow{
 						Components: []discordgo.MessageComponent{
