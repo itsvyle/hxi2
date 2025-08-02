@@ -17,7 +17,7 @@ export default (env, argv) => {
         devProxy: [
             {
                 context: ["/api"],
-                target: "http://localhost:8044",
+                target: "http://localhost:42005",
             },
         ],
         entries: {},
