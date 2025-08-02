@@ -60,6 +60,7 @@ RUN apt-get update \
 
 COPY /auth /app/auth
 COPY /global-go/utils /app/global-go/utils
+COPY /global-go/discord-bot-wrapper /app/global-go/discord-bot-wrapper
 COPY --from=frontend /app/auth/dist /app/auth/dist
 
 WORKDIR /app/auth
