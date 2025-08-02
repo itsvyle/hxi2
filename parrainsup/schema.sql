@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS MAIN (
+    user_id INTEGER PRIMARY KEY,
+    display_name TEXT NOT NULL,
+    surnom TEXT NOT NULL,
+    origine TEXT NOT NULL,
+    voeu TEXT NOT NULL,
+    couleur TEXT NOT NULL,
+    edit_restrictions INTEGER NOT NULL DEFAULT 0,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

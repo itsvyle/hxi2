@@ -43,6 +43,10 @@ func init() {
 		panic("Failed to load configuration")
 	}
 
+	// #region Database
+	DB = NewDatabaseManager(ConfigDBPath)
+	// #endregion
+
 	// #region Auth manager
 
 	authManager, err = ggu.NewAuthManagerFromEnv()
