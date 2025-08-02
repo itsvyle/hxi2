@@ -181,6 +181,24 @@ func (db *DatabaseManager) GetMainUserByID(userID int64) (*MainUser, error) {
 	return &user, nil
 }
 
+func (db *DatabaseManager) InsertNewMainUser(user *MainUser) error {
+	_, err := db.DB.NamedExec(`INSERT INTO MAIN (
+		user_id, hide, display_name, surnom, origine, voeu, couleur,
+		c_or_ocaml, fun_fact, conseil, algebre_or_analyse, pronouns,
+		discord_username, edit_restrictions
+	) VALUES (
+		:user_id, :hide, :display_name, :surnom, :origine, :voeu, :couleur,
+		:c_or_ocaml, :fun_fact, :conseil, :algebre_or_analyse, :pronouns,
+		:discord_username, :edit_restrictions
+	)`, user)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (db *DatabaseManager) UpdateMainUser(user *MainUser) error {
 	_, err := db.DB.NamedExec(`UPDATE MAIN SET
 		hide = :hide,
