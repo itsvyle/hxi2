@@ -52,7 +52,7 @@ FROM golang:1.23.2 AS backend
 WORKDIR /app
 
 COPY /tree /app/tree
-COPY /global-go-utils /app/global-go-utils
+COPY /global-go/utils /app/global-go/utils
 COPY --from=frontend /app/tree/dist /app/tree/dist
 
 WORKDIR /app/tree
