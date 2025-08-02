@@ -20,7 +20,9 @@ export default (env, argv) => {
                 target: "http://localhost:42005",
             },
         ],
-        entries: {},
+        entries: {
+            main: SRCDIR + "/main.ts",
+        },
         outputDirName: "dist",
         srcDir: SRCDIR,
     });
