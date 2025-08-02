@@ -59,7 +59,7 @@ RUN apt-get update \
       libsqlite3-dev
 
 COPY /auth /app/auth
-COPY /global-go-utils /app/global-go-utils
+COPY /global-go/utils /app/global-go/utils
 COPY --from=frontend /app/auth/dist /app/auth/dist
 
 WORKDIR /app/auth
