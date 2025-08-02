@@ -37,6 +37,12 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("preview-container")?.appendChild(previewCard);
 
         fillForm(newData);
+
+        if (!newData.display_name) {
+            dialog.success(
+                "Bienvenue sur votre page de modification de profil ! Commencez par remplir votre nom, puis les autres informations que vous souhaitez partager avec les bizuths.",
+            );
+        }
     });
 
     let saveButton = document.getElementById("save-container");

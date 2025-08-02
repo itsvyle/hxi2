@@ -11,10 +11,6 @@ import (
 	ggu "github.com/itsvyle/hxi2/global-go/utils"
 )
 
-// func GetDefaultMainUser(claims *ggu.HXI2JWTClaims) *MainUser {
-
-// }
-
 func HandleListUsers(w http.ResponseWriter, r *http.Request) {
 	c, err := authManager.AuthenticateHTTPRequest(w, r, true)
 	if err != nil || !c.CheckPermHTTP(w, ggu.RoleStudent) {
@@ -50,12 +46,16 @@ func HandleGetUserMyself(w http.ResponseWriter, r *http.Request) {
 	user, err := DB.GetMainUserByID(c.IDInt())
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			http.Error(w, "User not found", http.StatusNotFound)
+			user = &MainUser{
+				UserID:          c.IDInt(),
+				DiscordUsername: c.Username,
+			}
+
+		} else {
+			slog.With("error", err).Error("Failed to get user by ID")
+			http.Error(w, "Failed to get user", http.StatusInternalServerError)
 			return
 		}
-		slog.With("error", err).Error("Failed to get user by ID")
-		http.Error(w, "Failed to get user", http.StatusInternalServerError)
-		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -87,20 +87,36 @@ func HandleUpdateUserMyself(w http.ResponseWriter, r *http.Request) {
 	if newUserRaw.Couleur != "" {
 		newUserRaw.Couleur = strings.ToLower(newUserRaw.Couleur)
 	}
+	newUserRaw.DisplayName = strings.TrimSpace(newUserRaw.DisplayName)
+	if newUserRaw.DisplayName == "" {
+		http.Error(w, "Display name cannot be empty", http.StatusBadRequest)
+		return
+	}
 
 	if !c.IsAdmin() || newUserRaw.UserID != 0 {
 		newUserRaw.UserID = c.IDInt()
+		newUserRaw.DiscordUsername = c.Username
 	}
 
 	oldUser, err := DB.GetMainUserByID(newUserRaw.UserID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			http.Error(w, "User not found", http.StatusNotFound)
+			oldUser = &MainUser{
+				UserID:           newUserRaw.UserID,
+				DiscordUsername:  newUserRaw.DiscordUsername,
+				EditRestrictions: 0,
+			}
+			err = DB.InsertNewMainUser(oldUser)
+			if err != nil {
+				slog.With("error", err).Error("Failed to insert new user")
+				http.Error(w, "Failed to insert new user", http.StatusInternalServerError)
+				return
+			}
+		} else {
+			slog.With("error", err).Error("Failed to get user by ID")
+			http.Error(w, "Failed to get user", http.StatusInternalServerError)
 			return
 		}
-		slog.With("error", err).Error("Failed to get user by ID")
-		http.Error(w, "Failed to get user", http.StatusInternalServerError)
-		return
 	}
 
 	newUser, mergeErr := MergeUserWithRestrictions(oldUser, &newUserRaw)
