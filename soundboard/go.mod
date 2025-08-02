@@ -1,6 +1,6 @@
 module github.com/itsvyle/hxi2/soundboard
 
-go 1.23.2
+go 1.24.5
 
 replace github.com/itsvyle/hxi2/global-go/utils => ../global-go/utils
 
