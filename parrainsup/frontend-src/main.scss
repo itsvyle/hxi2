@@ -1,2 +1,68 @@
+@use "sass:color";
 @use "../../global-frontend-dependencies/global.scss";
 @use "../../global-frontend-dependencies/mixins-variables.scss" as *;
+@use "./vars.scss" as *;
+body {
+    background-color: $ps-bg;
+}
+main {
+    display: flex;
+    flex-direction: row;
+
+    article {
+        flex: 1;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        width: 100%;
+        // max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 100px;
+        min-height: 100dvh;
+
+        header {
+            p {
+                margin-bottom: 1rem;
+
+                &[role="doc-subtitle"] {
+                    text-align: center;
+                    font-style: italic;
+                    margin-bottom: 3rem;
+                }
+            }
+        }
+    }
+}
+
+h1 {
+    text-align: center;
+}
+
+#cards {
+    width: 100%;
+    // display: grid;
+    // grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; // also consider space-even
+    row-gap: 2rem;
+    column-gap: 2rem;
+}
+
+#edit-button {
+    @include cancelButtonStyles();
+    @include buttonIcon();
+
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    width: 4rem;
+    height: 4rem;
+    font-size: 50px;
+    justify-content: center;
+    border-radius: 20px;
+    background-color: color.scale($ps-bg, $lightness: +30%);
+    &:hover {
+        background-color: color.scale($ps-bg, $lightness: +20%);
+    }
+}

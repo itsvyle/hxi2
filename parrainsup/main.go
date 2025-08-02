@@ -14,6 +14,8 @@ var authManager *ggu.AuthManager
 var ConfigRunningPort = "42005"
 var HXI2TLD = ""
 
+var mainUsersCacher *ggu.Cacher[map[int64]*MainUser]
+
 func init() {
 	var err error
 	ggu.InitGlobalSlog()
@@ -54,6 +56,16 @@ func init() {
 		panic(err)
 	}
 	// #endregion
+
+	// #region Cachers
+	mainUsersCacher = ggu.NewCacher("mainUsersCacher", func() (map[int64]*MainUser, error) {
+		users, err := DB.ListVisibleMainUsers()
+		if err != nil {
+			return nil, err
+		}
+		return users, nil
+	}, 60*time.Second, 5)
+	// #endregion
 }
 
 //go:embed dist/*
@@ -84,6 +96,10 @@ func main() {
 	}
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" && r.URL.Path != "/index.html" {
+			http.NotFound(w, r)
+			return
+		}
 		c, err := authManager.AuthenticateHTTPRequest(w, r, false)
 		if err != nil || !c.CheckPermHTTP(w, ggu.RoleStudent) {
 			return
@@ -119,11 +135,11 @@ func main() {
 		treeHTML.ServeHTTP(w, r)
 	})
 
-	router.Handle("/api/list_users", ggu.GzipMiddleware(http.HandlerFunc(HandleListUsers)))
 	router.Handle("/api/list_relations", ggu.GzipMiddleware(http.HandlerFunc(HandleListRelations)))
 	router.Handle("POST /api/relation", http.HandlerFunc(HandlePostRelation))
 	router.Handle("DELETE /api/relation", http.HandlerFunc(HandleDeleteRelation))
 	router.Handle("GET /api/global_tree", ggu.GzipMiddleware(http.HandlerFunc(HandleGetGlobalTree))) */
+	router.Handle("/api/list_users", ggu.GzipMiddleware(http.HandlerFunc(HandleListUsers)))
 
 	slog.With("port", ConfigRunningPort).Info("Server is running")
 	slog.With("error", server.ListenAndServe()).Error("Server crashed")
