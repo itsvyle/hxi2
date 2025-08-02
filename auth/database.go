@@ -137,7 +137,7 @@ func (db *DatabaseManager) UpdateUser(user *DBUser) error {
 	}
 	_, err := db.DB.NamedExec(`
 		UPDATE users
-		SET first_name = :first_name, last_name = :last_name, discord_id = :discord_id, account_modified_date = :account_modified_date, promotion = :promotion, permissions = :permissions
+		SET first_name = :first_name, last_name = :last_name, discord_id = :discord_id, account_modified_date = :account_modified_date, promotion = :promotion, permissions = :permissions, username = :username
 		WHERE ID = :ID
 	`, user)
 	return err

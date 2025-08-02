@@ -136,7 +136,7 @@ func HandlePostRelation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !c.HasPermission(ggu.RoleAdmin) {
-		_, err := usersCacher.GetNow()
+		_, err := usersCacher.Get()
 		if err != nil {
 			slog.With("error", err).Error("Failed to get users for parrainage check")
 			http.Error(w, "Failed to get users", http.StatusInternalServerError)
@@ -258,7 +258,7 @@ func HandleGetGlobalTree(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	globalTree, err := globalTreeCacher.GetNow()
+	globalTree, err := globalTreeCacher.Get()
 	if err != nil {
 		slog.With(ggu.SlogHTTPInfo(r), "error", err).Error("Failed to get global tree")
 		http.Error(w, "Failed to get global tree", http.StatusInternalServerError)

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>HXI² - Parrainsup</title>
+        <script type="text/javascript" src="/dist/edit.bundle.js"></script>
+        <link rel="stylesheet" href="/dist/edit.bundle.css" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta property="og:title" content="Accueil" />
+        <meta
+            property="og:description"
+            content="hxi2.fr - Le site internet des élèves de la MP2I du Lycée du Parc" />
+        <meta name="theme-color" content="#e20f18" />
+        <!-- favicon -->
+        <!-- iconify-import -->
+    </head>
+    <body>
+        <main>
+            <aside id="menu-container" class="integrated-bar"></aside>
+            <article>
+                <div class="section-top">
+                    <div class="section-top-settings">
+                        <h1>Éditer son profil</h1>
+                        <div class="field field-row">
+                            <label>Cacher mon profil sur Parrainsup:</label>
+                            <input id="field-hide" type="checkbox" />
+                        </div>
+                        <div class="field field-row">
+                            <label>Couleur de mon profil:</label>
+                            <input id="field-couleur" type="color" />
+                        </div>
+                        <div class="separator"></div>
+                        <div class="field">
+                            <label for="field-display_name"
+                                >Nom d'affichage (mettre vrai prénom, et nom si
+                                vous le souhaitez):
+                                <span style="color: red !important"
+                                    >*</span
+                                ></label
+                            >
+                            <input
+                                id="field-display_name"
+                                type="text"
+                                placeholder="Nom d'affichage"
+                                maxlength="30"
+                                required />
+                        </div>
+                        <div class="field">
+                            <label for="field-surnom">Surnom:</label>
+                            <input
+                                id="field-surnom"
+                                type="text"
+                                placeholder="Surnom"
+                                maxlength="30" />
+                        </div>
+                        <div class="field">
+                            <label for="field-surnom">Pronoms:</label>
+                            <input
+                                id="field-pronouns"
+                                type="text"
+                                placeholder="Pronoms"
+                                maxlength="15" />
+                        </div>
+                        <div class="separator"></div>
+                    </div>
+                    <div id="preview-container"></div>
+                </div>
+                <div class="section-main">
+                    <div class="field">
+                        <label for="field-origine">Lycée d'origine:</label>
+                        <input
+                            id="field-origine"
+                            type="text"
+                            placeholder="Lycée d'origine"
+                            maxlength="60" />
+                    </div>
+                    <div class="field">
+                        <label for="field-voeu">Voeu d'école:</label>
+                        <input
+                            id="field-voeu"
+                            type="text"
+                            placeholder="École visée"
+                            maxlength="60" />
+                    </div>
+                    <div class="field">
+                        <label for="field-fun_fact">Fun fact sur vous:</label>
+                        <textarea
+                            id="field-fun_fact"
+                            placeholder="Fun Fact:"
+                            maxlength="200"></textarea>
+                    </div>
+                    <div class="field">
+                        <label for="field-conseil"
+                            >Conseil(s) pour les bizuths:</label
+                        >
+                        <textarea
+                            id="field-conseil"
+                            placeholder="Conseil(s):"
+                            maxlength="200"></textarea>
+                    </div>
+                    <div class="field">
+                        <label for="field-c_or_ocaml">C ou Ocaml:</label>
+                        <input
+                            id="field-c_or_ocaml"
+                            type="text"
+                            placeholder="C ou Ocaml"
+                            maxlength="50" />
+                    </div>
+                    <div class="field">
+                        <label for="field-algebre_or_analyse"
+                            >Algèbre ou Analyse:</label
+                        >
+                        <input
+                            id="field-algebre_or_analyse"
+                            type="text"
+                            placeholder="Algèbre ou Analyse"
+                            maxlength="50" />
+                    </div>
+                </div>
+            </article>
+        </main>
+        <button id="return-button" title="Retourner à la page d'accueil">
+            <iconify-icon
+                icon="mdi:arrow-u-left-top"
+                width="50"
+                height="50"></iconify-icon>
+        </button>
+        <button id="save-container">
+            Changements détectés: cliquer pour enregistrer
+        </button>
+        <!-- menu-import -->
+    </body>
+</html>
