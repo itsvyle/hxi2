@@ -1,0 +1,3 @@
+dist/*
+test_db.sqlite3
+.env
