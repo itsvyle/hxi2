@@ -1,6 +1,6 @@
 module github.com/itsvyle/hxi2/global-go/discord-bot-wrapper
 
-go 1.24.1
+go 1.24.5
 
 replace github.com/itsvyle/hxi2/global-go/utils => ../utils
 
