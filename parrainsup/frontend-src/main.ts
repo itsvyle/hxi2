@@ -3,12 +3,24 @@ import { CustomWindow } from "../../tree/frontend-src/api";
 import { listUsers } from "./api";
 import "./main.scss";
 import { MainUserCard } from "./user-card";
-declare const window: CustomWindow;
+export interface CustomAddWindow extends CustomWindow {
+    activePromotion: number;
+}
+declare const window: CustomAddWindow;
 
 document.addEventListener("DOMContentLoaded", () => {
     fillWindowUserData();
-    if (!window.userData || window.userData.promotion !== 2024) {
+    if (
+        !window.userData ||
+        window.userData.promotion !== window.activePromotion
+    ) {
         document.getElementById("edit-button").style.display = "none";
+    } else {
+        document
+            .getElementById("edit-button")
+            ?.addEventListener("click", () => {
+                window.location.href = `edit`;
+            });
     }
     listUsers().then((users) => {
         for (const userId in users) {

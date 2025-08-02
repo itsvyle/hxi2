@@ -1,4 +1,5 @@
 import path from "path";
+import fs from "fs";
 import "webpack-dev-server";
 import { getDefaultConfig } from "../global-frontend-dependencies/_webpack-utils";
 
@@ -22,6 +23,12 @@ export default (env, argv) => {
         ],
         entries: {
             main: SRCDIR + "/main.ts",
+            edit: SRCDIR + "/edit.ts",
+        },
+        extraDefines: {
+            "window.activePromotion": fs
+                .readFileSync("promo-active.txt", "utf-8")
+                .trim(),
         },
         outputDirName: "dist",
         srcDir: SRCDIR,

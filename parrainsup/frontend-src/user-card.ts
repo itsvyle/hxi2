@@ -14,6 +14,11 @@ export class MainUserCard extends LitElement {
         return this; // Render template in light DOM instead of shadow dom
     }
 
+    updateData(newData: MainUser) {
+        this.data = newData;
+        this.requestUpdate();
+    }
+
     render() {
         this.style.borderLeftColor = this.data.couleur;
         return html`
@@ -80,15 +85,15 @@ export class MainUserCard extends LitElement {
                 ${!this.data.fun_fact
                     ? html``
                     : html` <label>Fun Fact:</label>
-                          <p class="fun_fact" title="Fun Fact">
-                              ${this.data.fun_fact}
-                          </p>`}
+                          <!-- prettier-ignore -->
+                          <p class="fun_fact" title="Fun Fact">${this.data
+                              .fun_fact}</p>`}
                 ${!this.data.conseil
                     ? html``
                     : html` <label>Conseil pour les bizuths:</label>
-                          <p class="conseil" title="Conseil pour les bizuths">
-                              ${this.data.conseil}
-                          </p>`}
+                          <!-- prettier-ignore -->
+                          <p class="conseil" title="Conseil pour les bizuths">${this
+                              .data.conseil}</p>`}
                 ${!this.data.algebre_or_analyse
                     ? html``
                     : html` <label>Algèbre ou analyse?</label>

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -79,10 +80,27 @@ var EditRestrictionKeys = map[string]int{
 	"hide":               -1,
 }
 
+func isHexColor(s string) bool {
+	// Matches #RGB, #RRGGBB (case-insensitive)
+	re := regexp.MustCompile(`^#(?:[0-9a-fA-F]{3}){1,2}$`)
+	return re.MatchString(s)
+}
+
 // MergeUserWithRestrictions merges the wanted user data into the returned user, following the edit restrictions.
 // Returns an error with the restricted fields if the wanted user tries to edit them - it will still return the merged user.
 func MergeUserWithRestrictions(oldUser *MainUser, wanted *MainUser) (*MainUser, error) {
 	newUser := *oldUser
+
+	wanted.DisplayName = strings.TrimSpace(wanted.DisplayName)
+	wanted.Surnom = strings.TrimSpace(wanted.Surnom)
+	wanted.Origine = strings.TrimSpace(wanted.Origine)
+	wanted.Voeu = strings.TrimSpace(wanted.Voeu)
+	wanted.Couleur = strings.TrimSpace(wanted.Couleur)
+	wanted.COrOcaml = strings.TrimSpace(wanted.COrOcaml)
+	wanted.FunFact = strings.TrimSpace(wanted.FunFact)
+	wanted.Conseil = strings.TrimSpace(wanted.Conseil)
+	wanted.AlgebreOrAnalyse = strings.TrimSpace(wanted.AlgebreOrAnalyse)
+	wanted.Pronouns = strings.TrimSpace(wanted.Pronouns)
 
 	var restrictedFields []string
 
@@ -99,7 +117,10 @@ func MergeUserWithRestrictions(oldUser *MainUser, wanted *MainUser) (*MainUser, 
 		}
 
 		restrictionBit, ok := EditRestrictionKeys[jsonTag]
-		if !ok || restrictionBit == 0 {
+		if !ok {
+			continue
+		}
+		if restrictionBit == 0 {
 			continue
 		}
 
@@ -121,11 +142,7 @@ func MergeUserWithRestrictions(oldUser *MainUser, wanted *MainUser) (*MainUser, 
 
 	// check if the newVal for couleur is a valid hex color
 	if newUser.Couleur != "" {
-		if !strings.HasPrefix(newUser.Couleur, "#") || len(newUser.Couleur) != 7 {
-			newUser.Couleur = oldUser.Couleur // revert to old value
-			return &newUser, fmt.Errorf("couleur must be a valid hex color (e.g. #RRGGBB)")
-		}
-		if _, err := fmt.Sscanf(newUser.Couleur, "#%02x%02x%02x", newUser.Couleur[1:3], newUser.Couleur[3:5], newUser.Couleur[5:7]); err != nil {
+		if !isHexColor(newUser.Couleur) {
 			newUser.Couleur = oldUser.Couleur // revert to old value
 			return &newUser, fmt.Errorf("couleur must be a valid hex color (e.g. #RRGGBB)")
 		}
@@ -151,4 +168,38 @@ func (db *DatabaseManager) ListVisibleMainUsers() (map[int64]*MainUser, error) {
 	}
 
 	return userMap, nil
+}
+
+func (db *DatabaseManager) GetMainUserByID(userID int64) (*MainUser, error) {
+	var user MainUser
+	err := db.DB.Get(&user, "SELECT * FROM MAIN WHERE user_id = ? LIMIT 1", userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (db *DatabaseManager) UpdateMainUser(user *MainUser) error {
+	_, err := db.DB.NamedExec(`UPDATE MAIN SET
+		hide = :hide,
+		display_name = :display_name,
+		surnom = :surnom,
+		origine = :origine,
+		voeu = :voeu,
+		couleur = :couleur,
+		c_or_ocaml = :c_or_ocaml,
+		fun_fact = :fun_fact,
+		conseil = :conseil,
+		algebre_or_analyse = :algebre_or_analyse,
+		pronouns = :pronouns,
+		updated_at = CURRENT_TIMESTAMP
+	WHERE user_id = :user_id`, user)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

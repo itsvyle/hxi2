@@ -10,8 +10,8 @@ user-card {
     border-bottom-right-radius: 20px;
     border-left-width: 5px;
     border-left-style: solid;
-    max-width: 400px;
-    flex: 400px;
+    max-width: $desired-card-width;
+    flex: $desired-card-width;
     box-sizing: border-box;
     transition: transform 0.2s ease-in-out;
     cursor: pointer;
@@ -23,6 +23,13 @@ user-card {
     label {
         // it doesn't properly inherit cursor from parent, so set it explicitly
         cursor: pointer;
+    }
+
+    p {
+        word-wrap: break-all;
+        word-wrap: break-word; /* Legacy, but still widely used */
+        overflow-wrap: break-word; /* Standard property */
+        word-break: break-word; /* Not standard, but supported in some browsers */
     }
 
     .sep {
@@ -40,7 +47,7 @@ user-card {
     }
     .container-first-row {
         @extend .container-row;
-        p.display_name {
+        .display_name {
             font-size: 1.4em;
             flex: 1;
         }
@@ -113,5 +120,9 @@ user-card {
             padding-left: 0.5rem;
             margin-bottom: 0.5rem;
         }
+    }
+    .fun_fact,
+    .conseil {
+        white-space: pre-line;
     }
 }
