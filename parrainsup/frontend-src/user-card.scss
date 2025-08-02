@@ -1,0 +1,128 @@
+@use "sass:color";
+@use "../../global-frontend-dependencies/mixins-variables.scss" as *;
+@use "./vars.scss" as *;
+user-card {
+    padding: 2rem;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: color.scale($ps-bg, $lightness: -40%);
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-left-width: 5px;
+    border-left-style: solid;
+    max-width: $desired-card-width;
+    flex: $desired-card-width;
+    box-sizing: border-box;
+    transition: transform 0.2s ease-in-out;
+    cursor: pointer;
+
+    &:hover {
+        transform: scale(1.02);
+    }
+
+    label {
+        // it doesn't properly inherit cursor from parent, so set it explicitly
+        cursor: pointer;
+    }
+
+    p {
+        word-wrap: break-all;
+        word-wrap: break-word; /* Legacy, but still widely used */
+        overflow-wrap: break-word; /* Standard property */
+        word-break: break-word; /* Not standard, but supported in some browsers */
+    }
+
+    .sep {
+        border-top: 1px dashed var(--foreground-primary-transparent);
+        height: 1px;
+        margin: 0.75rem 1rem;
+    }
+
+    .container-row {
+        display: flex;
+        flex-direction: row;
+        &:not(:empty) {
+            margin-bottom: 0.5rem;
+        }
+    }
+    .container-first-row {
+        @extend .container-row;
+        .display_name {
+            font-size: 1.4em;
+            flex: 1;
+        }
+    }
+    .container-second-row {
+        @extend .container-row;
+        p.surnom {
+            font-size: 1.2em;
+            flex: 1;
+        }
+        p.discord_username {
+            color: #cab2fb;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    }
+
+    .container-third-row {
+        @extend .container-row;
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        column-gap: 0.5rem;
+        label {
+            font-weight: bold;
+        }
+
+        &.both {
+            grid-template-columns: 1fr 20px 1fr;
+            row-gap: 0.5rem;
+            column-gap: 0.5rem;
+            label,
+            p {
+                text-align: center;
+            }
+            .label-origine {
+                grid-row: 1;
+                grid-column: 1;
+            }
+            .origine {
+                grid-row: 2;
+                grid-column: 1;
+            }
+            .label-voeu {
+                grid-row: 1;
+                grid-column: 3;
+            }
+            .voeu {
+                grid-row: 2;
+                grid-column: 3;
+            }
+            .label-arrow {
+                grid-row: 1 / span 2;
+                grid-column: 2;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+    }
+
+    .container-questions {
+        display: flex;
+        flex-direction: column;
+        row-gap: 0.25rem;
+        label {
+            font-weight: bold;
+        }
+        p {
+            padding-left: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+    }
+    .fun_fact,
+    .conseil {
+        white-space: pre-line;
+    }
+}
