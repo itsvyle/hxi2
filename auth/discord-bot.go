@@ -2,6 +2,7 @@ package main
 
 import (
 	"log/slog"
+	"net/url"
 
 	"github.com/bwmarrin/discordgo"
 	dbw "github.com/itsvyle/hxi2/global-go/discord-bot-wrapper"
@@ -24,6 +25,7 @@ func NewDiscordBot(token string) (*DiscordBot, error) {
 	}
 	b.addCommandLogin()
 	b.addCommandUpdateUser()
+	b.addCommandParrainsup()
 	return b, nil
 }
 
@@ -140,6 +142,59 @@ func (discordBot *DiscordBot) addCommandLogin() {
 						Components: []discordgo.MessageComponent{
 							discordgo.Button{
 								Label:    "Login to hxi2.fr",
+								Style:    discordgo.LinkButton,
+								URL:      codeURL,
+								Disabled: false,
+							},
+						},
+					},
+				},
+			},
+		})
+		if err != nil {
+			discordBot.logger.With("err", err, "discordUserID", discordUserID).Error("Failed to respond to interaction")
+			return
+		}
+	}
+
+	discordBot.AddCommand(cmdName, command, hand)
+}
+
+func (discordBot *DiscordBot) addCommandParrainsup() {
+	const cmdName = "parrainsup"
+	var command = &discordgo.ApplicationCommand{
+		Name:        cmdName,
+		Description: "Ouvre parrainsup",
+	}
+
+	hand := func(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
+		if interaction.Member == nil {
+			return
+		}
+		discordUserID := interaction.Member.User.ID
+		user, err := DB.GetDBUserByDiscordID(discordUserID)
+		if err != nil || user == nil {
+			discordBot.logger.With("err", err, "discordUserID", discordUserID).Error("Failed to get user by discord ID")
+			discordBot.RespondWithError(interaction, "Failed to get hxi2.fr user - maybe you are not registered on hxi2.fr?")
+			return
+		}
+		code, err := DB.CreateOneTimeCode(user.ID)
+		if err != nil {
+			discordBot.RespondWithError(interaction, "Failed to create one-time code")
+			return
+		}
+		codeURL := authManager.LoginPageURL + "?code=" + code + "&redirectTo=" + url.QueryEscape("https://parrainsup.hxi2.fr/")
+
+		err = session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Flags:   discordgo.MessageFlagsEphemeral,
+				Content: "Cliquer sur le bouton ci-dessous pour ouvrir Parrainsup",
+				Components: []discordgo.MessageComponent{
+					discordgo.ActionsRow{
+						Components: []discordgo.MessageComponent{
+							discordgo.Button{
+								Label:    "Ouvrir Parrainsup",
 								Style:    discordgo.LinkButton,
 								URL:      codeURL,
 								Disabled: false,
