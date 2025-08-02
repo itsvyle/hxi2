@@ -1,4 +1,4 @@
-module github.com/itsvyle/hxi2/global-go-utils
+module github.com/itsvyle/hxi2/global-go/utils
 
 go 1.23.2
 
