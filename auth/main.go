@@ -10,7 +10,7 @@ import (
 
 	_ "embed"
 
-	ggu "github.com/itsvyle/hxi2/global-go-utils"
+	ggu "github.com/itsvyle/hxi2/global-go/utils"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/oauth2"

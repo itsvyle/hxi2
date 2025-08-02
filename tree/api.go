@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	ggu "github.com/itsvyle/hxi2/global-go-utils"
+	ggu "github.com/itsvyle/hxi2/global-go/utils"
 )
 
 func HandleListUsers(w http.ResponseWriter, r *http.Request) {

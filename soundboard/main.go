@@ -11,7 +11,7 @@ import (
 
 	_ "embed"
 
-	ggu "github.com/itsvyle/hxi2/global-go-utils"
+	ggu "github.com/itsvyle/hxi2/global-go/utils"
 )
 
 var ConfigRunningPort = "8037"

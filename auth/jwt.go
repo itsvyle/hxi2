@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/cristalhq/jwt/v5"
-	ggu "github.com/itsvyle/hxi2/global-go-utils"
+	ggu "github.com/itsvyle/hxi2/global-go/utils"
 )
 
 type JWTManager struct {
