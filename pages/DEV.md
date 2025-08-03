@@ -54,7 +54,7 @@ Le serveur local de développement devra etre redémarré si on ajoute un nouvea
 ```bash
 # Exemple
 ❯ cd public-pages
-❯ j create-page test
+❯ just create-page test
 Creating test.ts, test.scss, and test.md in section public-pages
 Updating sections.json
 ```
