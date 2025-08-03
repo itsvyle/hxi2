@@ -106,6 +106,12 @@ export class MainUserCard extends LitElement {
                           <p class="c_or_ocaml" title="Langage préféré">
                               ${this.data.c_or_ocaml}
                           </p>`}
+                ${!this.data.linux_distro
+                    ? html``
+                    : html` <label>Ma distro linux:</label>
+                          <p class="linux_disto" title="Distribution Linux">
+                              ${this.data.linux_distro}
+                          </p>`}
             </div>
         `;
     }
