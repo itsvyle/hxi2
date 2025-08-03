@@ -55,9 +55,13 @@ func (discordBot *DiscordBot) addCommandUpdateUser() {
 	const cmdName = "create"
 	const newUserPermissions = ggu.RoleStudent
 	minp, maxp := ggu.GetPromotionsRange()
+
+	var p int64 = discordgo.PermissionAdministrator | discordgo.PermissionManageRoles | discordgo.PermissionManageGuild
+
 	var command = &discordgo.ApplicationCommand{
-		Name:        cmdName,
-		Description: "Create a student's data",
+		Name:                     cmdName,
+		Description:              "Create a student's data",
+		DefaultMemberPermissions: &p,
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
