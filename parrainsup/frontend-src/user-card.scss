@@ -6,8 +6,8 @@ user-card {
     padding-left: 10px;
     padding-right: 10px;
     background-color: color.scale($ps-bg, $lightness: -40%);
-    border-top-right-radius: 20px;
-    border-bottom-right-radius: 20px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
     border-left-width: 5px;
     border-left-style: solid;
     max-width: $desired-card-width;
