@@ -12,6 +12,7 @@ export interface MainUser {
     conseil: string;
     algebre_or_analyse: string;
     pronouns: string;
+    linux_distro: string;
     discord_username: string;
     hide: boolean; // Indicates if the user is hidden
     edit_restrictions: number;

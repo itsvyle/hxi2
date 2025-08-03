@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS MAIN (
     fun_fact TEXT NOT NULL,
     conseil TEXT NOT NULL, -- Conseil pour les filleuls
     algebre_or_analyse TEXT NOT NULL, -- Préférence entre algèbre et analyse
+    linux_distro TEXT NOT NULL,
     discord_username TEXT NOT NULL, -- Nom d'utilisateur Discord
     edit_restrictions INTEGER NOT NULL DEFAULT 0,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
