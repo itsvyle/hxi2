@@ -61,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "algebre_or_analyse",
         "pronouns",
         "couleur",
+        "linux_distro",
     ] as (keyof MainUser)[]) {
         let input = document.getElementById(
             `field-${field}`,
@@ -108,6 +109,7 @@ function fillForm(data: MainUser) {
     g("field-algebre_or_analyse").value = data.algebre_or_analyse;
     g("field-fun_fact").value = data.fun_fact;
     g("field-conseil").value = data.conseil;
+    g("field-linux_distro").value = data.linux_distro;
 }
 
 function hasChanged(): boolean {

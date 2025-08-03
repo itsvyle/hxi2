@@ -58,6 +58,7 @@ type MainUser struct {
 	Conseil          string    `db:"conseil" json:"conseil"`
 	AlgebreOrAnalyse string    `db:"algebre_or_analyse" json:"algebre_or_analyse"`
 	Pronouns         string    `db:"pronouns" json:"pronouns"`
+	LinuxDistro      string    `db:"linux_distro" json:"linux_distro"`
 	DiscordUsername  string    `db:"discord_username" json:"discord_username"`
 	EditRestrictions int       `db:"edit_restrictions" json:"edit_restrictions"`
 	UpdatedAt        time.Time `db:"updated_at" json:"updated_at"`
@@ -77,6 +78,7 @@ var EditRestrictionKeys = map[string]int{
 	"conseil":            128,
 	"algebre_or_analyse": 256,
 	"pronouns":           512,
+	"linux_distro":       1024,
 	"hide":               -1,
 }
 
@@ -101,6 +103,7 @@ func MergeUserWithRestrictions(oldUser *MainUser, wanted *MainUser) (*MainUser, 
 	wanted.Conseil = strings.TrimSpace(wanted.Conseil)
 	wanted.AlgebreOrAnalyse = strings.TrimSpace(wanted.AlgebreOrAnalyse)
 	wanted.Pronouns = strings.TrimSpace(wanted.Pronouns)
+	wanted.LinuxDistro = strings.TrimSpace(wanted.LinuxDistro)
 
 	var restrictedFields []string
 
@@ -185,11 +188,11 @@ func (db *DatabaseManager) InsertNewMainUser(user *MainUser) error {
 	_, err := db.DB.NamedExec(`INSERT INTO MAIN (
 		user_id, hide, display_name, surnom, origine, voeu, couleur,
 		c_or_ocaml, fun_fact, conseil, algebre_or_analyse, pronouns,
-		discord_username, edit_restrictions
+		linux_distro, discord_username, edit_restrictions
 	) VALUES (
 		:user_id, :hide, :display_name, :surnom, :origine, :voeu, :couleur,
 		:c_or_ocaml, :fun_fact, :conseil, :algebre_or_analyse, :pronouns,
-		:discord_username, :edit_restrictions
+		:linux_distro, :discord_username, :edit_restrictions
 	)`, user)
 
 	if err != nil {
@@ -212,6 +215,7 @@ func (db *DatabaseManager) UpdateMainUser(user *MainUser) error {
 		conseil = :conseil,
 		algebre_or_analyse = :algebre_or_analyse,
 		pronouns = :pronouns,
+		linux_distro = :linux_distro,
 		updated_at = CURRENT_TIMESTAMP
 	WHERE user_id = :user_id`, user)
 
