@@ -187,14 +187,10 @@ func (discordBot *DiscordBot) addCommandUpdateUser() {
 		discordBot.Logger.Debug("Creating user", "discordUserID", userID, "firstName", firstName, "lastName", lastName, "promo", promo, "discordUsername", discordUsername)
 
 		// Now, create the user in the database
-		oldUser, err := DB.GetDBUserByDiscordID(userID)
+		_, err = DB.GetDBUserByDiscordID(userID)
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			discordBot.Logger.With("err", err, "discordUserID", userID).Error("Failed to get user by discord ID")
 			discordBot.RespondWithError(interaction, "Failed to get user by discord ID")
-			return
-		}
-		if oldUser != nil {
-			discordBot.RespondWithError(interaction, "User already exists with this discord ID")
 			return
 		}
 
