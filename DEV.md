@@ -5,6 +5,7 @@ Ce dépot centralise les multiples projets qui vivent sous l'écosystème et le 
 Chaque sous-projet doit comporter un fichier `DEV.md`, qui indique les instructions de développement pour ce projet: s'y référer pour les détails de chaque projet.
 
 ## Dépendances
+
 La grande dépendance de tous les projets sera d'avoir [just](https://github.com/casey/just), un nouvel équivalent à `make`, qui permet de faire des scripts de construction et d'installation.
 
 Chaque projet comprend une commande `just init`, qui a comme role d'initialiser le projet, en installant les dépendances nécessaires, et en vérifiant que les outils nécessaires sont installés.
@@ -22,6 +23,8 @@ Périodiquement, le jeton JWT expirera, et l'application cliente devra appeler l
 Chaque utilisateur peut avoir plusieurs permissions, qui sont stockées en tant que bitfield, dans le JWT.
 
 Dans la pratique, des bibliothèques sont disponibles pour gérer l'authentification des utilisateurs, et la vérification des permissions, dans les applications clientes.
+
+Afin qu'une application cliente puisse vérifier les permissions, rafraichir des tokens, etc, elle aura besoin d'une clé d'API, qui est délivrée par l'administrateur du service d'authentification (itsvyle)
 
 ## Environment variables to set
 
