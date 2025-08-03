@@ -55,6 +55,10 @@ func BoolPtr(b bool) *bool {
 	return &b
 }
 
+func F64Ptr(f float64) *float64 {
+	return &f
+}
+
 func ParseInt64(s string) (int64, error) {
 	id, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
@@ -70,4 +74,10 @@ func Filter[T any](ss []T, test func(T) bool) (ret []T) {
 		}
 	}
 	return
+}
+
+func GetPromotionsRange() (int, int) {
+	const minp = 2021
+	const maxp = 2025
+	return minp, maxp
 }

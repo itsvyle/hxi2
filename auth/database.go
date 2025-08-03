@@ -143,6 +143,24 @@ func (db *DatabaseManager) UpdateUser(user *DBUser) error {
 	return err
 }
 
+func (db *DatabaseManager) CreateNewUser(user *DBUser) error {
+	if user.ID == 0 {
+		user.ID, _ = ggu.Generate32BitsNumber()
+	}
+	user.AccountCreatedDate = time.Now().UTC()
+	user.AccountModifiedDate = time.Now().UTC()
+
+	if err := user.CheckSchema(); err != nil {
+		return err
+	}
+
+	_, err := db.DB.NamedExec(`
+		INSERT INTO users (ID, first_name, last_name, discord_id, account_created_date, account_modified_date, promotion, permissions, username)
+		VALUES (:ID, :first_name, :last_name, :discord_id, :account_created_date, :account_modified_date, :promotion, :permissions, :username)
+	`, user)
+	return err
+}
+
 func (db *DatabaseManager) GetDBUserByDiscordID(discordID string) (*DBUser, error) {
 	user := &DBUser{}
 	err := db.DB.Get(user, "SELECT * FROM users WHERE discord_id = ?", discordID)
