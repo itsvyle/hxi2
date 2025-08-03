@@ -192,6 +192,9 @@ func (discordBot *DiscordBot) addCommandUpdateUser() {
 			discordBot.Logger.With("err", err, "discordUserID", userID).Error("Failed to get user by discord ID")
 			discordBot.RespondWithError(interaction, "Failed to get user by discord ID")
 			return
+		} else if err == nil {
+			discordBot.RespondWithError(interaction, "User already exists with this Discord ID, please use a different ID or update the existing user")
+			return
 		}
 
 		var ln sql.NullString
