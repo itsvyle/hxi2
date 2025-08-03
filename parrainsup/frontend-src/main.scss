@@ -41,7 +41,7 @@ h1 {
 #cards {
     width: 100%;
     // display: grid;
-    // grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    // grid-template-columns: repeat(auto-fill, minmax($desired-card-width, 1fr));
     display: flex;
     flex-wrap: wrap;
     justify-content: center; // also consider space-even
