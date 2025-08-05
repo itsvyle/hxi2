@@ -1,0 +1,9 @@
+default:
+    just list
+
+auto:
+    uv run main.py -w "https://mp2i861.fr/spip.php?article1" -o "notes_de_cours"
+    uv run main.py -w "https://mp2i861.fr/spip.php?article2" -o "programmes_de_colle"
+    uv run main.py -w "https://mp2i861.fr/spip.php?article4" -o "feuilles_exercices"
+    uv run main.py -w "https://mp2i861.fr/spip.php?article5" -o "devoirs_maison"
+    uv run main.py -w "https://mp2i861.fr/spip.php?article6" -o "devoirs_surveilles"
