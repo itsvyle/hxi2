@@ -24,6 +24,7 @@ const CookieRefresh = "HXI2_REFRESH"
 const CookieSmallData = "HXI2_SMALL_DATA"
 const AuthRemotePublicKeyPath = "/api/public-key"
 const AuthRemoteRenewPath = "/api/renew"
+const AuthRemoteTempRenewPath = "/api/temp_renew"
 
 const (
 	RoleAdmin   = 0b1000
@@ -47,9 +48,11 @@ type SmallData struct {
 
 type HXI2JWTClaims struct {
 	jwt.RegisteredClaims
-	Username    string `json:"username"`
-	Permissions int    `json:"permissions"`
-	Promotion   int    `json:"promotion"`
+	Username              string `json:"username"`
+	Permissions           int    `json:"permissions"`
+	Promotion             int    `json:"promotion"`
+	Temporary             bool   `json:"temporary,omitempty"`
+	TemporaryRecheckAfter int64  `json:"recheck,omitempty"`
 }
 
 func (c *HXI2JWTClaims) IDInt() int64 {
@@ -357,6 +360,56 @@ func DefaultRenewToken(a *AuthManager, token, refreshToken string) (*AuthRenewal
 	return &renewalResponse, nil
 }
 
+func (a *AuthManager) RenewTemporaryToken(token string) (string, error) {
+	data, err := json.Marshal(AuthRenewalRequest{
+		Token: token,
+	})
+	if err != nil {
+		a.Logger.With("error", err, "token", token).Error("Failed to marshal renewal temporary request data")
+		return "", err
+	}
+
+	url := a.AuthEndpoint + AuthRemoteTempRenewPath
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(data))
+	if err != nil {
+		a.Logger.With("error", err, "url", url).Error("Failed to create request to renew token")
+		return "", err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	if a.projectAPIKey != "" {
+		req.Header.Set("Authorization", "Bearer "+a.projectAPIKey)
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		a.Logger.With("error", err, "url", url).Error("Failed to send request to renew token")
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		a.Logger.With("error", err, "url", url).Error("Failed to read response body")
+		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf("status code not OK: %s", resp.Status)
+		a.Logger.With("status", resp.Status, "url", url, "resBody", string(bodyBytes)).Error("Failed to renew token")
+		return "", err
+	}
+
+	newToken := string(bodyBytes)
+	if newToken == "" {
+		a.Logger.Error("RenewTemporaryToken returned empty token")
+		return "", fmt.Errorf("renewed token is empty")
+	}
+
+	return newToken, nil
+}
+
 type ProcessRequestAuthResponse struct {
 	Claims          *HXI2JWTClaims
 	RenewalResponse *AuthRenewalResponse
@@ -369,6 +422,9 @@ func (a *AuthManager) ProcessRequestAuth(providedToken string, providedRefreshTo
 	}
 	var renewalResponse *AuthRenewalResponse = nil
 	if !claims.IsValidAt(time.Now().UTC()) {
+		if claims.Temporary {
+			return nil, fmt.Errorf("your temporary access token has expired, please log in again")
+		}
 		if providedRefreshToken == "" {
 			return nil, fmt.Errorf("failed to get refresh cookie: %w", err)
 		}
@@ -390,9 +446,17 @@ func (a *AuthManager) ProcessRequestAuth(providedToken string, providedRefreshTo
 	}, nil
 }
 
+func (a *AuthManager) extractTokenFromRequest(r *http.Request) (string, error) {
+	tokenCookie, err := r.Cookie(CookieToken)
+	if err != nil || tokenCookie == nil || tokenCookie.Value == "" {
+		return "", fmt.Errorf("no token cookie found")
+	}
+	return tokenCookie.Value, nil
+}
+
 // if isAPI it won't redirect, it will return a 401
 // if this function returns an error, it has already sent a response, just exit your handler
-func (a *AuthManager) AuthenticateHTTPRequest(w http.ResponseWriter, r *http.Request, isAPI bool) (*HXI2JWTClaims, error) {
+func (a *AuthManager) _authenticateHTTPRequestDO_NOT_USE(w http.ResponseWriter, r *http.Request, isAPI bool) (*HXI2JWTClaims, error) {
 	redirect := func(e error) (*HXI2JWTClaims, error) {
 		if isAPI {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -409,9 +473,10 @@ func (a *AuthManager) AuthenticateHTTPRequest(w http.ResponseWriter, r *http.Req
 		http.Redirect(w, r, a.LoginPageURL+"?redirectTo="+url.QueryEscape(fullURL), http.StatusTemporaryRedirect)
 		return nil, e
 	}
-	tokenCookie, err := r.Cookie(CookieToken)
-	if err != nil || tokenCookie == nil || tokenCookie.Value == "" {
-		return redirect(fmt.Errorf("no token cookie"))
+
+	tokenCookie, err := a.extractTokenFromRequest(r)
+	if err != nil || tokenCookie == "" {
+		return redirect(err)
 	}
 
 	providedRefresh := ""
@@ -420,7 +485,7 @@ func (a *AuthManager) AuthenticateHTTPRequest(w http.ResponseWriter, r *http.Req
 		providedRefresh = refreshCookie.Value
 	}
 
-	res, err := a.ProcessRequestAuth(tokenCookie.Value, providedRefresh)
+	res, err := a.ProcessRequestAuth(tokenCookie, providedRefresh)
 	if err != nil {
 		a.Logger.With("error", err).Error("Failed to process request auth")
 		return redirect(err)
@@ -458,6 +523,64 @@ func (a *AuthManager) AuthenticateHTTPRequest(w http.ResponseWriter, r *http.Req
 	}
 
 	return res.Claims, nil
+}
+
+func (a *AuthManager) AuthenticateHTTPRequest(w http.ResponseWriter, r *http.Request, isAPI bool) (*HXI2JWTClaims, error) {
+	claims, err := a._authenticateHTTPRequestDO_NOT_USE(w, r, isAPI)
+	if err != nil {
+		return nil, err
+	}
+	if claims.Temporary {
+		http.Error(w, "Temporary accounts are not allowed to access this resource. Please login with a permanent account", http.StatusForbidden)
+		return nil, fmt.Errorf("temporary accounts are not allowed to access this resource")
+	}
+	return claims, nil
+}
+
+func (a *AuthManager) AuthenticateHTTPRequestIncludingTemporary(w http.ResponseWriter, r *http.Request, isAPI bool) (*HXI2JWTClaims, error) {
+	claims, err := a._authenticateHTTPRequestDO_NOT_USE(w, r, isAPI)
+	if err != nil {
+		return nil, err
+	}
+	if claims.Temporary && claims.TemporaryRecheckAfter > 0 {
+		if claims.IssuedAt.Add(time.Duration(claims.TemporaryRecheckAfter) * time.Second).Before(time.Now().UTC()) {
+			tok, err := a.extractTokenFromRequest(r)
+			if err != nil {
+				http.Error(w, "Failed to extract token from request", http.StatusUnauthorized)
+				return nil, fmt.Errorf("failed to extract token from request: %w", err)
+			}
+
+			newToken, err := a.RenewTemporaryToken(tok)
+			if err != nil {
+				http.Error(w, "Temporary token expired", http.StatusForbidden)
+				return nil, fmt.Errorf("temporary token expired: %w", err)
+			}
+
+			claims, err = a.VerifyTokenNoDate(newToken)
+			if err != nil {
+				http.Error(w, "Failed to verify renewed temporary token", http.StatusForbidden)
+				return nil, fmt.Errorf("failed to verify renewed temporary token: %w", err)
+			}
+
+			http.SetCookie(w, GenerateCookieObject(CookieToken, newToken, claims.ExpiresAt.Add(1*time.Hour).Sub(time.Now().UTC()), &OverwriteCookieOptions{
+				Path:   StringPtr("/"),
+				Domain: StringPtr(a.CookieDomain),
+			}))
+		}
+	}
+	return claims, nil
+}
+
+func (a *AuthManager) HandleTempLogin(username string, redirectTo string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		query := r.URL.RawQuery
+		if query == "" {
+			http.Error(w, "Missing code", http.StatusBadRequest)
+		}
+		url := a.AuthURL + "/temp_login?username=" + url.QueryEscape(username) + "&redirectTo=" + url.QueryEscape(redirectTo) + "&code=" + url.QueryEscape(query)
+
+		http.Redirect(w, r, url, http.StatusFound)
+	}
 }
 
 type ProjectUser struct {

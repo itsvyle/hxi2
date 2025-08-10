@@ -34,3 +34,12 @@ CREATE TABLE IF NOT EXISTS ONE_TIME_CODES (
     expires_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES USERS(ID) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS TEMPORARY_CODES (
+    ID INTEGER PRIMARY KEY,
+    username TEXT NOT NULL UNIQUE, -- a service name
+    code_hash TEXT NOT NULL UNIQUE, -- SHA-256 hash (32 bytes)
+    recheck_after INTEGER NOT NULL DEFAULT 0, -- seconds before rechecking with auth server if service is still valid - 0 means no recheck
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)

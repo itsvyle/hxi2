@@ -38,6 +38,13 @@ frontend-build:
 frontend-dev:
     pnpm serve
 
+hash-token token:
+    echo -n "{{token}}" | sha256sum | awk '{print $1}'
+
+create_temp_code username code recheck_after $CONFIG_DB_PATH=CONFIG_DB_PATH:
+    # Create a temporary code for a service, expires in a day
+    d=$(date -u -d 'tomorrow' '+%Y-%m-%d %H:%M:%S.%N+00:00'); sqlite3 $CONFIG_DB_PATH "INSERT INTO TEMPORARY_CODES (username, code_hash, recheck_after, expires_at) VALUES ('{{username}}', '$(just hash-token "{{code}}")', {{recheck_after}}, '$d');"
+
 # Run as a backend in development mode at port 42001
 run-as-local-backend $HXI2_AUTH_URL="http://localhost:42001" $HXI2_AUTH_ENDPOINT="http://localhost:42001" $CONFIG_RUNNING_PORT="42001" $CONFIG_JWT_PRIVATE_KEY=test_private_key $CONFIG_DB_PATH=CONFIG_DB_PATH: frontend-build
     CGO_ENABLED=1 go run .

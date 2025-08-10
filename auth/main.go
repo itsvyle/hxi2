@@ -332,6 +332,8 @@ func main() {
 	router.Handle("/api/public-key", http.HandlerFunc(HandlerPublicKey))
 	router.Handle("/api/discord_callback", http.HandlerFunc(HandleDiscordCallback))
 	router.Handle("POST /api/renew", http.HandlerFunc(HandleRenewToken))
+	router.Handle("GET /temp_login", http.HandlerFunc(HandleTempLogin))
+	router.Handle("POST /api/temp_renew", http.HandlerFunc(HandleTempRenew))
 
 	router.Handle("GET /api/project/list_users", http.HandlerFunc(ProjectHandleListUsers))
 
