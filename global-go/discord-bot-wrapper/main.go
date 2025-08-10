@@ -10,9 +10,9 @@ import (
 type DiscordBotCommandHandler func(session *discordgo.Session, interaction *discordgo.InteractionCreate)
 
 type DiscordBot struct {
-	session         *discordgo.Session
+	Session         *discordgo.Session
 	Logger          *slog.Logger
-	commandHandlers map[string]DiscordBotCommandHandler
+	CommandHandlers map[string]DiscordBotCommandHandler
 	commands        []*discordgo.ApplicationCommand
 }
 
@@ -31,25 +31,25 @@ func NewDiscordBot(token string) (*DiscordBot, error) {
 	discordSession.Identify.Intents = discordgo.MakeIntent(discordgo.PermissionCreateInstantInvite)
 
 	d := &DiscordBot{
-		session:         discordSession,
+		Session:         discordSession,
 		Logger:          l,
-		commandHandlers: map[string]DiscordBotCommandHandler{},
+		CommandHandlers: map[string]DiscordBotCommandHandler{},
 	}
 
-	discordSession.AddHandler(d.onReady)
+	d.Session.AddHandler(d.onReady)
 
 	return d, nil
 }
 
 func (discordBot *DiscordBot) Start() error {
-	err := discordBot.session.Open()
+	err := discordBot.Session.Open()
 	if err != nil {
 		discordBot.Logger.With("err", err).Error("Error logging in to the discord session. Check that token is valid.")
 		return err
 	}
 	discordBot.Logger.Debug("Discord bot started")
 	discordBot.Logger.Debug("Registering commands")
-	err = discordBot.RegisterCommands(discordBot.session)
+	err = discordBot.RegisterCommands(discordBot.Session)
 	if err != nil {
 		discordBot.Logger.With("err", err).Error("Failed to register commands")
 		return err
@@ -79,7 +79,7 @@ func (discordBot *DiscordBot) RegisterCommands(session *discordgo.Session) (err 
 
 func (discordBot *DiscordBot) AddCommand(commandName string, command *discordgo.ApplicationCommand, handler DiscordBotCommandHandler) {
 	discordBot.commands = append(discordBot.commands, command)
-	discordBot.commandHandlers[commandName] = handler
+	discordBot.CommandHandlers[commandName] = handler
 	discordBot.Logger.With("command", commandName).Debug("Command added")
 }
 
@@ -88,10 +88,10 @@ func (discordBot *DiscordBot) onCommandInteraction(session *discordgo.Session, i
 		return
 	}
 	interractionID := interaction.ApplicationCommandData().Name
-	if handler, ok := discordBot.commandHandlers[interractionID]; ok {
+	if handler, ok := discordBot.CommandHandlers[interractionID]; ok {
 		handler(session, interaction)
 	} else {
-		err := discordBot.session.InteractionRespond(interaction.Interaction, discordBot.ErrorInterractionResponse("Command not found"))
+		err := discordBot.Session.InteractionRespond(interaction.Interaction, discordBot.ErrorInterractionResponse("Command not found"))
 		if err != nil {
 			discordBot.Logger.With("err", err, "interractionID", interractionID).Error("Received invalid interraction id")
 		}
@@ -127,7 +127,7 @@ func (discordBot *DiscordBot) ErrorInterractionResponse(text string) *discordgo.
 }
 
 func (discordBot *DiscordBot) RespondWithError(interaction *discordgo.InteractionCreate, text string) {
-	err := discordBot.session.InteractionRespond(interaction.Interaction, discordBot.ErrorInterractionResponse(text))
+	err := discordBot.Session.InteractionRespond(interaction.Interaction, discordBot.ErrorInterractionResponse(text))
 	if err != nil {
 		discordBot.Logger.With("err", err).Error("Failed to respond to interaction with error")
 	}
