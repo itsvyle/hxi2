@@ -11,9 +11,19 @@ import (
 	ggu "github.com/itsvyle/hxi2/global-go/utils"
 )
 
+func CheckClaimsIncludingTemp(c *ggu.HXI2JWTClaims) bool {
+	if c.Temporary && c.Username == "parrainsup" {
+		return true
+	}
+	if c.IsStudent() {
+		return true
+	}
+	return false
+}
+
 func HandleListUsers(w http.ResponseWriter, r *http.Request) {
-	c, err := authManager.AuthenticateHTTPRequest(w, r, true)
-	if err != nil || !c.CheckPermHTTP(w, ggu.RoleStudent) {
+	c, err := authManager.AuthenticateHTTPRequestIncludingTemporary(w, r, true)
+	if err != nil || !CheckClaimsIncludingTemp(c) {
 		return
 	}
 
