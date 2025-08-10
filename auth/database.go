@@ -62,6 +62,7 @@ func (u *DBUser) GetNewJWTClaims() *ggu.HXI2JWTClaims {
 		Username:    u.Username,
 		Permissions: u.Permissions,
 		Promotion:   u.Promotion,
+		Temporary:   false,
 	}
 }
 
@@ -371,6 +372,77 @@ func (db *DatabaseManager) CreateOneTimeCode(userID int64) (string, error) {
 	}
 
 	return code, nil
+}
+
+type DBTemporaryCode struct {
+	ID           int64     `db:"ID" json:"id"`
+	Username     string    `db:"username" json:"username"`
+	CodeHash     string    `db:"code_hash" json:"codeHash"`
+	RecheckAfter int       `db:"recheck_after" json:"recheckAfter"`
+	CreatedAt    time.Time `db:"created_at" json:"createdAt"`
+	ExpiresAt    time.Time `db:"expires_at" json:"expiresAt"`
+}
+
+func (tempo *DBTemporaryCode) GetNewClaims() (*ggu.HXI2JWTClaims, error) {
+	jti, err := JWTGenerateJITToken()
+	if err != nil {
+		slog.With("error", err).Error("Failed to generate JTI token")
+		return nil, err
+	}
+	return &ggu.HXI2JWTClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			ID:        jti,
+			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
+			ExpiresAt: jwt.NewNumericDate(tempo.ExpiresAt),
+			NotBefore: jwt.NewNumericDate(time.Now().UTC()),
+		},
+		Username:              tempo.Username,
+		Permissions:           0,
+		Temporary:             true,
+		TemporaryRecheckAfter: int64(tempo.RecheckAfter),
+	}, nil
+}
+
+func (db *DatabaseManager) CheckTempCode(username, code string) (*DBTemporaryCode, error) {
+	if username == "" || code == "" {
+		return nil, errors.New("username or code is empty")
+	}
+
+	codeHash, err := db.hashToken(code)
+	if err != nil {
+		db.logger.With("error", err, "code", code).Error("Failed to hash code")
+		return nil, fmt.Errorf("failed to hash code")
+	}
+
+	var tempCode DBTemporaryCode
+	err = db.DB.Get(&tempCode, "SELECT * FROM TEMPORARY_CODES WHERE username = ? AND code_hash = ?", username, codeHash)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("invalid or expired code")
+		}
+		db.logger.With("error", err, "username", username, "code", code).Error("Failed to get temporary code")
+		return nil, fmt.Errorf("failed to get temporary code")
+	}
+
+	if time.Now().UTC().After(tempCode.ExpiresAt) {
+		return nil, errors.New("code has expired")
+	}
+
+	return &tempCode, nil
+}
+
+func (db *DatabaseManager) GetTempFromUsername(username string) (*DBTemporaryCode, error) {
+	if username == "" {
+		return nil, errors.New("username is empty")
+	}
+
+	var tempCode DBTemporaryCode
+	err := db.DB.Get(&tempCode, "SELECT * FROM TEMPORARY_CODES WHERE username = ?", username)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get temporary code: %w", err)
+	}
+
+	return &tempCode, nil
 }
 
 func (db *DatabaseManager) hashToken(token string) (string, error) {
