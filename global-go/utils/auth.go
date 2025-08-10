@@ -534,7 +534,7 @@ func (a *AuthManager) AuthenticateHTTPRequest(w http.ResponseWriter, r *http.Req
 		if isAPI {
 			http.Error(w, "Temporary accounts are not allowed to access this resource", http.StatusForbidden)
 		} else {
-			body := "<html><head><title>Forbidden</title><body>You aren't allowed to access this page with a temporary account. <a href=\"" + a.LoginPageURL + "\">Click here to login if you have an account</a></body></html>"
+			body := "<html style=\"color-scheme: dark;\"><head><title>Forbidden</title><body>You aren't allowed to access this page with a temporary account. <a href=\"" + a.LoginPageURL + "\">Click here to login if you have an account</a></body></html>"
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.WriteHeader(http.StatusForbidden)
 			_, err = w.Write([]byte(body))
