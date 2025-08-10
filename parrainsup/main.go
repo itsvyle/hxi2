@@ -115,8 +115,8 @@ func main() {
 			http.NotFound(w, r)
 			return
 		}
-		c, err := authManager.AuthenticateHTTPRequest(w, r, false)
-		if err != nil || !c.CheckPermHTTP(w, ggu.RoleStudent) {
+		c, err := authManager.AuthenticateHTTPRequestIncludingTemporary(w, r, false)
+		if err != nil || !CheckClaimsIncludingTemp(c) {
 			return
 		}
 		mainHTML.ServeHTTP(w, r)
@@ -175,6 +175,7 @@ func main() {
 	router.Handle("GET /api/list_users", ggu.GzipMiddleware(http.HandlerFunc(HandleListUsers)))
 	router.Handle("GET /api/me", http.HandlerFunc(HandleGetUserMyself))
 	router.Handle("PUT /api/me", http.HandlerFunc(HandleUpdateUserMyself))
+	router.Handle("GET /temp", authManager.HandleTempLogin("parrainsup", "https://parrainsup."+HXI2TLD))
 
 	slog.With("port", ConfigRunningPort).Info("Server is running")
 	slog.With("error", server.ListenAndServe()).Error("Server crashed")

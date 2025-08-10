@@ -78,6 +78,15 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleLogout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, ggu.GenerateCookieObject(ggu.CookieToken, "", -1*time.Minute, &ggu.OverwriteCookieOptions{
+		Domain: ggu.StringPtr(HXI2CookiesDomain),
+		Path:   ggu.StringPtr("/"),
+	}))
+	http.SetCookie(w, ggu.GenerateCookieObject(ggu.CookieSmallData, "", -1*time.Minute, &ggu.OverwriteCookieOptions{
+		Domain: ggu.StringPtr(HXI2CookiesDomain),
+		Path:   ggu.StringPtr("/"),
+	}))
+
 	refreshTokenCookie, err := r.Cookie(ggu.CookieRefresh)
 	if err != nil {
 		if !errors.Is(err, http.ErrNoCookie) {
@@ -94,15 +103,7 @@ func HandleLogout(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	http.SetCookie(w, ggu.GenerateCookieObject(ggu.CookieToken, "", -1*time.Minute, &ggu.OverwriteCookieOptions{
-		Domain: ggu.StringPtr(HXI2CookiesDomain),
-		Path:   ggu.StringPtr("/"),
-	}))
 	http.SetCookie(w, ggu.GenerateCookieObject(ggu.CookieRefresh, "", -1*time.Minute, &ggu.OverwriteCookieOptions{
-		Domain: ggu.StringPtr(HXI2CookiesDomain),
-		Path:   ggu.StringPtr("/"),
-	}))
-	http.SetCookie(w, ggu.GenerateCookieObject(ggu.CookieSmallData, "", -1*time.Minute, &ggu.OverwriteCookieOptions{
 		Domain: ggu.StringPtr(HXI2CookiesDomain),
 		Path:   ggu.StringPtr("/"),
 	}))
@@ -368,6 +369,131 @@ func HandleRenewToken(w http.ResponseWriter, r *http.Request) {
 		slog.With("error", err).Error("Failed to write response")
 	}
 
+}
+
+func HandleTempLogin(w http.ResponseWriter, r *http.Request) {
+	username := r.URL.Query().Get("username")
+	code := r.URL.Query().Get("code")
+	if username == "" || code == "" {
+		http.Error(w, "Username or code is empty", http.StatusBadRequest)
+		return
+	}
+	tempo, err := DB.CheckTempCode(username, code)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if tempo == nil {
+		http.Error(w, "Temporary code not found or expired", http.StatusUnauthorized)
+		return
+	}
+
+	newClaims, err := tempo.GetNewClaims()
+	if err != nil {
+		slog.With("error", err).Error("Failed to get new claims from temporary code")
+		http.Error(w, "Failed to get new claims from temporary code", http.StatusInternalServerError)
+		return
+	}
+
+	newToken, err := jwtManager.builder.Build(newClaims)
+	if err != nil {
+		slog.With("error", err).Error("Failed to build new token from temporary code")
+		http.Error(w, "Failed to build new token from temporary code", http.StatusInternalServerError)
+		return
+	}
+	http.SetCookie(w, ggu.GenerateCookieObject(ggu.CookieToken, newToken.String(), newClaims.ExpiresAt.Add(1*time.Hour).Sub(time.Now().UTC()), &ggu.OverwriteCookieOptions{
+		Domain: ggu.StringPtr(HXI2CookiesDomain),
+		Path:   ggu.StringPtr("/"),
+	}))
+
+	redirectTo := ConfigDefaultLoginRedirect
+	redirectCookie, err := r.Cookie("authRedirectTo")
+	if err != nil {
+		if !errors.Is(err, http.ErrNoCookie) {
+			slog.With("error", err).Error("Failed to get redirect cookie")
+			LoginError(w, r, "Failed to get redirect cookie")
+			return
+		}
+	} else if redirectCookie.Value != "" {
+		redirectTo = redirectCookie.Value
+		if !IsHXI2BaseDomain(redirectTo) {
+			redirectTo = ConfigDefaultLoginRedirect
+			slog.With("redirectTo", redirectTo).Error("Tried to redirect to a different TLD")
+		}
+	}
+
+	http.Redirect(w, r, redirectTo, http.StatusFound)
+}
+
+func HandleTempRenew(w http.ResponseWriter, r *http.Request) {
+	if !checkProjectApiAuth(w, r, ggu.APIRoleAuthentication) {
+		return
+	}
+	var renewRequest ggu.AuthRenewalRequest
+	err := json.NewDecoder(r.Body).Decode(&renewRequest)
+	if err != nil {
+		http.Error(w, "Failed to decode renew request", http.StatusBadRequest)
+		return
+	}
+
+	if renewRequest.Token == "" {
+		http.Error(w, "Token is empty", http.StatusBadRequest)
+		return
+	}
+
+	token := renewRequest.Token
+
+	var cl *ggu.HXI2JWTClaims
+	t, err := jwt.Parse([]byte(token), jwtManager.verifier)
+	if err != nil {
+		http.Error(w, "Failed to verify token", http.StatusUnauthorized)
+		return
+	}
+	err = t.DecodeClaims(&cl)
+	if err != nil {
+		http.Error(w, "Failed to decode claims", http.StatusUnauthorized)
+		return
+	}
+
+	if !cl.Temporary {
+		http.Error(w, "Token is not temporary", http.StatusBadRequest)
+		return
+	}
+
+	tempo, err := DB.GetTempFromUsername(cl.Username)
+	if err != nil || tempo == nil {
+		slog.With("error", err).Error("Failed to get temporary code from username")
+		http.Error(w, "Failed to get temporary code from username", http.StatusInternalServerError)
+		return
+	}
+
+	if tempo.RecheckAfter > 0 {
+		if tempo.ExpiresAt.Unix() < time.Now().Unix() {
+			slog.With("username", cl.Username).Info("Temporary code expired")
+			http.Error(w, "Temporary code expired", http.StatusUnauthorized)
+			return
+		}
+
+		newClaims, err := tempo.GetNewClaims()
+		if err != nil {
+			http.Error(w, "Failed to get new claims", http.StatusInternalServerError)
+			return
+		}
+
+		newToken, err := jwtManager.builder.Build(newClaims)
+		if err != nil {
+			slog.With("error", err).Error("Failed to build new token")
+			http.Error(w, "Failed to build new token", http.StatusInternalServerError)
+			return
+		}
+		token = newToken.String()
+	}
+
+	w.Header().Set("Content-Type", "text/plain")
+	_, err = w.Write([]byte(token))
+	if err != nil {
+		slog.With("error", err).Error("Failed to write token to response")
+	}
 }
 
 func IsHXI2BaseDomain(rawURL string) bool {
