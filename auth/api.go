@@ -468,13 +468,13 @@ func HandleTempRenew(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if tempo.RecheckAfter > 0 {
-		if tempo.ExpiresAt.Unix() < time.Now().Unix() {
-			slog.With("username", cl.Username).Info("Temporary code expired")
-			http.Error(w, "Temporary code expired", http.StatusUnauthorized)
-			return
-		}
+	if tempo.ExpiresAt.Unix() < time.Now().Unix() {
+		slog.With("username", cl.Username).Info("Temporary code expired")
+		http.Error(w, "Temporary code expired", http.StatusUnauthorized)
+		return
+	}
 
+	if tempo.RecheckAfter > 0 {
 		newClaims, err := tempo.GetNewClaims()
 		if err != nil {
 			http.Error(w, "Failed to get new claims", http.StatusInternalServerError)
