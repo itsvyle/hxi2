@@ -562,7 +562,17 @@ func (a *AuthManager) AuthenticateHTTPRequestIncludingTemporary(w http.ResponseW
 
 			newToken, err := a.RenewTemporaryToken(tok)
 			if err != nil {
-				http.Error(w, "Temporary token expired", http.StatusForbidden)
+				if isAPI {
+					http.Error(w, "Temporary token expired", http.StatusForbidden)
+				} else {
+					body := "<html style=\"color-scheme: dark;\"><head><title>Forbidden</title><body>Your temporary token is expired and couldn't be renewed - you will need to login with a real account to access this ressource. <a href=\"" + a.LoginPageURL + "\">Click here to login if you have an account</a></body></html>"
+					w.Header().Set("Content-Type", "text/html; charset=utf-8")
+					w.WriteHeader(http.StatusForbidden)
+					_, err = w.Write([]byte(body))
+					if err != nil {
+						slog.With("error", err).Error("Failed to write redirect response")
+					}
+				}
 				return nil, fmt.Errorf("temporary token expired: %w", err)
 			}
 
