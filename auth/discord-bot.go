@@ -29,7 +29,23 @@ func NewDiscordBot(token string) (*DiscordBot, error) {
 	b.addCommandLogin()
 	b.addCommandUpdateUser()
 	b.addCommandParrainsup()
+	b.addCommandTestButton()
+	b.DiscordBot.Session.AddHandler(b.onReady2)
 	return b, nil
+}
+
+func (discordBot *DiscordBot) onReady2(session *discordgo.Session, ready *discordgo.Ready) {
+	session.AddHandler(discordBot.onMessageButtonPressed)
+}
+
+func (discordBot *DiscordBot) onMessageButtonPressed(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
+	if interaction.Type != discordgo.InteractionMessageComponent {
+		return
+	}
+	switch interaction.MessageComponentData().CustomID {
+	case "button_parrainsup_clicked":
+		discordBot.DiscordBot.CommandHandlers["parrainsup"](session, interaction)
+	}
 }
 
 func (discordBot *DiscordBot) GetMemberClaims(memberID string) (*ggu.HXI2JWTClaims, error) {
@@ -401,6 +417,48 @@ func (discordBot *DiscordBot) addCommandParrainsup() {
 			discordBot.Logger.With("err", err, "discordUserID", discordUserID).Error("Failed to respond to interaction")
 			return
 		}
+	}
+
+	discordBot.AddCommand(cmdName, command, hand)
+}
+
+func (discordBot *DiscordBot) addCommandTestButton() {
+	const cmdName = "button_psup"
+	var p int64 = discordgo.PermissionAdministrator | discordgo.PermissionManageRoles | discordgo.PermissionManageGuild
+	var command = &discordgo.ApplicationCommand{
+		Name:                     cmdName,
+		Description:              "Send a button to open Parrainsup",
+		DefaultMemberPermissions: &p,
+	}
+
+	hand := func(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
+		// Send the button message in the same channel
+		_, err := session.ChannelMessageSendComplex(interaction.ChannelID, &discordgo.MessageSend{
+			Content: "",
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.Button{
+							Label:    "Ouvrir parrainsup",
+							Style:    discordgo.PrimaryButton,
+							CustomID: "button_parrainsup_clicked",
+						},
+					},
+				},
+			},
+		})
+		if err != nil {
+			discordBot.Logger.With("err", err).Error("Failed to send test button message")
+		}
+
+		// Respond ephemerally to the interaction to confirm
+		_ = session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Flags:   discordgo.MessageFlagsEphemeral,
+				Content: "Le bouton a été envoyé dans ce salon.",
+			},
+		})
 	}
 
 	discordBot.AddCommand(cmdName, command, hand)
