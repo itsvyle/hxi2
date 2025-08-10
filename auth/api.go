@@ -406,23 +406,24 @@ func HandleTempLogin(w http.ResponseWriter, r *http.Request) {
 		Path:   ggu.StringPtr("/"),
 	}))
 
-	redirectTo := ConfigDefaultLoginRedirect
-	redirectCookie, err := r.Cookie("authRedirectTo")
-	if err != nil {
-		if !errors.Is(err, http.ErrNoCookie) {
-			slog.With("error", err).Error("Failed to get redirect cookie")
-			LoginError(w, r, "Failed to get redirect cookie")
-			return
-		}
-	} else if redirectCookie.Value != "" {
-		redirectTo = redirectCookie.Value
-		if !IsHXI2BaseDomain(redirectTo) {
+	redirectTo := ""
+	redirectToCookie, err := r.Cookie("authRedirectTo")
+	if err != nil || redirectToCookie == nil || redirectToCookie.Value == "" {
+		redirectTo = r.URL.Query().Get("redirectTo")
+		if redirectTo == "" {
 			redirectTo = ConfigDefaultLoginRedirect
-			slog.With("redirectTo", redirectTo).Error("Tried to redirect to a different TLD")
 		}
+	} else {
+		redirectTo = redirectToCookie.Value
 	}
 
-	http.Redirect(w, r, redirectTo, http.StatusFound)
+	body := "<html><head><meta http-equiv=\"refresh\" content=\"0; url=" + redirectTo + "\"></head><body>Redirecting...</body></html>"
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(body))
+	if err != nil {
+		slog.With("error", err).Error("Failed to write redirect response")
+	}
 }
 
 func HandleTempRenew(w http.ResponseWriter, r *http.Request) {
