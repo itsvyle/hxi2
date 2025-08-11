@@ -79,7 +79,7 @@ var EditRestrictionKeys = map[string]int{
 	"algebre_or_analyse": 256,
 	"pronouns":           512,
 	"linux_distro":       1024,
-	"hide":               -1,
+	"hide":               2048,
 }
 
 func isHexColor(s string) bool {
