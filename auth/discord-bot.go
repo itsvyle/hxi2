@@ -384,7 +384,7 @@ func (discordBot *DiscordBot) addCommandParrainsup() {
 		user, err := DB.GetDBUserByDiscordID(discordUserID)
 		if err != nil || user == nil {
 			discordBot.Logger.With("err", err, "discordUserID", discordUserID).Error("Failed to get user by discord ID")
-			discordBot.RespondWithError(interaction, "Failed to get hxi2.fr user - maybe you are not registered on hxi2.fr?")
+			discordBot.RespondWithError(interaction, "Il y a eu une erreur en essayant de récupérer l'utilisateur hxi2.fr - peut-être n'êtes-vous pas enregistré sur hxi2.fr ?\nSi vous voulez avoir un compte, contacter Greg sur le discord intergénérationnel HXi².")
 			return
 		}
 		code, err := DB.CreateOneTimeCode(user.ID)
