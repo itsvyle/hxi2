@@ -1,0 +1,58 @@
+@font-face {
+    font-family: Nunito;
+    src: url(/Nunito.ttf);
+}
+
+html {
+    font-family: "Nunito", sans-serif;
+    background: #ebae3d;
+    color: #15141a;
+    height: 100%;
+}
+
+body {
+    display: flex;
+    margin: 0;
+    padding-left: 2em;
+    padding-right: 2em;
+    text-align: center;
+    height: 100%;
+}
+
+main {
+    margin: auto;
+}
+
+h1 {
+    font-size: 30pt;
+    text-align: center;
+}
+
+#counts > div {
+    display: inline-block;
+    margin: 0 2em;
+}
+
+div.count-value {
+    font-size: 60pt;
+}
+
+div.count-label {
+    font-size: 24pt;
+}
+
+#percentage-box {
+    margin: 2em 0;
+    font-size: 24pt;
+}
+
+#about-box {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 35em;
+    font-size: 20pt;
+}
+
+code {
+    font-size: 0.9em;
+}
