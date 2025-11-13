@@ -1,0 +1,13 @@
+wrangler := "pnpm wrangler"
+default:
+    just --list
+
+[private]
+pre:
+    @pnpm i
+
+login: pre
+    {{wrangler}} login
+
+push: pre
+    {{wrangler}} deploy
