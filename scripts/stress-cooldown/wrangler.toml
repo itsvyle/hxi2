@@ -1,0 +1,7 @@
+name = "stress-cooldown"
+compatibility_date = "2025-11-13"
+
+routes = [
+    { pattern = "stress-cooldown.hxi2.fr", custom_domain = true },
+]
+assets = { directory = "./assets", not_found_handling = "none" }
