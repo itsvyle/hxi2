@@ -11,6 +11,6 @@
   "license": "ISC",
   "packageManager": "pnpm@10.11.0",
   "devDependencies": {
-    "wrangler": "^4.48.0"
+    "wrangler": "^4.59.1"
   }
 }
