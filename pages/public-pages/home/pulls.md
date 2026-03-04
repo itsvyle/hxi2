@@ -10,6 +10,47 @@ Chaque année sont réalisés des pulls de classe - dessinés avec amour par des
 
 Les pulls comportent souvent un gros dessin à l'arrière, ainsi qu'un petit logo à l'avant! Ils sont souvent rouges en sup, mais gagnent en diversité de couleurs en spé!
 
+## Génération 2025
+
+{{< pulls >}}
+
+- title: MP2I Dos
+  image: "static:pulls/mp2i-dos-2025.png.webp"
+  real_image: "static:pulls/mp2i-dos-2025.png"
+  author: Sophie N.
+  bg: "#E20F18"
+- title: MP2I Avant
+  image: "static:pulls/mp2i-devant-2025.png.webp"
+  real_image: "static:pulls/mp2i-devant-2025.png"
+  author: Elisabeth D.
+  author_color: "white"
+  bg: "#ac0c24"
+
+{{</ pulls >}}
+
+{{< details summary="Informations supplémentaires">}}
+
+Commande réalisée par _Romain T. et Cheikh-Tahir F._, auprès de [l'Atelier du Quai](https://www.atelierduquai.com/)
+
+### Couleurs
+
+#### MP2I
+
+{{<pulls-couleur >}}
+
+- title: "Brick Red"
+  details: "pour certains sweats"
+  color: "#ac0c24"
+- title: "Fire Red"
+  details: "pour certains sweats"
+  color: "#E20F18"
+- title: "Fire Red"
+  details: "pour les zip"
+  color: "#E20F18"
+  {{</pulls-couleur >}}
+
+{{</ details >}}
+
 ## Génération 2024
 
 {{< pulls >}}
@@ -26,10 +67,19 @@ Les pulls comportent souvent un gros dessin à l'arrière, ainsi qu'un petit log
   author_color: "white"
   bg: "#ac0c24"
   border_radius: "50%"
-  #- sep: true
-  #- title: Pulls des trois classes
-  # image: "static:pulls/tous-pulls-2024.jpg.webp"
-  # real_image: "static:pulls/tous-pulls-2024.jpg"
+- sep: true
+- title: MPI* Dos
+  image: "static:pulls/mpietoile-dos-2024.png.webp"
+  real_image: "static:pulls/mpietoile-dos-2024.png"
+  author: "Maëlle D."
+  bg: "#005CA1"
+  author_color: "white"
+- title: MPI* Devant
+  image: "static:pulls/mpietoile-devant-2024.png.webp"
+  real_image: "static:pulls/mpietoile-devant-2024.png"
+  author: "Maëlle D."
+  bg: "#005CA1"
+  author_color: "white"
 
 {{</ pulls >}}
 
@@ -52,6 +102,15 @@ Commande réalisée par _Grégoire_, auprès de [l'Atelier du Quai](https://www.
 - title: "Fire Red"
   details: "pour les zip"
   color: "#E20F18"
+  {{</pulls-couleur >}}
+
+#### MPI*
+
+{{<pulls-couleur >}}
+
+- title: "Sapphire blue"
+  details: "pour tout"
+  color: "#005CA1"
   {{</pulls-couleur >}}
 
 {{</ details >}}
