@@ -22,13 +22,14 @@ def extract_folders_files(s: BeautifulSoup):
     foldlinks = []
     filelinks = []
     for p in ps:
-        if p["class"] == ["rep"]:
+        if p.attrs["class"] == ["rep"]:
             nom = enleve_espace_fin(
                 rendre_nom_valide(p.find(class_="nom").string)
             )  # si on rend le nom valide alors il if finiras sûrment par un espace, ce que le module os ne vérifie pas et ignore et dcp les chemins sont faux
             foldlinks.append((p.a.get("href"), nom))
         elif (
-            p["class"] == ["doc"] and "/" not in p.find(class_="nom").string
+            p.attrs["class"] == ["doc"]
+            and "/" not in p.find(class_="nom").string
         ):  # le cas '/' se présente sur la première page à cause de la section "documents récents"
             fext = p.find(class_="docdonnees").string[1:-1]
             fext = fext.split(",")[0]
