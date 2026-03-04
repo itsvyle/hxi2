@@ -22,8 +22,6 @@ def extract_folders_files(s: BeautifulSoup):
     foldlinks = []
     filelinks = []
     for p in ps:
-        if "class" not in p:
-            continue
         if p["class"] == ["rep"]:
             nom = enleve_espace_fin(
                 rendre_nom_valide(p.find(class_="nom").string)
