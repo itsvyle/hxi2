@@ -23,6 +23,7 @@ WORKDIR /app
 COPY --from=backend /app/sqlite-web/out_exe /app/sqlite-web
 COPY --from=backend /app/sqlite-web/backup.py /app/backup.py
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY manual-backup.sh /app/manual-backup.sh
 
 
 ARG USER_ID=4242
