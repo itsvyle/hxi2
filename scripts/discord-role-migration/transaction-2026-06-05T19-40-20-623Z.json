@@ -1,0 +1,767 @@
+{
+  "roles": {
+    "FUTUR_MP2I": "1511980336471474236",
+    "MP2I": "1380956217379389490",
+    "MPI": "1114162901033426964",
+    "INTEGRE": "882556708138942464"
+  },
+  "server_id": "876742071900340254",
+  "users": {
+    "761628618086023208": {
+      "added": [
+        "MP2I"
+      ],
+      "removed": [
+        "FUTUR_MP2I"
+      ],
+      "debug_name": "zakarya_2"
+    },
+    "685470986438574103": {
+      "added": [
+        "MP2I"
+      ],
+      "removed": [
+        "FUTUR_MP2I"
+      ],
+      "debug_name": "snykzyy"
+    },
+    "640620450376056842": {
+      "added": [
+        "MP2I"
+      ],
+      "removed": [
+        "FUTUR_MP2I"
+      ],
+      "debug_name": "dravog"
+    },
+    "690524522092429393": {
+      "added": [
+        "MP2I"
+      ],
+      "removed": [
+        "FUTUR_MP2I"
+      ],
+      "debug_name": "_grdp"
+    },
+    "1107038357399285900": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "gagluwu"
+    },
+    "843887451360985141": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "waltar06"
+    },
+    "1094546633355698236": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "norami__"
+    },
+    "1393871574339162252": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "steph31415926"
+    },
+    "693380852931100693": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "madedwolf"
+    },
+    "1400141848990973975": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "bas_toq"
+    },
+    "977880986958299186": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "escale153"
+    },
+    "1257013444960325836": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "lisedm"
+    },
+    "713795413630779444": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "sean__7886"
+    },
+    "967460818952257576": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "hillomate"
+    },
+    "707888692693303299": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "romain8179"
+    },
+    "679711354260946986": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "n.o.v.a.l.i.s"
+    },
+    "711565472595836959": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "lucas_sch"
+    },
+    "647749689990578187": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "its.purpol"
+    },
+    "1157585117309587537": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "p.ablito1215"
+    },
+    "737668343288299630": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "kishmyr"
+    },
+    "446254211034775553": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "sledaxe"
+    },
+    "737726111609520138": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "louschanen"
+    },
+    "647399918901788672": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "le.michel"
+    },
+    "1133096906868924528": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "eel2real"
+    },
+    "1054709739466002462": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "zab3348"
+    },
+    "1283368113676750930": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "romanito_72922"
+    },
+    "711183297530560532": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "bazoost"
+    },
+    "935247789955383356": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "romain0127"
+    },
+    "692800694981361755": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "durza42"
+    },
+    "745275091566461083": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "quentolosse"
+    },
+    "1201144096656457801": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "smiling05466"
+    },
+    "935909866424377425": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "thepoiuyt"
+    },
+    "686281948158623813": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "cosmopolitain"
+    },
+    "1062451401311125504": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "vedatletryharder"
+    },
+    "699367055840772188": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "marwenarbi"
+    },
+    "788448020659437608": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "momohd_007"
+    },
+    "693023573195096087": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "apodino"
+    },
+    "581515418187857937": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "patrick_8998"
+    },
+    "888818918343471146": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "mooninf"
+    },
+    "550849667806789633": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "redaste"
+    },
+    "1310482598748880898": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "cheikh.tahir"
+    },
+    "689908073132851256": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "emyxgame"
+    },
+    "693078797938851920": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "deki5178"
+    },
+    "1409979479589257277": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "gabriel057064"
+    },
+    "1163186121451253932": {
+      "added": [
+        "MPI"
+      ],
+      "removed": [
+        "MP2I"
+      ],
+      "debug_name": "hedigrrr1"
+    },
+    "473508457807609867": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "raylhor"
+    },
+    "691248650189275157": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "speculllooss"
+    },
+    "1281122187314728990": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "firasbj._68158"
+    },
+    "617640584777039883": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "timo_000"
+    },
+    "613092468648443924": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "yassinebenyounes"
+    },
+    "1163578838555557948": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "aya.jpeg"
+    },
+    "372440378986594306": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "lucas.alca"
+    },
+    "621802826418487309": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "vylein"
+    },
+    "691632697508102154": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "ydwannaknow"
+    },
+    "727895913363669013": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "a_cute"
+    },
+    "550335465341845515": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "ars.chrd"
+    },
+    "482538608620863498": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "ivan1768"
+    },
+    "538386967658758156": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "arokichelorraine"
+    },
+    "859498559149047838": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "kaebri"
+    },
+    "724189464980881409": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "thomadmo"
+    },
+    "548783502749990922": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "theoreb"
+    },
+    "447431618492235777": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "nathael00"
+    },
+    "1246198596429152319": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "jattelikoptere"
+    },
+    "585855784504655886": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "submit.to.fungi"
+    },
+    "774693369918128139": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "shadow.recruit"
+    },
+    "575560459013455872": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "w2ll25m"
+    },
+    "966715211333660713": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "nathanti"
+    },
+    "760079751367884830": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "unarrosoir"
+    },
+    "479367632085188628": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "davawen"
+    },
+    "514839459854811136": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "martsou_"
+    },
+    "282201728097583104": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "mestery"
+    },
+    "438209897281093632": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "levraijattelikoptere"
+    },
+    "560162972333506578": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "rotaroced_"
+    },
+    "590225909760393246": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "b_sim."
+    },
+    "379359966307549184": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "sardine_42"
+    },
+    "1081491202194538597": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "brakmar26"
+    },
+    "995994176871223356": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "lou.3690"
+    },
+    "777236881272209439": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "maxdams"
+    },
+    "510824346563117117": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "is0ss"
+    },
+    "451409498276495373": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": ".valacirca."
+    },
+    "384735732666728450": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "saskcwatch"
+    },
+    "1018096264799342592": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "hugoz3177"
+    },
+    "638034398582669342": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "p3che"
+    },
+    "610144615626047491": {
+      "added": [
+        "INTEGRE"
+      ],
+      "removed": [
+        "MPI"
+      ],
+      "debug_name": "sachikumo"
+    }
+  }
+}
