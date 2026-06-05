@@ -1,0 +1,32 @@
+{
+    "server_id": "876742071900340254",
+    "roles": {
+        "FUTUR_MP2I": "1511980336471474236",
+        "MP2I": "1380956217379389490",
+        "MPI": "1114162901033426964",
+        "INTEGRE": "882556708138942464"
+    },
+    "actions": [
+        {
+            "select": {
+                "has": ["FUTUR_MP2I"]
+            },
+            "remove": ["FUTUR_MP2I"],
+            "add": ["MP2I"]
+        },
+        {
+            "select": {
+                "has": ["MP2I"]
+            },
+            "remove": ["MP2I"],
+            "add": ["MPI"]
+        },
+        {
+            "select": {
+                "has": ["MPI"]
+            },
+            "remove": ["MPI"],
+            "add": ["INTEGRE"]
+        }
+    ]
+}
