@@ -1,5 +1,13 @@
 {
 	"hash": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262",
+  "/auth.v2.AuthService/GetJWTPublicKey": {
+    "allow_roles": [
+      1
+    ],
+    "is_public": true,
+    "public_url": null,
+    "compiled_permissions_bitfield": 1
+  },
   "/auth.v2.AuthService/ListUsers": {
     "allow_roles": [
       1,
@@ -8,14 +16,6 @@
     "is_public": false,
     "public_url": null,
     "compiled_permissions_bitfield": 5
-  },
-  "/auth.v2.AuthService/GetJWTPublicKey": {
-    "allow_roles": [
-      1
-    ],
-    "is_public": true,
-    "public_url": null,
-    "compiled_permissions_bitfield": 1
   },
   "/auth.v2.AuthService/RenewJWT": {
     "allow_roles": [

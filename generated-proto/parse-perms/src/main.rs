@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use anyhow::{Context as _, Result};
 
@@ -13,7 +13,6 @@ const BIN_FILE_PATH: &str = "../hxi2.binpb";
 const PROTO_FILES_PATH: &str = "../../protos";
 
 #[derive(Clone, Debug, serde::Serialize)]
-// allow serializing to json with serde, and also print with Debug
 pub struct MethodPermissions {
     #[serde(serialize_with = "serialize_roles_as_ints")]
     pub allow_roles: Vec<Permission>,
@@ -66,8 +65,8 @@ fn get_proto_folder_hash() -> Result<String> {
     Ok(hasher.finalize().to_hex().to_string())
 }
 
-fn get_permissions(descriptor_bytes: &[u8]) -> Result<HashMap<String, MethodPermissions>> {
-    let mut cache: HashMap<String, MethodPermissions> = HashMap::new();
+fn get_permissions(descriptor_bytes: &[u8]) -> Result<BTreeMap<String, MethodPermissions>> {
+    let mut cache: BTreeMap<String, MethodPermissions> = BTreeMap::new();
 
     let pool = DescriptorPool::decode(descriptor_bytes).context("parse FileDescriptorSet")?;
 
@@ -105,7 +104,7 @@ fn main() -> Result<()> {
     let descriptor_bytes =
         std::fs::read(BIN_FILE_PATH).context("Failed to read descriptor set binary")?;
 
-    let perms: HashMap<String, MethodPermissions> = get_permissions(&descriptor_bytes)
+    let perms: BTreeMap<String, MethodPermissions> = get_permissions(&descriptor_bytes)
         .context("get_permissions")?
         .iter()
         .map(|(k, v)| {
@@ -122,7 +121,6 @@ fn main() -> Result<()> {
         .collect();
     println!("Permissions: {:#?}", perms);
 
-    // serialize to json and print
     let json =
         serde_json::to_string_pretty(&perms).context("Failed to serialize permissions to JSON")?;
 
@@ -135,7 +133,6 @@ fn main() -> Result<()> {
         1,
     );
 
-    // write it to ../permissions.json
     std::fs::write("../permissions.json", json).context("Failed to write permissions to file")?;
     println!("Permissions written to ../permissions.json");
 
