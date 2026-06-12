@@ -1,15 +1,14 @@
 [package]
-name = "parse-perms"
+name = "generate-permissions-checking"
 version = "0.1.0"
 edition = "2024"
 
+[lib]
+name = "generate_permissions_checking"
+path = "src/lib.rs"
+
 [dependencies]
 anyhow = { workspace = true }
-blake3 = "1.8.5"
-buffa = { workspace = true }
-buffa-descriptor = { workspace = true }
-buffa-types = { workspace = true, features = ["reflect"] }
 hxi2-proto = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-walkdir = "2.5.0"

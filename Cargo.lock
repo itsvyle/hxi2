@@ -530,6 +530,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "generate-permissions-checking"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "hxi2-proto",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "getrandom"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"

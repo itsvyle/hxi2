@@ -4,6 +4,7 @@ members = [
     "auth-rs",
     "generated-proto/parse-perms",
     "generated-proto/rs",
+    "global-rs/generate-permissions-checking",
 ]
 
 [workspace.dependencies]
@@ -15,6 +16,7 @@ buffa-types = { version = "0.7.1", features = ["json"] }
 connectrpc = { version = "0.7.0", features = ["axum", "client", "server", "tls"] }
 http = "1.4.2"
 http-body = "1.0.1"
+hxi2-proto = { path = "generated-proto/rs" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1.52.3", features = ["tokio-macros", "rt-multi-thread"] }

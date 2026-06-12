@@ -100,6 +100,11 @@ fn get_permissions(descriptor_bytes: &[u8]) -> Result<BTreeMap<String, MethodPer
     Ok(cache)
 }
 
+#[derive(serde::Serialize)]
+pub struct PermissionsOutput {
+    pub permissions: BTreeMap<String, MethodPermissions>,
+}
+
 fn main() -> Result<()> {
     let descriptor_bytes =
         std::fs::read(BIN_FILE_PATH).context("Failed to read descriptor set binary")?;
@@ -121,17 +126,14 @@ fn main() -> Result<()> {
         .collect();
     println!("Permissions: {:#?}", perms);
 
+    let output = PermissionsOutput { permissions: perms };
     let json =
-        serde_json::to_string_pretty(&perms).context("Failed to serialize permissions to JSON")?;
+        serde_json::to_string_pretty(&output).context("Failed to serialize permissions to JSON")?;
 
-    let json = json.replacen(
-        "{",
-        &format!(
-            "{{\n\t\"hash\": \"{}\",",
-            get_proto_folder_hash().unwrap_or_else(|_| "unknown".into())
-        ),
-        1,
-    );
+    let hash = get_proto_folder_hash().unwrap_or_else(|_| "unknown".into());
+
+    // doing this so that the hash is always first in the output, for determinism
+    let json = json.replacen("{", &format!("{{\n\t\"hash\": \"{}\",", hash), 1);
 
     std::fs::write("../permissions.json", json).context("Failed to write permissions to file")?;
     println!("Permissions written to ../permissions.json");

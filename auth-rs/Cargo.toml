@@ -9,7 +9,7 @@ axum = { workspace = true }
 buffa = { workspace = true }
 buffa-types = { workspace = true }
 connectrpc = { workspace = true }
-hxi2-proto = { path = "../generated-proto/rs" }
+hxi2-proto = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true }
