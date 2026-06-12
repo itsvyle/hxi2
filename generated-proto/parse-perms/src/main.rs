@@ -19,6 +19,7 @@ pub struct MethodPermissions {
     pub allow_roles: Vec<Permission>,
     pub is_public: bool,
     pub public_url: Option<String>,
+    pub compiled_permissions_bitfield: Option<i32>,
 }
 
 fn serialize_roles_as_ints<S>(roles: &[Permission], serializer: S) -> Result<S::Ok, S::Error>
@@ -75,6 +76,7 @@ fn get_permissions(descriptor_bytes: &[u8]) -> Result<HashMap<String, MethodPerm
             allow_roles: vec![],
             is_public: false,
             public_url: None,
+            compiled_permissions_bitfield: None,
         };
         if let Some(options) = service.options()
             && let Some(perms_msg) = options.extension(&PERMISSION_LEVEL_SERVICE)
@@ -103,7 +105,21 @@ fn main() -> Result<()> {
     let descriptor_bytes =
         std::fs::read(BIN_FILE_PATH).context("Failed to read descriptor set binary")?;
 
-    let perms = get_permissions(&descriptor_bytes).context("get_permissions")?;
+    let perms: HashMap<String, MethodPermissions> = get_permissions(&descriptor_bytes)
+        .context("get_permissions")?
+        .iter()
+        .map(|(k, v)| {
+            (
+                k.clone(),
+                MethodPermissions {
+                    compiled_permissions_bitfield: Some(
+                        v.allow_roles.iter().fold(0, |acc, r| acc | r.to_i32()),
+                    ),
+                    ..v.clone()
+                },
+            )
+        })
+        .collect();
     println!("Permissions: {:#?}", perms);
 
     // serialize to json and print
