@@ -5,3 +5,10 @@ _build-asset-inserter.js
 .wrangler
 dist/
 scripts/cdp-crawler/cookies.py
+
+# Rust
+/target/
+**/*.rs.bk
+*.bck
+.rust-analyzer/
+hxi2.binpb

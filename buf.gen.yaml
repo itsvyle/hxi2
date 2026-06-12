@@ -1,16 +1,19 @@
 # note: run cargo install --locked connectrpc-codegen protoc-gen-buffa protoc-gen-buffa-packaging
 version: v2
 plugins:
-  - local: protoc-gen-buffa
-    out: generated-proto/rs/buffa
-    opt: [views=true, json=true]
-  - local: protoc-gen-buffa-packaging
-    out: generated-proto/rs/buffa
-    strategy: all
-  - local: protoc-gen-connect-rust
-    out: generated-proto/rs/connect
-    opt: [buffa_module=crate::proto]
-  - local: protoc-gen-buffa-packaging
-    out: generated-proto/rs/connect
-    strategy: all
-    opt: [filter=services]
+    - local: protoc-gen-buffa
+      out: generated-proto/rs/buffa
+      opt:
+          - views=true
+          - json=true
+          - reflect=true
+    - local: protoc-gen-buffa-packaging
+      out: generated-proto/rs/buffa
+      strategy: all
+    - local: protoc-gen-connect-rust
+      out: generated-proto/rs/connect
+      opt: [buffa_module=crate::proto]
+    - local: protoc-gen-buffa-packaging
+      out: generated-proto/rs/connect
+      strategy: all
+      opt: [filter=services]

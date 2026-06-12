@@ -16,3 +16,7 @@ clean:
     fd --type=directory -H -I node_modules -x rm -rf {}
     fd --type=directory -H -I dist -x rm -rf {}
     fd --type=directory -H -I target -x bash -c '[[ -f "{//}/Cargo.toml" ]] && echo "Removing {}" && rm -rf {}'
+
+compile-proto:
+    buf build -o ./generated-proto/hxi2.binpb
+    buf generate --debug

@@ -7,6 +7,7 @@ extend google.protobuf.MethodOptions {
     optional Permissions permission_level = 50801;
 }
 extend google.protobuf.ServiceOptions {
+    // Set the default permissions for all methods in the service, which can be overridden by method-level options
     optional Permissions permission_level_service = 50802;
 }
 

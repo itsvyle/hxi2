@@ -1,0 +1,13 @@
+[package]
+name = "parse-perms"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = { workspace = true }
+buffa = { workspace = true }
+buffa-descriptor = { workspace = true }
+buffa-types = { workspace = true, features = ["reflect"] }
+hxi2-proto = { path = "../rs" }
+serde = { workspace = true }
+serde_json = { workspace = true }

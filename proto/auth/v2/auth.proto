@@ -9,6 +9,9 @@ import "google/protobuf/timestamp.proto";
 
 
 service AuthService {
+    option (permission_level_service) = {
+        allow_role: PERMISSION_ADMIN
+    };
     rpc GetJWTPublicKey(GetJWTPublicKeyRequest) returns (GetJWTPublicKeyResponse) {
         option (permission_level).is_public = true;
     }
