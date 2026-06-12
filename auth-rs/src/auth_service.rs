@@ -7,6 +7,8 @@ use hxi2_proto::proto::auth::v2::{
     RenewJWTRequest, RenewJWTResponse,
 };
 
+use crate::app_config::AppConfiguration;
+
 pub struct AuthServiceImpl;
 
 #[allow(refining_impl_trait)]
@@ -17,7 +19,7 @@ impl AuthService for AuthServiceImpl {
         _request: ServiceRequest<'_, GetJWTPublicKeyRequest>,
     ) -> ServiceResult<GetJWTPublicKeyResponse> {
         Response::ok(GetJWTPublicKeyResponse {
-            public_key: "fake-public-key".to_string(),
+            public_key: AppConfiguration::INSTANCE().jwt_public_key().to_string(),
             ..Default::default()
         })
     }

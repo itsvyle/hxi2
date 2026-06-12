@@ -1,0 +1,37 @@
+import "../utils.just"
+set dotenv-load
+set fallback
+_default: 
+    just --list
+
+create-jwt-private-key:
+    openssl genpkey -algorithm Ed25519 -out jwt_private_key.pem
+
+
+CONFIG_DB_PATH := "test_db.sqlite3"
+test_private_key := "-----BEGIN PRIVATE KEY-----
+MC4CAQAwBQYDK2VwBCIEIGSBlJqHrMz/gSJ0QgiEZVVgOmFzSNDT38RS6FPcXgXg
+-----END PRIVATE KEY-----"
+export HXI2_TLD := "hxi2.fr"
+export LOCAL_DEBUG_INSTANCE := "1"
+export HXI2_COOKIES_DOMAIN := "localhost"
+
+init: 
+    @just _utils-check-program "cargo" 1
+    @just _utils-check-program "volta" 0
+    cd ../global-frontend-dependencies/ && pnpm install
+    pnpm install
+
+[linux,macos]
+dev:
+    #!/usr/bin/env bash
+    if [[ -n "$TMUX" ]]; then
+        tmux split-window -d -h "just frontend-dev"
+        just test-run
+    else
+        echo "{{ style("error") }}You must run this command in a tmux session to use the split-window feature{{ NORMAL }}"
+        echo "{{ style("error") }}Instead, you should run "just frontend-dev" and "just test-run" in separate terminals{{ NORMAL }}"
+    fi
+
+run $HXI2_AUTH_URL="http://localhost:8080" $HXI2_AUTH_ENDPOINT="http://localhost:8080" $CONFIG_JWT_PRIVATE_KEY=test_private_key $CONFIG_DB_PATH=CONFIG_DB_PATH:
+    cargo run .

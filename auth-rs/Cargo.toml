@@ -9,10 +9,19 @@ axum = { workspace = true }
 buffa = { workspace = true }
 buffa-types = { workspace = true }
 connectrpc = { workspace = true }
+ed25519-dalek = { version = "2.1", features = ["pkcs8", "pem"] }
+hex = "0.4.3"
+http = { workspace = true }
+http-body = { workspace = true }
+http-body-util = { workspace = true }
 hxi2-proto = { workspace = true }
+once_cell = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true }
+utils = { workspace = true }
 
 [build-dependencies]
 generate-permissions-checking = { workspace = true }

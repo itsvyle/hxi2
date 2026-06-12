@@ -50,6 +50,11 @@ fn write_public_to_route(perms: &PermissionsOutput) -> Option<String> {
                 "\tif url == \"{}\" {{ return Some(\"{}\".to_string()) }}\n",
                 public_url, route
             ));
+        } else {
+            s.push_str(&format!(
+                "\tif url == \"{}\" {{ return Some(\"{}\".to_string()) }}\n",
+                route, route
+            ));
         }
     }
 

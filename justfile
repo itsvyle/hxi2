@@ -21,3 +21,6 @@ compile-proto:
     buf build -o ./generated-proto/hxi2.binpb
     buf generate --debug
     cd generated-proto/parse-perms && cargo run
+
+grpcui url="0.0.0.0:8080":
+    grpcui -plaintext -protoset ./generated-proto/hxi2.binpb {{url}}

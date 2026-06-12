@@ -5,6 +5,7 @@ _build-asset-inserter.js
 .wrangler
 dist/
 scripts/cdp-crawler/cookies.py
+*.env
 
 # Rust
 target/

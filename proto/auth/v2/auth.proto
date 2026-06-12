@@ -14,6 +14,7 @@ service AuthService {
     };
     rpc GetJWTPublicKey(GetJWTPublicKeyRequest) returns (GetJWTPublicKeyResponse) {
         option (permission_level).is_public = true;
+        option idempotency_level = NO_SIDE_EFFECTS;
     }
     rpc RenewJWT(RenewJWTRequest) returns (RenewJWTResponse) {
         option (permission_level).allow_role = PERMISSION_API_JWT;

@@ -92,7 +92,7 @@ pub const AUTH_SERVICE_GET_JWT_PUBLIC_KEY_SPEC: ::connectrpc::Spec = ::connectrp
         "/auth.v2.AuthService/GetJWTPublicKey",
         ::connectrpc::StreamType::Unary,
     )
-    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
 /// Static [`Spec`](::connectrpc::Spec) for the server-side `RenewJWT` RPC.
 ///
 /// The dispatcher surfaces this on
@@ -259,7 +259,7 @@ impl<S: AuthService> AuthServiceExt for S {
         router: ::connectrpc::Router,
     ) -> ::connectrpc::Router {
         router
-            .route_view(
+            .route_view_idempotent(
                 AUTH_SERVICE_SERVICE_NAME,
                 "GetJWTPublicKey",
                 {
@@ -389,7 +389,7 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
         match method {
             "GetJWTPublicKey" => {
                 Some(
-                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
                         .with_spec(AUTH_SERVICE_GET_JWT_PUBLIC_KEY_SPEC),
                 )
             }
