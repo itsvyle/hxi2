@@ -1,4 +1,4 @@
-use anyhow::{Context as _, Result};
+// use anyhow::{Context as _, Result};
 use connectrpc::{ConnectError, RequestContext, Response, ServiceRequest, ServiceResult};
 use hxi2_proto::connect::auth::v2::AuthService;
 pub use hxi2_proto::connect::auth::v2::AuthServiceExt;

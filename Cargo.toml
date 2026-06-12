@@ -14,6 +14,7 @@ buffa = { version = "0.7.1", features = ["json"] }
 buffa-descriptor = { version = "0.7.1", features = ["json"] }
 buffa-types = { version = "0.7.1", features = ["json"] }
 connectrpc = { version = "0.7.0", features = ["axum", "client", "server", "tls"] }
+generate-permissions-checking = { path = "global-rs/generate-permissions-checking" }
 http = "1.4.2"
 http-body = "1.0.1"
 hxi2-proto = { path = "generated-proto/rs" }

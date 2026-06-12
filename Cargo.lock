@@ -64,6 +64,7 @@ dependencies = [
  "buffa",
  "buffa-types",
  "connectrpc",
+ "generate-permissions-checking",
  "hxi2-proto",
  "serde",
  "serde_json",
@@ -534,6 +535,8 @@ name = "generate-permissions-checking"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "buffa",
+ "buffa-types",
  "hxi2-proto",
  "serde",
  "serde_json",

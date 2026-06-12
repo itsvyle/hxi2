@@ -18,7 +18,7 @@ pub struct MethodPermissions {
     pub allow_roles: Vec<Permission>,
     pub is_public: bool,
     pub public_url: Option<String>,
-    pub compiled_permissions_bitfield: Option<i32>,
+    pub compiled_permissions_bitfield: Option<i64>,
 }
 
 fn serialize_roles_as_ints<S>(roles: &[Permission], serializer: S) -> Result<S::Ok, S::Error>
@@ -117,7 +117,9 @@ fn main() -> Result<()> {
                 k.clone(),
                 MethodPermissions {
                     compiled_permissions_bitfield: Some(
-                        v.allow_roles.iter().fold(0, |acc, r| acc | r.to_i32()),
+                        v.allow_roles
+                            .iter()
+                            .fold(0, |acc, r| acc | i64::from(r.to_i32())),
                     ),
                     ..v.clone()
                 },

@@ -1,4 +1,5 @@
 mod auth_service;
+mod permissions_checking;
 
 use anyhow::{Context as _, Result};
 use auth_service::{AuthServiceExt, AuthServiceImpl};
@@ -8,6 +9,8 @@ use std::sync::Arc;
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    println!("{:#?}", permissions_checking::get_compiled_permissions());
+
     let service = Arc::new(AuthServiceImpl);
     let connect = service.register(ConnectRouter::new());
 
