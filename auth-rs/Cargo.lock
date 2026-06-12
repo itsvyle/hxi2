@@ -50,6 +50,8 @@ dependencies = [
  "anyhow",
  "axum",
  "hxi2-proto",
+ "serde",
+ "serde_json",
  "tokio",
 ]
 

@@ -6,5 +6,13 @@ edition = "2024"
 [dependencies]
 anyhow = "1.0.102"
 axum = "0.8.9"
-hxi2-proto = {path = "../generated-proto/rs"}
+hxi2-proto = { path = "../generated-proto/rs" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 tokio = { version = "1.52.3", features = ["tokio-macros", "rt-multi-thread"] }
+
+[package.metadata.rust-analyzer]
+# For LSP support on proto types
+linkedProjects = [
+    "../generated-proto/rs/Cargo.toml",
+]

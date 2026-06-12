@@ -1,0 +1,28 @@
+syntax = "proto3";
+package auth.v2;
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.MethodOptions {
+    optional Permissions permission_level = 50801;
+}
+extend google.protobuf.ServiceOptions {
+    optional Permissions permission_level_service = 50802;
+}
+
+message Permissions {
+    repeated Permission allow_role = 1;
+    optional bool is_public = 2;
+    optional string public_url = 3;
+}
+
+enum Permission {
+    PERMISSION_PERMISSION_UNSPECIFIED = 0;
+    PERMISSION_ADMIN = 1;
+    PERMISSION_STUDENT = 2;
+    PERMISSION_TEACHER = 3;
+
+    // API Permissions
+    PERMISSION_API_JWT = 4;
+    PERMISSION_API_LIST_USERS = 5;
+}

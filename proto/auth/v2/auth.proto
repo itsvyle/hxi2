@@ -1,0 +1,45 @@
+syntax = "proto3";
+package auth.v2;
+
+import "auth/v2/permissions.proto";
+import "auth/v2/jwt.proto";
+import "auth/v2/auth_data.proto";
+// import something for time type
+import "google/protobuf/timestamp.proto";
+
+
+service AuthService {
+    rpc GetJWTPublicKey(GetJWTPublicKeyRequest) returns (GetJWTPublicKeyResponse) {
+        option (permission_level).is_public = true;
+    }
+    rpc RenewJWT(RenewJWTRequest) returns (RenewJWTResponse) {
+        option (permission_level).allow_role = PERMISSION_API_JWT;
+    }
+
+    rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
+        option (permission_level).allow_role = PERMISSION_API_LIST_USERS;
+    }
+}
+
+message GetJWTPublicKeyRequest {}
+message GetJWTPublicKeyResponse {
+    string public_key = 1;
+}
+
+message RenewJWTRequest {
+    string jwt = 1;
+    string refresh_token = 2;
+}
+
+message RenewJWTResponse {
+    string jwt = 1;
+    string refresh_token = 2;
+    google.protobuf.Timestamp refresh_token_expiry = 3;
+    optional SmallData small_data = 4;
+}
+
+message ListUsersRequest {}
+
+message ListUsersResponse {    
+    repeated DBUser users = 1;
+}

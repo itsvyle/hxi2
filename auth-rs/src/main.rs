@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Context as _, Result};
 use axum::{routing::get, Router};
 use hxi2_proto::connectrpc::Router as ConnectRouter;
 use std::sync::Arc;
@@ -6,6 +6,8 @@ use std::sync::Arc;
 use hxi2_proto::connect::auth::v1::{GreetService, GreetServiceExt};
 use hxi2_proto::connectrpc::{RequestContext, Response, ServiceRequest, ServiceResult};
 use hxi2_proto::proto::auth::v1::{GreetRequest, GreetResponse};
+
+use hxi2_proto::proto::auth::v2::DBUser;
 
 struct MyGreetService;
 
@@ -31,6 +33,16 @@ impl GreetService for MyGreetService {
 async fn main() -> Result<()> {
     let service = Arc::new(MyGreetService);
     let connect = service.register(ConnectRouter::new());
+
+    let user = DBUser {
+        id: 85,
+        ..Default::default()
+    };
+    let json = serde_json::to_string(&user).context("serializing DBUser")?;
+    println!("DBUser as JSON: {json}");
+
+    let decoded: DBUser = serde_json::from_str(&json).context("deserializing DBUser")?;
+    println!("Decoded DBUser: {decoded:#?}");
 
     // Plain HTTP liveness probe for `kubectl`'s httpGet style. For the
     // standard gRPC Health protocol (grpc_health_probe, kubelet `grpc:`
