@@ -1,0 +1,7 @@
+[package]
+name = "auth-rs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+hxi2-proto = {path = "../generated-proto/rs"}

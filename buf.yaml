@@ -1,0 +1,7 @@
+version: v2
+modules:
+    - path: proto
+deps:
+    - buf.build/bufbuild/protovalidate
+    # specific version is important here, so that the files are included in "buf export --all"
+    - buf.build/protocolbuffers/wellknowntypes:v22.0
