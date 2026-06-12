@@ -7,7 +7,6 @@ edition = "2024"
 anyhow = { workspace = true }
 axum = { workspace = true }
 buffa = { workspace = true }
-buffa-descriptor = { workspace = true }
 buffa-types = { workspace = true }
 connectrpc = { workspace = true }
 hxi2-proto = { path = "../generated-proto/rs" }

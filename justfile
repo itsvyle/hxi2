@@ -20,3 +20,4 @@ clean:
 compile-proto:
     buf build -o ./generated-proto/hxi2.binpb
     buf generate --debug
+    cd generated-proto/parse-perms && cargo run

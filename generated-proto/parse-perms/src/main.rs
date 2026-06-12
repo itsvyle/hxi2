@@ -9,12 +9,16 @@ use hxi2_proto::proto::auth::v2::{
 };
 use serde::Serializer;
 
+const BIN_FILE_PATH: &str = "../hxi2.binpb";
+const PROTO_FILES_PATH: &str = "../../protos";
+
 #[derive(Clone, Debug, serde::Serialize)]
 // allow serializing to json with serde, and also print with Debug
 pub struct MethodPermissions {
     #[serde(serialize_with = "serialize_roles_as_ints")]
     pub allow_roles: Vec<Permission>,
     pub is_public: bool,
+    pub public_url: Option<String>,
 }
 
 fn serialize_roles_as_ints<S>(roles: &[Permission], serializer: S) -> Result<S::Ok, S::Error>
@@ -39,6 +43,26 @@ fn method_permissions_from_permissions(perms_msg: Permissions, base: &mut Method
             .map(|r| r.as_known().unwrap_or(Permission::PermissionUnspecified))
             .filter(|&r| r != Permission::PermissionUnspecified),
     );
+    if let Some(url) = perms_msg.public_url {
+        base.public_url = Some(url);
+    }
+}
+
+fn get_proto_folder_hash() -> Result<String> {
+    let mut hasher = blake3::Hasher::new();
+    let mut entries: Vec<_> = walkdir::WalkDir::new(PROTO_FILES_PATH)
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .filter(|e| e.file_type().is_file())
+        .collect();
+    entries.sort_by_key(|e| e.path().to_path_buf());
+    for entry in entries {
+        let path = entry.path();
+        let content =
+            std::fs::read(path).context(format!("Failed to read proto file: {:?}", path))?;
+        hasher.update(&content);
+    }
+    Ok(hasher.finalize().to_hex().to_string())
 }
 
 fn get_permissions(descriptor_bytes: &[u8]) -> Result<HashMap<String, MethodPermissions>> {
@@ -50,6 +74,7 @@ fn get_permissions(descriptor_bytes: &[u8]) -> Result<HashMap<String, MethodPerm
         let mut default_perms = MethodPermissions {
             allow_roles: vec![],
             is_public: false,
+            public_url: None,
         };
         if let Some(options) = service.options()
             && let Some(perms_msg) = options.extension(&PERMISSION_LEVEL_SERVICE)
@@ -76,7 +101,7 @@ fn get_permissions(descriptor_bytes: &[u8]) -> Result<HashMap<String, MethodPerm
 
 fn main() -> Result<()> {
     let descriptor_bytes =
-        std::fs::read("../hxi2.binpb").context("Failed to read descriptor set binary")?;
+        std::fs::read(BIN_FILE_PATH).context("Failed to read descriptor set binary")?;
 
     let perms = get_permissions(&descriptor_bytes).context("get_permissions")?;
     println!("Permissions: {:#?}", perms);
@@ -84,6 +109,15 @@ fn main() -> Result<()> {
     // serialize to json and print
     let json =
         serde_json::to_string_pretty(&perms).context("Failed to serialize permissions to JSON")?;
+
+    let json = json.replacen(
+        "{",
+        &format!(
+            "{{\n\t\"hash\": \"{}\",",
+            get_proto_folder_hash().unwrap_or_else(|_| "unknown".into())
+        ),
+        1,
+    );
 
     // write it to ../permissions.json
     std::fs::write("../permissions.json", json).context("Failed to write permissions to file")?;

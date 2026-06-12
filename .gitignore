@@ -7,7 +7,7 @@ dist/
 scripts/cdp-crawler/cookies.py
 
 # Rust
-/target/
+target/
 **/*.rs.bk
 *.bck
 .rust-analyzer/

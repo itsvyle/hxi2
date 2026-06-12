@@ -5,9 +5,11 @@ edition = "2024"
 
 [dependencies]
 anyhow = { workspace = true }
+blake3 = "1.8.5"
 buffa = { workspace = true }
 buffa-descriptor = { workspace = true }
 buffa-types = { workspace = true, features = ["reflect"] }
 hxi2-proto = { path = "../rs" }
 serde = { workspace = true }
 serde_json = { workspace = true }
+walkdir = "2.5.0"

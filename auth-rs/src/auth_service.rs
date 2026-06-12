@@ -1,12 +1,13 @@
 use anyhow::{Context as _, Result};
 use connectrpc::{ConnectError, RequestContext, Response, ServiceRequest, ServiceResult};
-use hxi2_proto::connect::auth::v2::{AuthService, AuthServiceExt};
+use hxi2_proto::connect::auth::v2::AuthService;
+pub use hxi2_proto::connect::auth::v2::AuthServiceExt;
 use hxi2_proto::proto::auth::v2::{
     GetJWTPublicKeyRequest, GetJWTPublicKeyResponse, ListUsersRequest, ListUsersResponse,
     RenewJWTRequest, RenewJWTResponse,
 };
 
-struct AuthServiceImpl;
+pub struct AuthServiceImpl;
 
 #[allow(refining_impl_trait)]
 impl AuthService for AuthServiceImpl {
