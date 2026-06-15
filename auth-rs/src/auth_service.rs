@@ -1,5 +1,7 @@
 // use anyhow::{Context as _, Result};
-use connectrpc::{ConnectError, RequestContext, Response, ServiceRequest, ServiceResult};
+use connectrpc::{
+    ConnectError, ErrorCode, RequestContext, Response, ServiceRequest, ServiceResult,
+};
 use hxi2_proto::connect::auth::v2::AuthService;
 pub use hxi2_proto::connect::auth::v2::AuthServiceExt;
 use hxi2_proto::proto::auth::v2::{
@@ -15,9 +17,21 @@ pub struct AuthServiceImpl;
 impl AuthService for AuthServiceImpl {
     async fn get_jwt_public_key(
         &self,
-        _ctx: RequestContext,
+        ctx: RequestContext,
         _request: ServiceRequest<'_, GetJWTPublicKeyRequest>,
     ) -> ServiceResult<GetJWTPublicKeyResponse> {
+        let user = ctx
+            .extensions()
+            .get::<crate::UserId>()
+            .ok_or_else(|| {
+                ConnectError::new(
+                    ErrorCode::Internal,
+                    "auth layer did not attach UserId - middleware misconfigured",
+                )
+            })?
+            .clone();
+
+        println!("get_jwt_public_key called by user: {:?}", user);
         Response::ok(GetJWTPublicKeyResponse {
             public_key: AppConfiguration::INSTANCE().jwt_public_key().to_string(),
             ..Default::default()

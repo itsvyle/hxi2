@@ -5,52 +5,54 @@ mod permissions_checking;
 use anyhow::{Context as _, Result};
 use app_config::AppConfiguration;
 use auth_service::{AuthServiceExt, AuthServiceImpl};
-use axum::{Router, routing::get};
-use connectrpc::{ConnectError, ErrorCode, Router as ConnectRouter};
+use axum::routing::get;
+use connectrpc::{ConnectError, Router as ConnectRouter};
 use std::sync::Arc;
 
-use axum::extract::Request;
-use axum::middleware::Next;
-use axum::response::Response;
-use http_body_util::BodyExt;
+use axum::extract::FromRequestParts;
+use axum::response::{IntoResponse, Response};
 use hxi2_proto::proto::auth::v2::JwtClaims;
 use tower::ServiceBuilder;
 use tower_http::timeout::TimeoutLayer;
-async fn auth_middleware(req: Request, next: Next) -> Response {
-    let Some(token) = req
-        .headers()
-        .get(http::header::AUTHORIZATION)
-        .and_then(|v| v.to_str().ok())
-        .and_then(|s| s.strip_prefix("Bearer "))
-    else {
-        return unauthorized("missing Bearer token");
-    };
 
-    let route =
-        permissions_checking::get_route_from_public_url(req.uri().path()).unwrap_or_default();
+#[derive(Debug, Clone)]
+pub struct UserId(String);
 
-    println!(
-        "Received request for route: {}, with token: {}",
-        route, token
-    );
+struct RequireAuth;
 
-    next.run(req).await
-}
+impl<S> FromRequestParts<S> for RequireAuth
+where
+    S: Send + Sync,
+{
+    type Rejection = Response;
 
-/// Build a 401 response in the Connect-protocol JSON error shape.
-/// Returning a structured Connect error keeps clients on the same
-/// error-handling path they use for handler-side `ConnectError`s.
-/// source: https://github.com/anthropics/connect-rust/blob/main/examples/middleware/src/server.rs
-fn unauthorized(message: &'static str) -> Response {
-    let err = ConnectError::new(ErrorCode::Unauthenticated, message);
-    let body = http_body_util::Full::new(err.to_json())
-        .map_err(|never| match never {})
-        .boxed_unsync();
-    http::Response::builder()
-        .status(http::StatusCode::UNAUTHORIZED)
-        .header(http::header::CONTENT_TYPE, "application/json")
-        .body(axum::body::Body::new(body))
-        .unwrap()
+    async fn from_request_parts(
+        parts: &mut http::request::Parts,
+        _: &S,
+    ) -> Result<Self, Self::Rejection> {
+        let Some(token) = parts
+            .headers
+            .get(http::header::AUTHORIZATION)
+            .and_then(|v| v.to_str().ok())
+            .and_then(|s| s.strip_prefix("Bearer "))
+        else {
+            return Err(ConnectError::permission_denied("missing Bearer token")
+                .into_http_response(&parts.headers)
+                .into_response());
+        };
+
+        let route =
+            permissions_checking::get_route_from_public_url(parts.uri.path()).unwrap_or_default();
+
+        parts.extensions.insert(UserId(token.to_string()));
+
+        println!(
+            "Received request for route: {}, with token: {}",
+            route, token
+        );
+
+        Ok(Self)
+    }
 }
 
 #[tokio::main]
@@ -67,7 +69,7 @@ async fn main() -> Result<()> {
         .fallback_service(connect.into_axum_service())
         .layer(
             ServiceBuilder::new()
-                .layer(axum::middleware::from_fn(auth_middleware))
+                .layer(axum::middleware::from_extractor::<RequireAuth>())
                 .layer(TimeoutLayer::with_status_code(
                     http::StatusCode::REQUEST_TIMEOUT,
                     std::time::Duration::from_secs(5),
