@@ -1,4 +1,5 @@
-use anyhow::Result;
+use anyhow::{Context, Result};
+use ed25519_dalek::pkcs8::EncodePublicKey;
 use once_cell::sync::Lazy;
 use utils::cfg_from_env_or;
 
@@ -57,11 +58,11 @@ impl AppConfiguration {
         let signing_key = SigningKey::from_pkcs8_pem(&self.jwt_private_key)
             .map_err(|e| anyhow::anyhow!("Invalid PKCS8 PEM private key: {}", e))?;
 
-        let verifying_key = signing_key.verifying_key();
-
-        let public_key_hex = hex::encode(verifying_key.to_bytes());
-
-        Ok(public_key_hex)
+        let verifying_key = signing_key
+            .verifying_key()
+            .to_public_key_pem(ed25519_dalek::pkcs8::spki::der::pem::LineEnding::LF)
+            .context("encode public key to PEM")?;
+        Ok(verifying_key)
     }
 
     pub fn jwt_public_key(&self) -> &'static str {

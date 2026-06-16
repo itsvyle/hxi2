@@ -1,6 +1,7 @@
 mod app_config;
 mod auth_service;
 mod jwt_signer;
+mod jwt_verifier;
 mod permissions_checking;
 
 use anyhow::{Context as _, Result};
@@ -67,6 +68,13 @@ fn encode_jwt() -> Result<String> {
             ..Default::default()
         },
     )?;
+
+    println!("Encoded JWT: {}", token);
+
+    let verifier = jwt_verifier::JWTVerifier::new_from_cfg()?;
+    let claims = verifier.verify_token(&token)?;
+
+    println!("Verified claims: {:?}", claims);
 
     Ok(token)
 }

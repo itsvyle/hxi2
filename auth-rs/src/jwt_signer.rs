@@ -1,5 +1,6 @@
 use std::time;
 
+use anyhow::{Context as _, Result};
 use hxi2_proto::proto::auth::v2::{JwtClaims, SmallData};
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation, decode, encode};
 use rand::RngExt;
@@ -12,11 +13,12 @@ pub struct JWTSigner {
 }
 
 impl JWTSigner {
-    pub fn new() -> anyhow::Result<Self> {
+    pub fn new() -> Result<Self> {
         let cfg = AppConfiguration::INSTANCE();
         Ok(JWTSigner {
             header: Header::new(Algorithm::EdDSA),
-            encoding_key: EncodingKey::from_ed_pem(cfg.jwt_private_key.as_bytes())?,
+            encoding_key: EncodingKey::from_ed_pem(cfg.jwt_private_key.as_bytes())
+                .context("encoding private key")?,
         })
     }
 
@@ -25,7 +27,7 @@ impl JWTSigner {
         validity: time::Duration,
         sub: &str,
         data: SmallData,
-    ) -> anyhow::Result<(String, JwtClaims)> {
+    ) -> Result<(String, JwtClaims)> {
         let cfg = AppConfiguration::INSTANCE();
 
         // calculate iat, exp, and nbf based on current time and validity
@@ -48,7 +50,7 @@ impl JWTSigner {
             ..Default::default()
         };
 
-        let token = encode(&self.header, &claims, &self.encoding_key)?;
+        let token = encode(&self.header, &claims, &self.encoding_key).context("encoding token")?;
         Ok((token, claims))
     }
 
