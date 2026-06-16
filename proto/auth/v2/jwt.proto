@@ -13,8 +13,15 @@ message SmallData {
 }
 
 message JwtClaims {
-    string sub = 1;
-    bool temporary = 2;
-    int64 temporary_recheck_after = 3;
-    SmallData data = 4;
+    string iss = 1;     // Issuer
+    string sub = 2;     // Subject
+    string aud = 3;     // Audience
+    int64  exp = 4;     // Expiration Time (Unix timestamp)
+    int64  nbf = 5;     // Not Before (Unix timestamp)
+    int64  iat = 6;     // Issued At (Unix timestamp)
+    string jti = 7;     // JWT ID
+
+    bool temporary = 8;
+    optional int64 temporary_recheck_after = 9;
+    SmallData data = 10;
 }

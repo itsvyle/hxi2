@@ -286,29 +286,85 @@ pub const __SMALL_DATA_JSON_ANY: ::buffa::type_registry::JsonAnyEntry = ::buffa:
 #[derive(::serde::Serialize, ::serde::Deserialize)]
 #[serde(default)]
 pub struct JwtClaims {
-    /// Field 1: `sub`
+    /// Issuer
+    ///
+    /// Field 1: `iss`
+    #[serde(
+        rename = "iss",
+        with = "::buffa::json_helpers::proto_string",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_str"
+    )]
+    pub iss: ::buffa::alloc::string::String,
+    /// Subject
+    ///
+    /// Field 2: `sub`
     #[serde(
         rename = "sub",
         with = "::buffa::json_helpers::proto_string",
         skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_str"
     )]
     pub sub: ::buffa::alloc::string::String,
-    /// Field 2: `temporary`
+    /// Audience
+    ///
+    /// Field 3: `aud`
+    #[serde(
+        rename = "aud",
+        with = "::buffa::json_helpers::proto_string",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_str"
+    )]
+    pub aud: ::buffa::alloc::string::String,
+    /// Expiration Time (Unix timestamp)
+    ///
+    /// Field 4: `exp`
+    #[serde(
+        rename = "exp",
+        with = "::buffa::json_helpers::int64",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_zero_i64"
+    )]
+    pub exp: i64,
+    /// Not Before (Unix timestamp)
+    ///
+    /// Field 5: `nbf`
+    #[serde(
+        rename = "nbf",
+        with = "::buffa::json_helpers::int64",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_zero_i64"
+    )]
+    pub nbf: i64,
+    /// Issued At (Unix timestamp)
+    ///
+    /// Field 6: `iat`
+    #[serde(
+        rename = "iat",
+        with = "::buffa::json_helpers::int64",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_zero_i64"
+    )]
+    pub iat: i64,
+    /// JWT ID
+    ///
+    /// Field 7: `jti`
+    #[serde(
+        rename = "jti",
+        with = "::buffa::json_helpers::proto_string",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_str"
+    )]
+    pub jti: ::buffa::alloc::string::String,
+    /// Field 8: `temporary`
     #[serde(
         rename = "temporary",
         with = "::buffa::json_helpers::proto_bool",
         skip_serializing_if = "::buffa::json_helpers::skip_if::is_false"
     )]
     pub temporary: bool,
-    /// Field 3: `temporary_recheck_after`
+    /// Field 9: `temporary_recheck_after`
     #[serde(
         rename = "temporaryRecheckAfter",
         alias = "temporary_recheck_after",
-        with = "::buffa::json_helpers::int64",
-        skip_serializing_if = "::buffa::json_helpers::skip_if::is_zero_i64"
+        with = "::buffa::json_helpers::opt_int64",
+        skip_serializing_if = "::core::option::Option::is_none"
     )]
-    pub temporary_recheck_after: i64,
-    /// Field 4: `data`
+    pub temporary_recheck_after: ::core::option::Option<i64>,
+    /// Field 10: `data`
     #[serde(
         rename = "data",
         skip_serializing_if = "::buffa::json_helpers::skip_if::is_unset_message_field"
@@ -321,7 +377,13 @@ pub struct JwtClaims {
 impl ::core::fmt::Debug for JwtClaims {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         f.debug_struct("JwtClaims")
+            .field("iss", &self.iss)
             .field("sub", &self.sub)
+            .field("aud", &self.aud)
+            .field("exp", &self.exp)
+            .field("nbf", &self.nbf)
+            .field("iat", &self.iat)
+            .field("jti", &self.jti)
             .field("temporary", &self.temporary)
             .field("temporary_recheck_after", &self.temporary_recheck_after)
             .field("data", &self.data)
@@ -334,6 +396,15 @@ impl JwtClaims {
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
     pub const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.JwtClaims";
+}
+impl JwtClaims {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::temporary_recheck_after`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_temporary_recheck_after(mut self, value: i64) -> Self {
+        self.temporary_recheck_after = Some(value);
+        self
+    }
 }
 impl ::buffa::DefaultInstance for JwtClaims {
     fn default_instance() -> &'static Self {
@@ -358,17 +429,32 @@ impl ::buffa::Message for JwtClaims {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u32;
+        if !self.iss.is_empty() {
+            size += 1u32 + ::buffa::types::string_encoded_len(&self.iss) as u32;
+        }
         if !self.sub.is_empty() {
             size += 1u32 + ::buffa::types::string_encoded_len(&self.sub) as u32;
+        }
+        if !self.aud.is_empty() {
+            size += 1u32 + ::buffa::types::string_encoded_len(&self.aud) as u32;
+        }
+        if self.exp != 0i64 {
+            size += 1u32 + ::buffa::types::int64_encoded_len(self.exp) as u32;
+        }
+        if self.nbf != 0i64 {
+            size += 1u32 + ::buffa::types::int64_encoded_len(self.nbf) as u32;
+        }
+        if self.iat != 0i64 {
+            size += 1u32 + ::buffa::types::int64_encoded_len(self.iat) as u32;
+        }
+        if !self.jti.is_empty() {
+            size += 1u32 + ::buffa::types::string_encoded_len(&self.jti) as u32;
         }
         if self.temporary {
             size += 1u32 + ::buffa::types::BOOL_ENCODED_LEN as u32;
         }
-        if self.temporary_recheck_after != 0i64 {
-            size
-                += 1u32
-                    + ::buffa::types::int64_encoded_len(self.temporary_recheck_after)
-                        as u32;
+        if let Some(v) = self.temporary_recheck_after {
+            size += 1u32 + ::buffa::types::int64_encoded_len(v) as u32;
         }
         if self.data.is_set() {
             let __slot = __cache.reserve();
@@ -388,27 +474,66 @@ impl ::buffa::Message for JwtClaims {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if !self.sub.is_empty() {
+        if !self.iss.is_empty() {
             ::buffa::encoding::Tag::new(
                     1u32,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )
                 .encode(buf);
+            ::buffa::types::encode_string(&self.iss, buf);
+        }
+        if !self.sub.is_empty() {
+            ::buffa::encoding::Tag::new(
+                    2u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
             ::buffa::types::encode_string(&self.sub, buf);
         }
+        if !self.aud.is_empty() {
+            ::buffa::encoding::Tag::new(
+                    3u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(&self.aud, buf);
+        }
+        if self.exp != 0i64 {
+            ::buffa::encoding::Tag::new(4u32, ::buffa::encoding::WireType::Varint)
+                .encode(buf);
+            ::buffa::types::encode_int64(self.exp, buf);
+        }
+        if self.nbf != 0i64 {
+            ::buffa::encoding::Tag::new(5u32, ::buffa::encoding::WireType::Varint)
+                .encode(buf);
+            ::buffa::types::encode_int64(self.nbf, buf);
+        }
+        if self.iat != 0i64 {
+            ::buffa::encoding::Tag::new(6u32, ::buffa::encoding::WireType::Varint)
+                .encode(buf);
+            ::buffa::types::encode_int64(self.iat, buf);
+        }
+        if !self.jti.is_empty() {
+            ::buffa::encoding::Tag::new(
+                    7u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(&self.jti, buf);
+        }
         if self.temporary {
-            ::buffa::encoding::Tag::new(2u32, ::buffa::encoding::WireType::Varint)
+            ::buffa::encoding::Tag::new(8u32, ::buffa::encoding::WireType::Varint)
                 .encode(buf);
             ::buffa::types::encode_bool(self.temporary, buf);
         }
-        if self.temporary_recheck_after != 0i64 {
-            ::buffa::encoding::Tag::new(3u32, ::buffa::encoding::WireType::Varint)
+        if let Some(v) = self.temporary_recheck_after {
+            ::buffa::encoding::Tag::new(9u32, ::buffa::encoding::WireType::Varint)
                 .encode(buf);
-            ::buffa::types::encode_int64(self.temporary_recheck_after, buf);
+            ::buffa::types::encode_int64(v, buf);
         }
         if self.data.is_set() {
             ::buffa::encoding::Tag::new(
-                    4u32,
+                    10u32,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )
                 .encode(buf);
@@ -436,32 +561,94 @@ impl ::buffa::Message for JwtClaims {
                         actual: tag.wire_type() as u8,
                     });
                 }
-                ::buffa::types::merge_string(&mut self.sub, buf)?;
+                ::buffa::types::merge_string(&mut self.iss, buf)?;
             }
             2u32 => {
-                if tag.wire_type() != ::buffa::encoding::WireType::Varint {
+                if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
                     return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
                         field_number: 2u32,
+                        expected: 2u8,
+                        actual: tag.wire_type() as u8,
+                    });
+                }
+                ::buffa::types::merge_string(&mut self.sub, buf)?;
+            }
+            3u32 => {
+                if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
+                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                        field_number: 3u32,
+                        expected: 2u8,
+                        actual: tag.wire_type() as u8,
+                    });
+                }
+                ::buffa::types::merge_string(&mut self.aud, buf)?;
+            }
+            4u32 => {
+                if tag.wire_type() != ::buffa::encoding::WireType::Varint {
+                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                        field_number: 4u32,
+                        expected: 0u8,
+                        actual: tag.wire_type() as u8,
+                    });
+                }
+                self.exp = ::buffa::types::decode_int64(buf)?;
+            }
+            5u32 => {
+                if tag.wire_type() != ::buffa::encoding::WireType::Varint {
+                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                        field_number: 5u32,
+                        expected: 0u8,
+                        actual: tag.wire_type() as u8,
+                    });
+                }
+                self.nbf = ::buffa::types::decode_int64(buf)?;
+            }
+            6u32 => {
+                if tag.wire_type() != ::buffa::encoding::WireType::Varint {
+                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                        field_number: 6u32,
+                        expected: 0u8,
+                        actual: tag.wire_type() as u8,
+                    });
+                }
+                self.iat = ::buffa::types::decode_int64(buf)?;
+            }
+            7u32 => {
+                if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
+                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                        field_number: 7u32,
+                        expected: 2u8,
+                        actual: tag.wire_type() as u8,
+                    });
+                }
+                ::buffa::types::merge_string(&mut self.jti, buf)?;
+            }
+            8u32 => {
+                if tag.wire_type() != ::buffa::encoding::WireType::Varint {
+                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                        field_number: 8u32,
                         expected: 0u8,
                         actual: tag.wire_type() as u8,
                     });
                 }
                 self.temporary = ::buffa::types::decode_bool(buf)?;
             }
-            3u32 => {
+            9u32 => {
                 if tag.wire_type() != ::buffa::encoding::WireType::Varint {
                     return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 3u32,
+                        field_number: 9u32,
                         expected: 0u8,
                         actual: tag.wire_type() as u8,
                     });
                 }
-                self.temporary_recheck_after = ::buffa::types::decode_int64(buf)?;
+                self.temporary_recheck_after = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
             }
-            4u32 => {
+            10u32 => {
                 if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
                     return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 4u32,
+                        field_number: 10u32,
                         expected: 2u8,
                         actual: tag.wire_type() as u8,
                     });
@@ -480,9 +667,15 @@ impl ::buffa::Message for JwtClaims {
         ::core::result::Result::Ok(())
     }
     fn clear(&mut self) {
+        self.iss.clear();
         self.sub.clear();
+        self.aud.clear();
+        self.exp = 0i64;
+        self.nbf = 0i64;
+        self.iat = 0i64;
+        self.jti.clear();
         self.temporary = false;
-        self.temporary_recheck_after = 0i64;
+        self.temporary_recheck_after = ::core::option::Option::None;
         self.data = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }

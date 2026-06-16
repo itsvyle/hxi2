@@ -465,13 +465,39 @@ impl ::serde::Serialize for SmallDataOwnedView {
 }
 #[derive(Clone, Debug, Default)]
 pub struct JwtClaimsView<'a> {
-    /// Field 1: `sub`
+    /// Issuer
+    ///
+    /// Field 1: `iss`
+    pub iss: &'a str,
+    /// Subject
+    ///
+    /// Field 2: `sub`
     pub sub: &'a str,
-    /// Field 2: `temporary`
+    /// Audience
+    ///
+    /// Field 3: `aud`
+    pub aud: &'a str,
+    /// Expiration Time (Unix timestamp)
+    ///
+    /// Field 4: `exp`
+    pub exp: i64,
+    /// Not Before (Unix timestamp)
+    ///
+    /// Field 5: `nbf`
+    pub nbf: i64,
+    /// Issued At (Unix timestamp)
+    ///
+    /// Field 6: `iat`
+    pub iat: i64,
+    /// JWT ID
+    ///
+    /// Field 7: `jti`
+    pub jti: &'a str,
+    /// Field 8: `temporary`
     pub temporary: bool,
-    /// Field 3: `temporary_recheck_after`
-    pub temporary_recheck_after: i64,
-    /// Field 4: `data`
+    /// Field 9: `temporary_recheck_after`
+    pub temporary_recheck_after: ::core::option::Option<i64>,
+    /// Field 10: `data`
     pub data: ::buffa::MessageFieldView<super::super::__buffa::view::SmallDataView<'a>>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
@@ -521,34 +547,94 @@ impl<'a> JwtClaimsView<'a> {
                             actual: tag.wire_type() as u8,
                         });
                     }
-                    view.sub = ::buffa::types::borrow_str(&mut cur)?;
+                    view.iss = ::buffa::types::borrow_str(&mut cur)?;
                 }
                 2u32 => {
-                    if tag.wire_type() != ::buffa::encoding::WireType::Varint {
+                    if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
                         return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
                             field_number: 2u32,
+                            expected: 2u8,
+                            actual: tag.wire_type() as u8,
+                        });
+                    }
+                    view.sub = ::buffa::types::borrow_str(&mut cur)?;
+                }
+                3u32 => {
+                    if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
+                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                            field_number: 3u32,
+                            expected: 2u8,
+                            actual: tag.wire_type() as u8,
+                        });
+                    }
+                    view.aud = ::buffa::types::borrow_str(&mut cur)?;
+                }
+                4u32 => {
+                    if tag.wire_type() != ::buffa::encoding::WireType::Varint {
+                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                            field_number: 4u32,
+                            expected: 0u8,
+                            actual: tag.wire_type() as u8,
+                        });
+                    }
+                    view.exp = ::buffa::types::decode_int64(&mut cur)?;
+                }
+                5u32 => {
+                    if tag.wire_type() != ::buffa::encoding::WireType::Varint {
+                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                            field_number: 5u32,
+                            expected: 0u8,
+                            actual: tag.wire_type() as u8,
+                        });
+                    }
+                    view.nbf = ::buffa::types::decode_int64(&mut cur)?;
+                }
+                6u32 => {
+                    if tag.wire_type() != ::buffa::encoding::WireType::Varint {
+                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                            field_number: 6u32,
+                            expected: 0u8,
+                            actual: tag.wire_type() as u8,
+                        });
+                    }
+                    view.iat = ::buffa::types::decode_int64(&mut cur)?;
+                }
+                7u32 => {
+                    if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
+                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                            field_number: 7u32,
+                            expected: 2u8,
+                            actual: tag.wire_type() as u8,
+                        });
+                    }
+                    view.jti = ::buffa::types::borrow_str(&mut cur)?;
+                }
+                8u32 => {
+                    if tag.wire_type() != ::buffa::encoding::WireType::Varint {
+                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                            field_number: 8u32,
                             expected: 0u8,
                             actual: tag.wire_type() as u8,
                         });
                     }
                     view.temporary = ::buffa::types::decode_bool(&mut cur)?;
                 }
-                3u32 => {
+                9u32 => {
                     if tag.wire_type() != ::buffa::encoding::WireType::Varint {
                         return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                            field_number: 3u32,
+                            field_number: 9u32,
                             expected: 0u8,
                             actual: tag.wire_type() as u8,
                         });
                     }
-                    view.temporary_recheck_after = ::buffa::types::decode_int64(
-                        &mut cur,
-                    )?;
+                    view.temporary_recheck_after = Some(
+                        ::buffa::types::decode_int64(&mut cur)?,
+                    );
                 }
-                4u32 => {
+                10u32 => {
                     if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
                         return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                            field_number: 4u32,
+                            field_number: 10u32,
                             expected: 2u8,
                             actual: tag.wire_type() as u8,
                         });
@@ -602,7 +688,13 @@ impl<'a> ::buffa::MessageView<'a> for JwtClaimsView<'a> {
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
         super::super::JwtClaims {
+            iss: self.iss.to_string(),
             sub: self.sub.to_string(),
+            aud: self.aud.to_string(),
+            exp: self.exp,
+            nbf: self.nbf,
+            iat: self.iat,
+            jti: self.jti.to_string(),
             temporary: self.temporary,
             temporary_recheck_after: self.temporary_recheck_after,
             data: match self.data.as_option() {
@@ -628,17 +720,32 @@ impl<'a> ::buffa::ViewEncode<'a> for JwtClaimsView<'a> {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u32;
+        if !self.iss.is_empty() {
+            size += 1u32 + ::buffa::types::string_encoded_len(&self.iss) as u32;
+        }
         if !self.sub.is_empty() {
             size += 1u32 + ::buffa::types::string_encoded_len(&self.sub) as u32;
+        }
+        if !self.aud.is_empty() {
+            size += 1u32 + ::buffa::types::string_encoded_len(&self.aud) as u32;
+        }
+        if self.exp != 0i64 {
+            size += 1u32 + ::buffa::types::int64_encoded_len(self.exp) as u32;
+        }
+        if self.nbf != 0i64 {
+            size += 1u32 + ::buffa::types::int64_encoded_len(self.nbf) as u32;
+        }
+        if self.iat != 0i64 {
+            size += 1u32 + ::buffa::types::int64_encoded_len(self.iat) as u32;
+        }
+        if !self.jti.is_empty() {
+            size += 1u32 + ::buffa::types::string_encoded_len(&self.jti) as u32;
         }
         if self.temporary {
             size += 1u32 + ::buffa::types::BOOL_ENCODED_LEN as u32;
         }
-        if self.temporary_recheck_after != 0i64 {
-            size
-                += 1u32
-                    + ::buffa::types::int64_encoded_len(self.temporary_recheck_after)
-                        as u32;
+        if let Some(v) = self.temporary_recheck_after {
+            size += 1u32 + ::buffa::types::int64_encoded_len(v) as u32;
         }
         if self.data.is_set() {
             let __slot = __cache.reserve();
@@ -659,27 +766,66 @@ impl<'a> ::buffa::ViewEncode<'a> for JwtClaimsView<'a> {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if !self.sub.is_empty() {
+        if !self.iss.is_empty() {
             ::buffa::encoding::Tag::new(
                     1u32,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )
                 .encode(buf);
+            ::buffa::types::encode_string(&self.iss, buf);
+        }
+        if !self.sub.is_empty() {
+            ::buffa::encoding::Tag::new(
+                    2u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
             ::buffa::types::encode_string(&self.sub, buf);
         }
+        if !self.aud.is_empty() {
+            ::buffa::encoding::Tag::new(
+                    3u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(&self.aud, buf);
+        }
+        if self.exp != 0i64 {
+            ::buffa::encoding::Tag::new(4u32, ::buffa::encoding::WireType::Varint)
+                .encode(buf);
+            ::buffa::types::encode_int64(self.exp, buf);
+        }
+        if self.nbf != 0i64 {
+            ::buffa::encoding::Tag::new(5u32, ::buffa::encoding::WireType::Varint)
+                .encode(buf);
+            ::buffa::types::encode_int64(self.nbf, buf);
+        }
+        if self.iat != 0i64 {
+            ::buffa::encoding::Tag::new(6u32, ::buffa::encoding::WireType::Varint)
+                .encode(buf);
+            ::buffa::types::encode_int64(self.iat, buf);
+        }
+        if !self.jti.is_empty() {
+            ::buffa::encoding::Tag::new(
+                    7u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(&self.jti, buf);
+        }
         if self.temporary {
-            ::buffa::encoding::Tag::new(2u32, ::buffa::encoding::WireType::Varint)
+            ::buffa::encoding::Tag::new(8u32, ::buffa::encoding::WireType::Varint)
                 .encode(buf);
             ::buffa::types::encode_bool(self.temporary, buf);
         }
-        if self.temporary_recheck_after != 0i64 {
-            ::buffa::encoding::Tag::new(3u32, ::buffa::encoding::WireType::Varint)
+        if let Some(v) = self.temporary_recheck_after {
+            ::buffa::encoding::Tag::new(9u32, ::buffa::encoding::WireType::Varint)
                 .encode(buf);
-            ::buffa::types::encode_int64(self.temporary_recheck_after, buf);
+            ::buffa::types::encode_int64(v, buf);
         }
         if self.data.is_set() {
             ::buffa::encoding::Tag::new(
-                    4u32,
+                    10u32,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )
                 .encode(buf);
@@ -707,13 +853,16 @@ impl<'__a> ::serde::Serialize for JwtClaimsView<'__a> {
     ) -> ::core::result::Result<__S::Ok, __S::Error> {
         use ::serde::ser::SerializeMap as _;
         let mut __map = __s.serialize_map(::core::option::Option::None)?;
+        if !::buffa::json_helpers::skip_if::is_empty_str(self.iss) {
+            __map.serialize_entry("iss", self.iss)?;
+        }
         if !::buffa::json_helpers::skip_if::is_empty_str(self.sub) {
             __map.serialize_entry("sub", self.sub)?;
         }
-        if self.temporary {
-            __map.serialize_entry("temporary", &self.temporary)?;
+        if !::buffa::json_helpers::skip_if::is_empty_str(self.aud) {
+            __map.serialize_entry("aud", self.aud)?;
         }
-        if !::buffa::json_helpers::skip_if::is_zero_i64(&self.temporary_recheck_after) {
+        if !::buffa::json_helpers::skip_if::is_zero_i64(&self.exp) {
             struct _W(i64);
             impl ::serde::Serialize for _W {
                 fn serialize<__S: ::serde::Serializer>(
@@ -723,11 +872,49 @@ impl<'__a> ::serde::Serialize for JwtClaimsView<'__a> {
                     ::buffa::json_helpers::int64::serialize(&self.0, __s)
                 }
             }
-            __map
-                .serialize_entry(
-                    "temporaryRecheckAfter",
-                    &_W(self.temporary_recheck_after),
-                )?;
+            __map.serialize_entry("exp", &_W(self.exp))?;
+        }
+        if !::buffa::json_helpers::skip_if::is_zero_i64(&self.nbf) {
+            struct _W(i64);
+            impl ::serde::Serialize for _W {
+                fn serialize<__S: ::serde::Serializer>(
+                    &self,
+                    __s: __S,
+                ) -> ::core::result::Result<__S::Ok, __S::Error> {
+                    ::buffa::json_helpers::int64::serialize(&self.0, __s)
+                }
+            }
+            __map.serialize_entry("nbf", &_W(self.nbf))?;
+        }
+        if !::buffa::json_helpers::skip_if::is_zero_i64(&self.iat) {
+            struct _W(i64);
+            impl ::serde::Serialize for _W {
+                fn serialize<__S: ::serde::Serializer>(
+                    &self,
+                    __s: __S,
+                ) -> ::core::result::Result<__S::Ok, __S::Error> {
+                    ::buffa::json_helpers::int64::serialize(&self.0, __s)
+                }
+            }
+            __map.serialize_entry("iat", &_W(self.iat))?;
+        }
+        if !::buffa::json_helpers::skip_if::is_empty_str(self.jti) {
+            __map.serialize_entry("jti", self.jti)?;
+        }
+        if self.temporary {
+            __map.serialize_entry("temporary", &self.temporary)?;
+        }
+        if let ::core::option::Option::Some(__v) = self.temporary_recheck_after {
+            struct _W(i64);
+            impl ::serde::Serialize for _W {
+                fn serialize<__S: ::serde::Serializer>(
+                    &self,
+                    __s: __S,
+                ) -> ::core::result::Result<__S::Ok, __S::Error> {
+                    ::buffa::json_helpers::int64::serialize(&self.0, __s)
+                }
+            }
+            __map.serialize_entry("temporaryRecheckAfter", &_W(__v))?;
         }
         {
             if let ::core::option::Option::Some(__v) = self.data.as_option() {
@@ -833,22 +1020,66 @@ impl JwtClaimsOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Field 1: `sub`
+    /// Issuer
+    ///
+    /// Field 1: `iss`
+    #[must_use]
+    pub fn iss(&self) -> &'_ str {
+        self.0.reborrow().iss
+    }
+    /// Subject
+    ///
+    /// Field 2: `sub`
     #[must_use]
     pub fn sub(&self) -> &'_ str {
         self.0.reborrow().sub
     }
-    /// Field 2: `temporary`
+    /// Audience
+    ///
+    /// Field 3: `aud`
+    #[must_use]
+    pub fn aud(&self) -> &'_ str {
+        self.0.reborrow().aud
+    }
+    /// Expiration Time (Unix timestamp)
+    ///
+    /// Field 4: `exp`
+    #[must_use]
+    pub fn exp(&self) -> i64 {
+        self.0.reborrow().exp
+    }
+    /// Not Before (Unix timestamp)
+    ///
+    /// Field 5: `nbf`
+    #[must_use]
+    pub fn nbf(&self) -> i64 {
+        self.0.reborrow().nbf
+    }
+    /// Issued At (Unix timestamp)
+    ///
+    /// Field 6: `iat`
+    #[must_use]
+    pub fn iat(&self) -> i64 {
+        self.0.reborrow().iat
+    }
+    /// JWT ID
+    ///
+    /// Field 7: `jti`
+    #[must_use]
+    pub fn jti(&self) -> &'_ str {
+        self.0.reborrow().jti
+    }
+    /// Field 8: `temporary`
     #[must_use]
     pub fn temporary(&self) -> bool {
         self.0.reborrow().temporary
     }
-    /// Field 3: `temporary_recheck_after`
+    /// Field 9: `temporary_recheck_after`
     #[must_use]
-    pub fn temporary_recheck_after(&self) -> i64 {
+    pub fn temporary_recheck_after(&self) -> ::core::option::Option<i64> {
         self.0.reborrow().temporary_recheck_after
     }
-    /// Field 4: `data`
+    /// Field 10: `data`
     #[must_use]
     pub fn data(
         &self,

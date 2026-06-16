@@ -1,5 +1,6 @@
 mod app_config;
 mod auth_service;
+mod jwt_signer;
 mod permissions_checking;
 
 use anyhow::{Context as _, Result};
@@ -7,11 +8,12 @@ use app_config::AppConfiguration;
 use auth_service::{AuthServiceExt, AuthServiceImpl};
 use axum::routing::get;
 use connectrpc::{ConnectError, Router as ConnectRouter};
+use hxi2_proto::proto::auth::v2::SmallData;
 use std::sync::Arc;
+use std::time::Duration;
 
 use axum::extract::FromRequestParts;
 use axum::response::{IntoResponse, Response};
-use hxi2_proto::proto::auth::v2::JwtClaims;
 use tower::ServiceBuilder;
 use tower_http::timeout::TimeoutLayer;
 
@@ -55,6 +57,20 @@ where
     }
 }
 
+fn encode_jwt() -> Result<String> {
+    let signer = jwt_signer::JWTSigner::new()?;
+    let (token, _) = signer.new_token(
+        Duration::from_hours(2),
+        "me",
+        SmallData {
+            first_name: "ur mom".to_string(),
+            ..Default::default()
+        },
+    )?;
+
+    Ok(token)
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let service = Arc::new(AuthServiceImpl);
@@ -63,6 +79,8 @@ async fn main() -> Result<()> {
     let cfg = AppConfiguration::INSTANCE();
     // Force initialization of the JWT public key at startup, so we fail fast if the private key is invalid.
     let _jwt_public = cfg.jwt_public_key();
+
+    println!("Encoded JWT: {}", encode_jwt()?);
 
     let app = axum::Router::new()
         .route("/health", get(|| async { "OK" }))

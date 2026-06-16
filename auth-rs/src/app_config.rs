@@ -49,6 +49,8 @@ impl AppConfiguration {
     }
 
     fn jwt_public_key_(&self) -> Result<String> {
+        // let key_pair = Ed25519KeyPair
+
         use ed25519_dalek::SigningKey;
         use ed25519_dalek::pkcs8::DecodePrivateKey;
 
