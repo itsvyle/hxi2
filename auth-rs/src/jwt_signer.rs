@@ -1,4 +1,3 @@
-use chrono;
 use std::time;
 
 use hxi2_proto::proto::auth::v2::{JwtClaims, SmallData};
@@ -31,8 +30,8 @@ impl JWTSigner {
 
         // calculate iat, exp, and nbf based on current time and validity
         let now = chrono::Utc::now();
-        let iat = now.timestamp() as i64;
-        let exp = (now + chrono::Duration::from_std(validity)?).timestamp() as i64;
+        let iat = now.timestamp();
+        let exp = (now + chrono::Duration::from_std(validity)?).timestamp();
         let nbf = iat;
 
         let claims = JwtClaims {
