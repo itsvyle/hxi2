@@ -29,9 +29,10 @@ pub struct MethodPermissions {
     is_public: bool,
     public_url: Option<String>,
     compiled_permissions_bitfield: i64,
-    pub csrf_token_header: Option<String>,
-    pub csrf_token_cookie: Option<String>,
-    pub response_cors_headers: Option<BTreeMap<String, String>>,
+    csrf_token_header: Option<String>,
+    csrf_token_cookie: Option<String>,
+    response_cors_headers: Option<BTreeMap<String, String>>,
+    enforce_csrf: bool,
 }
 
 #[derive(serde::Deserialize, Clone, Debug)]
@@ -96,6 +97,7 @@ fn write_embedded_structs(perms: &PermissionsOutput) -> Option<String> {
                             csrf_token_header: {csrf_header},
                             csrf_token_cookie: {csrf_cookie},
                             response_cors_headers: {cors_headers},
+                            enforce_csrf: {enforce_csrf},
                         }}),
             "#},
             route = route,
@@ -121,7 +123,8 @@ fn write_embedded_structs(perms: &PermissionsOutput) -> Option<String> {
                     headers_str
                 }
                 None => "None".to_string(),
-            }
+            },
+            enforce_csrf = perm_data.enforce_csrf
         ));
     }
 
@@ -147,6 +150,7 @@ fn write_embedded_structs(perms: &PermissionsOutput) -> Option<String> {
                 pub csrf_token_header: Option<&'static str>,
                 pub csrf_token_cookie: Option<&'static str>,
                 pub response_cors_headers: Option<BTreeMap<&'static str, &'static str>>,
+                pub enforce_csrf: bool,
             }}
 
             pub trait MethodPermissionsOptionExt {{

@@ -8,9 +8,10 @@
       "is_public": true,
       "public_url": null,
       "compiled_permissions_bitfield": 2,
-      "csrf_token_header": null,
-      "csrf_token_cookie": null,
-      "response_cors_headers": null
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": false
     },
     "/auth.v2.AuthService/GetJWTPublicKey": {
       "allow_roles": [
@@ -20,9 +21,10 @@
       "is_public": false,
       "public_url": null,
       "compiled_permissions_bitfield": 10,
-      "csrf_token_header": null,
-      "csrf_token_cookie": null,
-      "response_cors_headers": null
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": false
     },
     "/auth.v2.AuthService/ListUsers": {
       "allow_roles": [
@@ -32,9 +34,10 @@
       "is_public": false,
       "public_url": null,
       "compiled_permissions_bitfield": 10,
-      "csrf_token_header": null,
-      "csrf_token_cookie": null,
-      "response_cors_headers": null
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": false
     },
     "/auth.v2.AuthService/Login": {
       "allow_roles": [
@@ -45,7 +48,8 @@
       "compiled_permissions_bitfield": 2,
       "csrf_token_header": "X-CSRF-Token",
       "csrf_token_cookie": "csrf_token",
-      "response_cors_headers": null
+      "response_cors_headers": null,
+      "enforce_csrf": true
     },
     "/auth.v2.AuthService/RenewJWT": {
       "allow_roles": [
@@ -55,9 +59,10 @@
       "is_public": false,
       "public_url": null,
       "compiled_permissions_bitfield": 10,
-      "csrf_token_header": null,
-      "csrf_token_cookie": null,
-      "response_cors_headers": null
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": false
     }
   }
 }

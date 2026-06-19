@@ -233,6 +233,14 @@ pub struct Permissions {
         ::buffa::alloc::string::String,
         ::buffa::alloc::string::String,
     >,
+    /// Field 7: `enforce_csrf`
+    #[serde(
+        rename = "enforceCsrf",
+        alias = "enforce_csrf",
+        with = "::buffa::json_helpers::proto_bool",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_false"
+    )]
+    pub enforce_csrf: bool,
     #[serde(skip)]
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
@@ -246,6 +254,7 @@ impl ::core::fmt::Debug for Permissions {
             .field("csrf_token_header", &self.csrf_token_header)
             .field("csrf_token_cookie", &self.csrf_token_cookie)
             .field("response_cors_headers", &self.response_cors_headers)
+            .field("enforce_csrf", &self.enforce_csrf)
             .finish()
     }
 }
@@ -347,6 +356,9 @@ impl ::buffa::Message for Permissions {
                 += 1u32 + ::buffa::encoding::varint_len(entry_size as u64) as u32
                     + entry_size;
         }
+        if self.enforce_csrf {
+            size += 1u32 + ::buffa::types::BOOL_ENCODED_LEN as u32;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u32;
         size
     }
@@ -423,6 +435,11 @@ impl ::buffa::Message for Permissions {
                 )
                 .encode(buf);
             ::buffa::types::encode_string(v, buf);
+        }
+        if self.enforce_csrf {
+            ::buffa::encoding::Tag::new(7u32, ::buffa::encoding::WireType::Varint)
+                .encode(buf);
+            ::buffa::types::encode_bool(self.enforce_csrf, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -594,6 +611,16 @@ impl ::buffa::Message for Permissions {
                 }
                 self.response_cors_headers.insert(key, val);
             }
+            7u32 => {
+                if tag.wire_type() != ::buffa::encoding::WireType::Varint {
+                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                        field_number: 7u32,
+                        expected: 0u8,
+                        actual: tag.wire_type() as u8,
+                    });
+                }
+                self.enforce_csrf = ::buffa::types::decode_bool(buf)?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, depth)?);
@@ -608,6 +635,7 @@ impl ::buffa::Message for Permissions {
         self.csrf_token_header = ::core::option::Option::None;
         self.csrf_token_cookie = ::core::option::Option::None;
         self.response_cors_headers.clear();
+        self.enforce_csrf = false;
         self.__buffa_unknown_fields.clear();
     }
 }

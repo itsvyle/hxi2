@@ -12,6 +12,9 @@ service AuthService {
     option (permission_level_service) = {
         allow_role: PERMISSION_ADMIN
     };
+    option (permission_level_service).csrf_token_header = "X-CSRF-Token";
+    option (permission_level_service).csrf_token_cookie = "csrf_token";
+
     rpc GetJWTPublicKey(GetJWTPublicKeyRequest) returns (GetJWTPublicKeyResponse) {
         option (permission_level).allow_role = PERMISSION_API_JWT;
         option idempotency_level = NO_SIDE_EFFECTS;
@@ -30,9 +33,7 @@ service AuthService {
 
     rpc Login(LoginRequest) returns (LoginResponse) {
         option (permission_level).is_public = true;
-        option (permission_level).csrf_token_header = "X-CSRF-Token";
-        option (permission_level).csrf_token_cookie = "csrf_token";
-        // option (permission_level).response_cors_headers = {key: "ACL," value: "123"};
+        option (permission_level).enforce_csrf = true;
     }
 }
 

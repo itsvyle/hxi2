@@ -24,6 +24,7 @@ pub struct MethodPermissions {
     pub csrf_token_header: Option<&'static str>,
     pub csrf_token_cookie: Option<&'static str>,
     pub response_cors_headers: Option<BTreeMap<&'static str, &'static str>>,
+    pub enforce_csrf: bool,
 }
 
 pub trait MethodPermissionsOptionExt {
@@ -77,9 +78,10 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 is_public: true,
                 public_url: None,
                 compiled_permissions_bitfield: 2,
-                csrf_token_header: None,
-                csrf_token_cookie: None,
+                csrf_token_header: Some("X-CSRF-Token"),
+                csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
+                enforce_csrf: false,
             }),
             ("/auth.v2.AuthService/GetJWTPublicKey", MethodPermissions {
                 allow_roles: &[
@@ -89,9 +91,10 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 is_public: false,
                 public_url: None,
                 compiled_permissions_bitfield: 10,
-                csrf_token_header: None,
-                csrf_token_cookie: None,
+                csrf_token_header: Some("X-CSRF-Token"),
+                csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
+                enforce_csrf: false,
             }),
             ("/auth.v2.AuthService/ListUsers", MethodPermissions {
                 allow_roles: &[
@@ -101,9 +104,10 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 is_public: false,
                 public_url: None,
                 compiled_permissions_bitfield: 10,
-                csrf_token_header: None,
-                csrf_token_cookie: None,
+                csrf_token_header: Some("X-CSRF-Token"),
+                csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
+                enforce_csrf: false,
             }),
             ("/auth.v2.AuthService/Login", MethodPermissions {
                 allow_roles: &[
@@ -115,6 +119,7 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 csrf_token_header: Some("X-CSRF-Token"),
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
+                enforce_csrf: true,
             }),
             ("/auth.v2.AuthService/RenewJWT", MethodPermissions {
                 allow_roles: &[
@@ -124,9 +129,10 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 is_public: false,
                 public_url: None,
                 compiled_permissions_bitfield: 10,
-                csrf_token_header: None,
-                csrf_token_cookie: None,
+                csrf_token_header: Some("X-CSRF-Token"),
+                csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
+                enforce_csrf: false,
             }),
         ],
         hash: "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262",

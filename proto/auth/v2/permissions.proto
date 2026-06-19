@@ -18,6 +18,7 @@ message Permissions {
     optional string csrf_token_header = 4;
     optional string csrf_token_cookie = 5;
     map<string, string> response_cors_headers = 6;
+    bool enforce_csrf = 7;
 }
 
 enum Permission {

@@ -18,6 +18,8 @@ pub struct PermissionsView<'a> {
     pub csrf_token_cookie: ::core::option::Option<&'a str>,
     /// Field 6: `response_cors_headers` (map)
     pub response_cors_headers: ::buffa::MapView<'a, &'a str, &'a str>,
+    /// Field 7: `enforce_csrf`
+    pub enforce_csrf: bool,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> PermissionsView<'a> {
@@ -97,6 +99,16 @@ impl<'a> PermissionsView<'a> {
                         });
                     }
                     view.csrf_token_cookie = Some(::buffa::types::borrow_str(&mut cur)?);
+                }
+                7u32 => {
+                    if tag.wire_type() != ::buffa::encoding::WireType::Varint {
+                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                            field_number: 7u32,
+                            expected: 0u8,
+                            actual: tag.wire_type() as u8,
+                        });
+                    }
+                    view.enforce_csrf = ::buffa::types::decode_bool(&mut cur)?;
                 }
                 1u32 => {
                     if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
@@ -219,6 +231,7 @@ impl<'a> ::buffa::MessageView<'a> for PermissionsView<'a> {
                 .iter()
                 .map(|(k, v)| (k.to_string(), v.to_string()))
                 .collect(),
+            enforce_csrf: self.enforce_csrf,
             __buffa_unknown_fields: self
                 .__buffa_unknown_fields
                 .to_owned()
@@ -262,6 +275,9 @@ impl<'a> ::buffa::ViewEncode<'a> for PermissionsView<'a> {
             size
                 += 1u32 + ::buffa::encoding::varint_len(entry_size as u64) as u32
                     + entry_size;
+        }
+        if self.enforce_csrf {
+            size += 1u32 + ::buffa::types::BOOL_ENCODED_LEN as u32;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u32;
         size
@@ -341,6 +357,11 @@ impl<'a> ::buffa::ViewEncode<'a> for PermissionsView<'a> {
                 .encode(buf);
             ::buffa::types::encode_string(v, buf);
         }
+        if self.enforce_csrf {
+            ::buffa::encoding::Tag::new(7u32, ::buffa::encoding::WireType::Varint)
+                .encode(buf);
+            ::buffa::types::encode_bool(self.enforce_csrf, buf);
+        }
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
@@ -407,6 +428,9 @@ impl<'__a> ::serde::Serialize for PermissionsView<'__a> {
                     "responseCorsHeaders",
                     &_WM(&self.response_cors_headers),
                 )?;
+        }
+        if self.enforce_csrf {
+            __map.serialize_entry("enforceCsrf", &self.enforce_csrf)?;
         }
         __map.end()
     }
@@ -538,6 +562,11 @@ impl PermissionsOwnedView {
     #[must_use]
     pub fn response_cors_headers(&self) -> &::buffa::MapView<'_, &'_ str, &'_ str> {
         &self.0.reborrow().response_cors_headers
+    }
+    /// Field 7: `enforce_csrf`
+    #[must_use]
+    pub fn enforce_csrf(&self) -> bool {
+        self.0.reborrow().enforce_csrf
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<PermissionsView<'static>>>

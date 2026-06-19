@@ -22,6 +22,7 @@ pub struct MethodPermissions {
     pub csrf_token_header: Option<String>,
     pub csrf_token_cookie: Option<String>,
     pub response_cors_headers: Option<BTreeMap<String, String>>,
+    pub enforce_csrf: bool,
 }
 
 fn serialize_roles_as_ints<S>(roles: &[Permission], serializer: S) -> Result<S::Ok, S::Error>
@@ -70,6 +71,7 @@ fn method_permissions_from_permissions(perms_msg: Permissions, base: &mut Method
         }
         base.response_cors_headers = Some(headers_map);
     }
+    base.enforce_csrf = perms_msg.enforce_csrf;
 }
 
 fn get_proto_folder_hash() -> Result<String> {
@@ -103,6 +105,7 @@ fn get_permissions(descriptor_bytes: &[u8]) -> Result<BTreeMap<String, MethodPer
             csrf_token_header: None,
             csrf_token_cookie: None,
             response_cors_headers: None,
+            enforce_csrf: false,
         };
         if let Some(options) = service.options()
             && let Some(perms_msg) = options.extension(&PERMISSION_LEVEL_SERVICE)
