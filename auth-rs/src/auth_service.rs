@@ -160,8 +160,8 @@ impl AuthService for AuthServiceImpl {
         Ok(res)
     }
 
-    impl_unimplemented_rpc!(frontend_index, Empty, Empty);
     impl_unimplemented_rpc!(renew_jwt, RenewJWTRequest, RenewJWTResponse);
     impl_unimplemented_rpc!(login, LoginRequest, LoginResponse);
     impl_unimplemented_rpc!(list_users, ListUsersRequest, ListUsersResponse);
+    impl_unimplemented_rpc!(frontend_index, Empty, Empty);
 }
