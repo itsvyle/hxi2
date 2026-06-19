@@ -12,5 +12,6 @@ anyhow = { workspace = true }
 buffa = { workspace = true }
 buffa-types = { workspace = true }
 hxi2-proto = { workspace = true }
+indoc = "2.0.7"
 serde = { workspace = true }
 serde_json = { workspace = true }

@@ -1,5 +1,6 @@
 use anyhow::{Context as _, Result};
 use buffa::Enumeration;
+use indoc::indoc;
 use std::collections::BTreeMap;
 
 use hxi2_proto::proto::auth::v2::Permission;
@@ -39,123 +40,138 @@ pub struct PermissionsOutput {
 // Two functions to output to stdout basically:
 // 1. Take in a public url, outputs the route as an option
 // 2. Take in a route, and the permissions of a user, and returns if the user is allowed on that route
-
 fn write_public_to_route(perms: &PermissionsOutput) -> Option<String> {
-    let mut s = String::new();
-    s.push_str("pub fn get_route_from_public_url(url: &str) -> Option<String> {\n");
+    let mut if_statements = String::new();
 
     for (route, perms) in &perms.permissions {
-        if let Some(public_url) = &perms.public_url {
-            s.push_str(&format!(
-                "\tif url == \"{}\" {{ return Some(\"{}\".to_string()) }}\n",
-                public_url, route
-            ));
-        } else {
-            s.push_str(&format!(
-                "\tif url == \"{}\" {{ return Some(\"{}\".to_string()) }}\n",
-                route, route
-            ));
-        }
-    }
+        let match_url = perms.public_url.as_ref().unwrap_or(route);
 
-    s.push_str("\tNone\n}");
-    Some(s)
-}
-
-fn write_route_to_permissions_check(perms: &PermissionsOutput) -> Option<String> {
-    let mut s = String::new();
-    s.push_str(
-        "pub fn check_permissions_for_route(route: &str, user_permissions: i64) -> bool {\n",
-    );
-
-    s.push_str("\tmatch route {\n");
-
-    for (route, perms) in &perms.permissions {
-        if perms.is_public {
-            s.push_str(&format!("\t\t\"{}\" => return true,\n", route));
-            continue;
-        }
-        // just check if the user_permissions fits the compiled_permissions_bitfield, since the bitfield is just an OR of all the permissions
-        s.push_str(&format!(
-            "\t\t\"{}\" => return (user_permissions & {}) > 0,\n",
-            route, perms.compiled_permissions_bitfield
+        if_statements.push_str(&format!(
+            "\tif url == \"{}\" {{ return Some(\"{}\") }}\n",
+            match_url, route
         ));
     }
 
-    s.push_str("\t\t_ => println!(\"Warning: route not found: {}\", route),\n");
-    s.push_str("\t}\n\tfalse\n}");
-    Some(s)
+    Some(format!(
+        indoc! {r#"
+            pub fn get_route_from_public_url(url: &str) -> Option<&'static str> {{
+            {}
+                None
+            }}
+        "#},
+        if_statements
+    ))
 }
 
 fn write_embedded_structs(perms: &PermissionsOutput) -> Option<String> {
-    let mut s = String::new();
-
-    s.push_str("use hxi2_proto::proto::auth::v2::Permission;\n\n");
-
-    s.push_str("#[derive(Debug, Clone)]\n");
-    s.push_str("pub struct MethodPermissions {\n");
-    s.push_str("\tpub allow_roles: &'static [Permission],\n");
-    s.push_str("\tpub is_public: bool,\n");
-    s.push_str("\tpub public_url: Option<&'static str>,\n");
-    s.push_str("\tpub compiled_permissions_bitfield: i64,\n");
-    s.push_str("}\n\n");
-
-    s.push_str("#[derive(Debug, Clone)]\n");
-    s.push_str("pub struct CompiledPermissions {\n");
-    s.push_str("\tpub permissions: &'static [(&'static str, MethodPermissions)],\n");
-    s.push_str("\tpub hash: &'static str,\n");
-    s.push_str("}\n\n");
-
-    s.push_str("impl CompiledPermissions {\n");
-    s.push_str("\tpub fn get_by_route(&self, route: &str) -> Option<&MethodPermissions> {\n");
-    s.push_str("\t\tself.permissions\n");
-    s.push_str("\t\t\t.binary_search_by_key(&route, |&(k, _)| k)\n");
-    s.push_str("\t\t\t.ok()\n");
-    s.push_str("\t\t\t.map(|idx| &self.permissions[idx].1)\n");
-    s.push_str("\t}\n");
-    s.push_str("}\n\n");
-
     let mut sorted_perms: Vec<(&String, &MethodPermissions)> = perms.permissions.iter().collect();
     sorted_perms.sort_by_key(|&(route, _)| route);
 
-    s.push_str("pub fn get_compiled_permissions() -> &'static CompiledPermissions {\n");
-    s.push_str("\tstatic INSTANCE: CompiledPermissions = CompiledPermissions {\n");
-    s.push_str("\t\tpermissions: &[\n");
-
-    for (route, perms) in sorted_perms {
-        s.push_str(&format!("\t\t\t(\"{}\", MethodPermissions {{\n", route));
-        s.push_str("\t\t\t\tallow_roles: &[\n");
-        for role in &perms.allow_roles {
-            s.push_str(&format!(
-                "\t\t\t\t\tPermission::{},\n",
-                Permission::from_i32(*role)
-                    .unwrap_or(Permission::PermissionUnspecified)
-                    .proto_name()
-            ));
-        }
-        s.push_str("\t\t\t\t],\n");
-        s.push_str(&format!("\t\t\t\tis_public: {},\n", perms.is_public));
-
-        if let Some(public_url) = &perms.public_url {
-            s.push_str(&format!("\t\t\t\tpublic_url: Some(\"{}\"),\n", public_url));
-        } else {
-            s.push_str("\t\t\t\tpublic_url: None,\n");
+    let mut array_entries = String::new();
+    for (route, perm_data) in &sorted_perms {
+        let mut roles_list = String::new();
+        for role in &perm_data.allow_roles {
+            let role_name = Permission::from_i32(*role)
+                .unwrap_or(Permission::PermissionUnspecified)
+                .proto_name();
+            roles_list.push_str(&format!("\t\t\t\t\tPermission::{},\n", role_name));
         }
 
-        s.push_str(&format!(
-            "\t\t\t\tcompiled_permissions_bitfield: {},\n",
-            perms.compiled_permissions_bitfield
+        let public_url_val = match &perm_data.public_url {
+            Some(url) => format!("Some(\"{}\")", url),
+            None => "None".to_string(),
+        };
+
+        array_entries.push_str(&format!(
+            indoc! {r#"
+                        ("{route}", MethodPermissions {{
+                            allow_roles: &[
+            {roles_list}                ],
+                            is_public: {is_public},
+                            public_url: {public_url},
+                            compiled_permissions_bitfield: {bitfield},
+                        }}),
+            "#},
+            route = route,
+            roles_list = roles_list,
+            is_public = perm_data.is_public,
+            public_url = public_url_val,
+            bitfield = perm_data.compiled_permissions_bitfield,
         ));
-        s.push_str("\t\t\t}),\n");
     }
 
-    s.push_str("\t\t],\n");
-    s.push_str(&format!("\t\thash: \"{}\",\n", perms.hash));
-    s.push_str("\t};\n\n");
-    s.push_str("\t&INSTANCE\n");
-    s.push('}');
+    let mut match_arms = String::new();
+    for (idx, (route, _)) in sorted_perms.iter().enumerate() {
+        match_arms.push_str(&format!(
+            "\t\t\t\t\"{}\" => return Some(&self.permissions[{}].1),\n",
+            route, idx
+        ));
+    }
 
-    Some(s)
+    Some(format!(
+        indoc! {r#"
+            use hxi2_proto::proto::auth::v2::Permission;
+
+            #[derive(Debug, Clone)]
+            pub struct MethodPermissions {{
+                pub allow_roles: &'static [Permission],
+                pub is_public: bool,
+                pub public_url: Option<&'static str>,
+                pub compiled_permissions_bitfield: i64,
+            }}
+
+            pub trait MethodPermissionsOptionExt {{
+                fn check_permissions(&self, user_permissions: i64) -> bool;
+            }}
+
+            impl MethodPermissionsOptionExt for MethodPermissions {{
+                fn check_permissions(&self, user_permissions: i64) -> bool {{
+                    if self.is_public {{
+                        return true;
+                    }}
+                    (user_permissions & self.compiled_permissions_bitfield) > 0
+                }}
+            }}
+
+            impl MethodPermissionsOptionExt for Option<&MethodPermissions> {{
+                fn check_permissions(&self, user_permissions: i64) -> bool {{
+                    match self {{
+                        Some(perm) => perm.check_permissions(user_permissions),
+                        None => false,
+                    }}
+                }}
+            }}
+
+            #[derive(Debug, Clone)]
+            pub struct CompiledPermissions {{
+                pub permissions: &'static [(&'static str, MethodPermissions)],
+                pub hash: &'static str,
+            }}
+
+            impl CompiledPermissions {{
+                pub fn get_by_route(&self, route: &str) -> Option<&MethodPermissions> {{
+                    match route {{
+            {}            _ => None,
+                    }}
+                }}
+            }}
+
+            pub fn get_compiled_permissions() -> &'static CompiledPermissions {{
+                static INSTANCE: CompiledPermissions = CompiledPermissions {{
+                    permissions: &[
+            {}        ],
+                    hash: "{}",
+                }};
+
+                &INSTANCE
+            }}
+
+            pub fn get_by_route(route: &str) -> Option<&'static MethodPermissions> {{
+                get_compiled_permissions().get_by_route(route)
+            }}
+        "#},
+        match_arms, array_entries, perms.hash
+    ))
 }
 
 pub fn main(path: &str) -> Result<String> {
@@ -167,11 +183,6 @@ pub fn main(path: &str) -> Result<String> {
 
     if let Some(route) = write_public_to_route(&perms) {
         s.push_str(&route);
-    }
-
-    if let Some(check) = write_route_to_permissions_check(&perms) {
-        s.push_str("\n\n");
-        s.push_str(&check);
     }
 
     if let Some(structs) = write_embedded_structs(&perms) {

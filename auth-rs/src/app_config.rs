@@ -3,6 +3,8 @@ use ed25519_dalek::pkcs8::EncodePublicKey;
 use once_cell::sync::Lazy;
 use utils::cfg_from_env_or;
 
+use crate::jwt_verifier::JWTVerifier;
+
 pub enum Environnement {
     Development,
     Production,
@@ -112,5 +114,21 @@ impl AppConfiguration {
 
     pub fn is_development(&self) -> bool {
         matches!(self.environment, Environnement::Development)
+    }
+
+    pub fn new_jwt_verifier(&self) -> Result<JWTVerifier> {
+        use jsonwebtoken::{Algorithm, DecodingKey, Validation};
+        let key = self.jwt_public_key();
+
+        let public_key = DecodingKey::from_ed_pem(key.as_bytes()).context("decoding public key")?;
+
+        let mut v = Validation::new(Algorithm::EdDSA);
+        v.set_audience(&[format!("https://{}", self.tld)]);
+        v.leeway = 1;
+
+        Ok(JWTVerifier {
+            public_key,
+            validation_settings: v,
+        })
     }
 }

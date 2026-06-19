@@ -5,7 +5,7 @@ use hxi2_proto::proto::auth::v2::JwtClaims;
 use axum::extract::FromRequestParts;
 use axum::response::{IntoResponse, Response};
 
-use crate::permissions_checking;
+use crate::permissions_checking::{self, MethodPermissionsOptionExt};
 
 #[derive(Debug, Clone)]
 pub struct ReqAuthState {
@@ -30,8 +30,9 @@ where
                     .into_http_response(&parts.headers)
                     .into_response()
             })?;
-
-        let is_public = permissions_checking::check_permissions_for_route(&route, 0);
+        let perms = permissions_checking::get_by_route(route)
+            .expect("impossible: route can't be non empty, and not be in the permissions list");
+        let is_public = perms.is_public;
 
         let token = parts
             .headers
@@ -61,7 +62,7 @@ where
 
         if !is_public
             && let Some(ref c) = claims
-            && !permissions_checking::check_permissions_for_route(&route, c.data.permissions)
+            && !perms.check_permissions(c.data.permissions)
         {
             return Err(ConnectError::permission_denied("insufficient permissions")
                 .into_http_response(&parts.headers)
