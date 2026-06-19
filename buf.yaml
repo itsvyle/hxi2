@@ -5,3 +5,8 @@ deps:
     - buf.build/bufbuild/protovalidate
     # specific version is important here, so that the files are included in "buf export --all"
     - buf.build/protocolbuffers/wellknowntypes:v22.0
+lint:
+    use:
+        - STANDARD
+    rpc_allow_google_protobuf_empty_requests: true
+    rpc_allow_google_protobuf_empty_responses: true

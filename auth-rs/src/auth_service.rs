@@ -24,6 +24,20 @@ pub struct AuthServiceImpl {
     pub verifier: &'static crate::jwt_verifier::JWTVerifier,
 }
 
+macro_rules! impl_unimplemented_rpc {
+    ($name:ident, $req_type:ty, $res_type:ty) => {
+        async fn $name(
+            &self,
+            _ctx: connectrpc::RequestContext,
+            _request: connectrpc::ServiceRequest<'_, $req_type>,
+        ) -> connectrpc::ServiceResult<$res_type> {
+            Err(connectrpc::ConnectError::unimplemented(
+                concat!(stringify!($name), " is not implemented yet").to_string(),
+            ))
+        }
+    };
+}
+
 #[allow(refining_impl_trait)]
 impl AuthService for AuthServiceImpl {
     async fn get_jwt_public_key(
@@ -100,33 +114,7 @@ impl AuthService for AuthServiceImpl {
         })
     }
 
-    async fn renew_jwt(
-        &self,
-        _ctx: RequestContext,
-        _request: ServiceRequest<'_, RenewJWTRequest>,
-    ) -> ServiceResult<RenewJWTResponse> {
-        Err(ConnectError::unimplemented(
-            "renew_jwt is not implemented yet".to_string(),
-        ))
-    }
-
-    async fn login(
-        &self,
-        _ctx: RequestContext,
-        _request: ServiceRequest<'_, LoginRequest>,
-    ) -> ServiceResult<LoginResponse> {
-        Err(ConnectError::unimplemented(
-            "login is not implemented yet".to_string(),
-        ))
-    }
-
-    async fn list_users(
-        &self,
-        _ctx: RequestContext,
-        _request: ServiceRequest<'_, ListUsersRequest>,
-    ) -> ServiceResult<ListUsersResponse> {
-        Err(ConnectError::unimplemented(
-            "list_users is not implemented yet".to_string(),
-        ))
-    }
+    impl_unimplemented_rpc!(renew_jwt, RenewJWTRequest, RenewJWTResponse);
+    impl_unimplemented_rpc!(login, LoginRequest, LoginResponse);
+    impl_unimplemented_rpc!(list_users, ListUsersRequest, ListUsersResponse);
 }
