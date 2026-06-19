@@ -12,9 +12,9 @@ pub fn get_route_from_public_url(url: &str) -> Option<String> {
 pub fn check_permissions_for_route(route: &str, user_permissions: i64) -> bool {
 	match route {
 		"/auth.v2.AuthService/GetDevToken" => return true,
-		"/auth.v2.AuthService/GetJWTPublicKey" => return true,
-		"/auth.v2.AuthService/ListUsers" => return user_permissions & 10 == 10,
-		"/auth.v2.AuthService/RenewJWT" => return user_permissions & 10 == 10,
+		"/auth.v2.AuthService/GetJWTPublicKey" => return (user_permissions & 10) > 0,
+		"/auth.v2.AuthService/ListUsers" => return (user_permissions & 10) > 0,
+		"/auth.v2.AuthService/RenewJWT" => return (user_permissions & 10) > 0,
 		_ => println!("Warning: route not found: {}", route),
 	}
 	false
@@ -59,10 +59,11 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
 			("/auth.v2.AuthService/GetJWTPublicKey", MethodPermissions {
 				allow_roles: &[
 					Permission::PERMISSION_ADMIN,
+					Permission::PERMISSION_API_JWT,
 				],
-				is_public: true,
+				is_public: false,
 				public_url: None,
-				compiled_permissions_bitfield: 2,
+				compiled_permissions_bitfield: 10,
 			}),
 			("/auth.v2.AuthService/ListUsers", MethodPermissions {
 				allow_roles: &[

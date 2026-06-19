@@ -77,8 +77,8 @@ fn write_route_to_permissions_check(perms: &PermissionsOutput) -> Option<String>
         }
         // just check if the user_permissions fits the compiled_permissions_bitfield, since the bitfield is just an OR of all the permissions
         s.push_str(&format!(
-            "\t\t\"{}\" => return user_permissions & {} == {},\n",
-            route, perms.compiled_permissions_bitfield, perms.compiled_permissions_bitfield
+            "\t\t\"{}\" => return (user_permissions & {}) > 0,\n",
+            route, perms.compiled_permissions_bitfield
         ));
     }
 

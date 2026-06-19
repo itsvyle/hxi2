@@ -19,8 +19,9 @@ use crate::connect_result::ToConnectError;
 use crate::{app_config::AppConfiguration, auth_middleware::ReqAuthState};
 
 pub struct AuthServiceImpl {
-    pub signer: crate::jwt_signer::JWTSigner,
-    pub verifier: crate::jwt_verifier::JWTVerifier,
+    pub signer: &'static crate::jwt_signer::JWTSigner,
+    #[allow(unused)]
+    pub verifier: &'static crate::jwt_verifier::JWTVerifier,
 }
 
 #[allow(refining_impl_trait)]
@@ -86,17 +87,12 @@ impl AuthService for AuthServiceImpl {
             .obfuscate()
             .to_connect_internal()?;
 
-        let claims = self
+        let _claims = self
             .verifier
             .verify_token(&token.0)
             .context("verifying token after signing")
             .obfuscate()
-            .to_connect_internal()?;
-
-        println!(
-            "get_dev_token called, generated token: {}, claims: {:?}",
-            token.0, claims
-        );
+            .to_connect_permission_denied()?;
 
         Response::ok(GetDevTokenResponse {
             jwt: token.0,

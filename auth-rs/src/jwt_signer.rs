@@ -1,4 +1,4 @@
-use std::time;
+use std::{sync::LazyLock, time};
 
 use anyhow::{Context as _, Result};
 use hxi2_proto::proto::auth::v2::{JwtClaims, SmallData};
@@ -6,6 +6,9 @@ use jsonwebtoken::{Algorithm, EncodingKey, Header, encode};
 use rand::RngExt;
 
 use crate::app_config::AppConfiguration;
+
+pub static GLOBAL_JWT_SIGNER: LazyLock<JWTSigner> =
+    LazyLock::new(|| JWTSigner::new().expect("failed to initialize JWTSigner"));
 
 pub struct JWTSigner {
     header: Header,
@@ -92,15 +95,15 @@ impl JWTSigner {
             serde_json::to_value(claims).context("converting claims to serde JSON values")?;
 
         // Intercept and convert stringified numbers back to true JSON numbers
-        // if let Some(obj) = val.as_object_mut() {
-        //     for field in ["exp", "nbf", "iat"] {
-        //         if let Some(Value::String(s)) = obj.get(field)
-        //             && let Ok(parsed_num) = s.parse::<i64>()
-        //         {
-        //             obj.insert(field.to_string(), Value::Number(parsed_num.into()));
-        //         }
-        //     }
-        // }
+        if let Some(obj) = val.as_object_mut() {
+            for field in ["exp", "nbf", "iat"] {
+                if let Some(Value::String(s)) = obj.get(field)
+                    && let Ok(parsed_num) = s.parse::<i64>()
+                {
+                    obj.insert(field.to_string(), Value::Number(parsed_num.into()));
+                }
+            }
+        }
 
         Ok(val)
     }

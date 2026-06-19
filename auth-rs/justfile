@@ -16,6 +16,7 @@ export HXI2_TLD := "hxi2.fr"
 export LOCAL_DEBUG_INSTANCE := "1"
 export HXI2_COOKIES_DOMAIN := "localhost"
 export CONFIG_ENVIRONMENT := "development"
+PORT := "8080"
 
 init: 
     @just _utils-check-program "cargo" 1
@@ -37,16 +38,22 @@ dev:
 run $HXI2_AUTH_URL="http://localhost:8080" $HXI2_AUTH_ENDPOINT="http://localhost:8080" $CONFIG_JWT_PRIVATE_KEY=test_private_key $CONFIG_DB_PATH=CONFIG_DB_PATH:
     cargo run .
 
-jwt_token_payload := '{"user_id": "42"}'
+jwt_token_payload := '{"user_id": "42", "roles": ["PERMISSION_STUDENT"]}'
 
 get_jwt:
     curl -s -X POST \
         -H "Content-Type: application/json" \
         -d '{{jwt_token_payload}}' \
-        http://localhost:8080/auth.v2.AuthService/GetDevToken
+        http://localhost:{{PORT}}/auth.v2.AuthService/GetDevToken | jq -r '.jwt'
 
-get_jwt_public_key:
-    curl -s -X POST \
-        -H "Content-Type: application/json" \
-        -d '{}' \
-        http://localhost:8080/auth.v2.AuthService/GetJWTPublicKey
+grpcui:
+    grpcui -plaintext \
+        -protoset ../generated-proto/hxi2.binpb \
+        -H "Authorization: Bearer {{shell('just get_jwt')}}" \
+        "0.0.0.0:{{PORT}}"
+
+# get_jwt_public_key:
+#     curl -s -X POST \
+#         -H "Content-Type: application/json" \
+#         -d '{}' \
+#         http://localhost:8080/auth.v2.AuthService/GetJWTPublicKey

@@ -11,11 +11,12 @@
     },
     "/auth.v2.AuthService/GetJWTPublicKey": {
       "allow_roles": [
-        1
+        1,
+        4
       ],
-      "is_public": true,
+      "is_public": false,
       "public_url": null,
-      "compiled_permissions_bitfield": 2
+      "compiled_permissions_bitfield": 10
     },
     "/auth.v2.AuthService/ListUsers": {
       "allow_roles": [

@@ -12,40 +12,18 @@ use auth_middleware::RequireAuthMiddleware;
 use auth_service::{AuthServiceExt, AuthServiceImpl};
 use axum::routing::get;
 use connectrpc::Router as ConnectRouter;
-use hxi2_proto::proto::auth::v2::SmallData;
 use std::sync::Arc;
 
 use tower::ServiceBuilder;
 use tower_http::timeout::TimeoutLayer;
 
-fn encode_jwt() -> Result<String> {
-    let signer = jwt_signer::JWTSigner::new()?;
-    let (token, _) = signer.new_token(
-        "me",
-        SmallData {
-            first_name: "ur mom".to_string(),
-            ..Default::default()
-        },
-        &jwt_signer::JWTSignerOptions::default(),
-    )?;
-
-    println!("Encoded JWT: {}", token);
-
-    let verifier = jwt_verifier::JWTVerifier::new_from_cfg()?;
-    let claims = verifier.verify_token(&token)?;
-
-    println!("Verified claims: {:?}", claims);
-
-    println!("Claims user_id: {}", claims.data.user_id);
-
-    Ok(token)
-}
+use crate::{jwt_signer::GLOBAL_JWT_SIGNER, jwt_verifier::GLOBAL_JWT_VERIFIER};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     let service = Arc::new(AuthServiceImpl {
-        signer: jwt_signer::JWTSigner::new()?,
-        verifier: jwt_verifier::JWTVerifier::new_from_cfg()?,
+        signer: &GLOBAL_JWT_SIGNER,
+        verifier: &GLOBAL_JWT_VERIFIER,
     });
     let connect = service.register(ConnectRouter::new());
 
