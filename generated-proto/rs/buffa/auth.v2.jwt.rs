@@ -709,3 +709,215 @@ pub const __JWT_CLAIMS_JSON_ANY: ::buffa::type_registry::JsonAnyEntry = ::buffa:
     from_json: ::buffa::type_registry::any_from_json::<JwtClaims>,
     is_wkt: false,
 };
+#[derive(Clone, PartialEq, Default)]
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+#[serde(default)]
+pub struct GetCSRFTokenRequest {
+    #[serde(skip)]
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for GetCSRFTokenRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("GetCSRFTokenRequest").finish()
+    }
+}
+impl GetCSRFTokenRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.GetCSRFTokenRequest";
+}
+impl ::buffa::DefaultInstance for GetCSRFTokenRequest {
+    fn default_instance() -> &'static Self {
+        static VALUE: ::buffa::__private::OnceBox<GetCSRFTokenRequest> = ::buffa::__private::OnceBox::new();
+        VALUE.get_or_init(|| ::buffa::alloc::boxed::Box::new(Self::default()))
+    }
+}
+impl ::buffa::MessageName for GetCSRFTokenRequest {
+    const PACKAGE: &'static str = "auth.v2";
+    const NAME: &'static str = "GetCSRFTokenRequest";
+    const FULL_NAME: &'static str = "auth.v2.GetCSRFTokenRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.GetCSRFTokenRequest";
+}
+impl ::buffa::Message for GetCSRFTokenRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// The result is a `u32`; the protobuf specification requires all
+    /// messages to fit within 2 GiB (2,147,483,647 bytes), so a
+    /// compliant message will never overflow this type.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u32;
+        size += self.__buffa_unknown_fields.encoded_len() as u32;
+        size
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::bytes::BufMut,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        depth: u32,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, depth)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for GetCSRFTokenRequest {
+    const PROTO_FQN: &'static str = "auth.v2.GetCSRFTokenRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+impl ::buffa::json_helpers::ProtoElemJson for GetCSRFTokenRequest {
+    fn serialize_proto_json<S: ::serde::Serializer>(
+        v: &Self,
+        s: S,
+    ) -> ::core::result::Result<S::Ok, S::Error> {
+        ::serde::Serialize::serialize(v, s)
+    }
+    fn deserialize_proto_json<'de, D: ::serde::Deserializer<'de>>(
+        d: D,
+    ) -> ::core::result::Result<Self, D::Error> {
+        <Self as ::serde::Deserialize>::deserialize(d)
+    }
+}
+#[doc(hidden)]
+pub const __GET_CSRF_TOKEN_REQUEST_JSON_ANY: ::buffa::type_registry::JsonAnyEntry = ::buffa::type_registry::JsonAnyEntry {
+    type_url: "type.googleapis.com/auth.v2.GetCSRFTokenRequest",
+    to_json: ::buffa::type_registry::any_to_json::<GetCSRFTokenRequest>,
+    from_json: ::buffa::type_registry::any_from_json::<GetCSRFTokenRequest>,
+    is_wkt: false,
+};
+#[derive(Clone, PartialEq, Default)]
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+#[serde(default)]
+pub struct GetCSRFTokenResponse {
+    #[serde(skip)]
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for GetCSRFTokenResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("GetCSRFTokenResponse").finish()
+    }
+}
+impl GetCSRFTokenResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.GetCSRFTokenResponse";
+}
+impl ::buffa::DefaultInstance for GetCSRFTokenResponse {
+    fn default_instance() -> &'static Self {
+        static VALUE: ::buffa::__private::OnceBox<GetCSRFTokenResponse> = ::buffa::__private::OnceBox::new();
+        VALUE.get_or_init(|| ::buffa::alloc::boxed::Box::new(Self::default()))
+    }
+}
+impl ::buffa::MessageName for GetCSRFTokenResponse {
+    const PACKAGE: &'static str = "auth.v2";
+    const NAME: &'static str = "GetCSRFTokenResponse";
+    const FULL_NAME: &'static str = "auth.v2.GetCSRFTokenResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.GetCSRFTokenResponse";
+}
+impl ::buffa::Message for GetCSRFTokenResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// The result is a `u32`; the protobuf specification requires all
+    /// messages to fit within 2 GiB (2,147,483,647 bytes), so a
+    /// compliant message will never overflow this type.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u32;
+        size += self.__buffa_unknown_fields.encoded_len() as u32;
+        size
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::bytes::BufMut,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        depth: u32,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, depth)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for GetCSRFTokenResponse {
+    const PROTO_FQN: &'static str = "auth.v2.GetCSRFTokenResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+impl ::buffa::json_helpers::ProtoElemJson for GetCSRFTokenResponse {
+    fn serialize_proto_json<S: ::serde::Serializer>(
+        v: &Self,
+        s: S,
+    ) -> ::core::result::Result<S::Ok, S::Error> {
+        ::serde::Serialize::serialize(v, s)
+    }
+    fn deserialize_proto_json<'de, D: ::serde::Deserializer<'de>>(
+        d: D,
+    ) -> ::core::result::Result<Self, D::Error> {
+        <Self as ::serde::Deserialize>::deserialize(d)
+    }
+}
+#[doc(hidden)]
+pub const __GET_CSRF_TOKEN_RESPONSE_JSON_ANY: ::buffa::type_registry::JsonAnyEntry = ::buffa::type_registry::JsonAnyEntry {
+    type_url: "type.googleapis.com/auth.v2.GetCSRFTokenResponse",
+    to_json: ::buffa::type_registry::any_to_json::<GetCSRFTokenResponse>,
+    from_json: ::buffa::type_registry::any_from_json::<GetCSRFTokenResponse>,
+    is_wkt: false,
+};

@@ -16,6 +16,7 @@ export HXI2_TLD := "hxi2.fr"
 export LOCAL_DEBUG_INSTANCE := "1"
 export HXI2_COOKIES_DOMAIN := "localhost"
 export CONFIG_ENVIRONMENT := "development"
+export CONFIG_CSRF_SIGNING_KEY := "PAFXpBAmnyWvpeYK0FoaCSe3QrOp4OZygusAquc4Zho="
 PORT := "8080"
 
 init: 
@@ -53,6 +54,12 @@ grpcui:
         -protoset ../generated-proto/hxi2.binpb \
         -H "Authorization: Bearer {{shell('just get_jwt')}}" \
         "0.0.0.0:{{PORT}}"
+
+generate-csrf-token:
+    openssl rand -base64 32
+
+generate-jwt-token:
+    openssl genpkey -algorithm Ed25519 -out jwt_private_key.pem
 
 # get_jwt_public_key:
 #     curl -s -X POST \

@@ -1117,3 +1117,515 @@ impl ::serde::Serialize for JwtClaimsOwnedView {
         ::serde::Serialize::serialize(&self.0, __s)
     }
 }
+#[derive(Clone, Debug, Default)]
+pub struct GetCSRFTokenRequestView<'a> {
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> GetCSRFTokenRequestView<'a> {
+    /// Decode from `buf`, enforcing a recursion depth limit for nested messages.
+    ///
+    /// Called by [`::buffa::MessageView::decode_view`] with [`::buffa::RECURSION_LIMIT`]
+    /// and by generated sub-message decode arms with `depth - 1`.
+    ///
+    /// **Not part of the public API.** Named with a leading underscore to
+    /// signal that it is for generated-code use only.
+    #[doc(hidden)]
+    pub fn _decode_depth(
+        buf: &'a [u8],
+        depth: u32,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let mut view = Self::default();
+        view._merge_into_view(buf, depth)?;
+        ::core::result::Result::Ok(view)
+    }
+    /// Merge fields from `buf` into this view (proto merge semantics).
+    ///
+    /// Repeated fields append; singular fields last-wins; singular
+    /// MESSAGE fields merge recursively. Used by sub-message decode
+    /// arms when the same field appears multiple times on the wire.
+    ///
+    /// **Not part of the public API.**
+    #[doc(hidden)]
+    pub fn _merge_into_view(
+        &mut self,
+        buf: &'a [u8],
+        depth: u32,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        let _ = depth;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur: &'a [u8] = buf;
+        while !cur.is_empty() {
+            let before_tag = cur;
+            let tag = ::buffa::encoding::Tag::decode(&mut cur)?;
+            match tag.field_number() {
+                _ => {
+                    ::buffa::encoding::skip_field_depth(tag, &mut cur, depth)?;
+                    let span_len = before_tag.len() - cur.len();
+                    view.__buffa_unknown_fields.push_raw(&before_tag[..span_len]);
+                }
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+}
+impl<'a> ::buffa::MessageView<'a> for GetCSRFTokenRequestView<'a> {
+    type Owned = super::super::GetCSRFTokenRequest;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        Self::_decode_depth(buf, ::buffa::RECURSION_LIMIT)
+    }
+    fn decode_view_with_limit(
+        buf: &'a [u8],
+        depth: u32,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        Self::_decode_depth(buf, depth)
+    }
+    fn to_owned_message(&self) -> super::super::GetCSRFTokenRequest {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> super::super::GetCSRFTokenRequest {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        super::super::GetCSRFTokenRequest {
+            __buffa_unknown_fields: self
+                .__buffa_unknown_fields
+                .to_owned()
+                .unwrap_or_default()
+                .into(),
+            ..::core::default::Default::default()
+        }
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for GetCSRFTokenRequestView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u32;
+        size += self.__buffa_unknown_fields.encoded_len() as u32;
+        size
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::bytes::BufMut,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+/// Serializes this view as protobuf JSON.
+///
+/// Implicit-presence fields with default values are omitted, `required`
+/// fields are always emitted, explicit-presence (`optional`) fields are
+/// emitted only when set, bytes fields are base64-encoded, and enum
+/// values are their proto name strings.
+///
+/// This impl uses `serialize_map(None)` because the number of emitted
+/// fields depends on default-omission rules; serializers that require
+/// known map lengths (e.g. `bincode`) will return a runtime error.
+/// Use the owned message type for those formats.
+impl<'__a> ::serde::Serialize for GetCSRFTokenRequestView<'__a> {
+    fn serialize<__S: ::serde::Serializer>(
+        &self,
+        __s: __S,
+    ) -> ::core::result::Result<__S::Ok, __S::Error> {
+        use ::serde::ser::SerializeMap as _;
+        let mut __map = __s.serialize_map(::core::option::Option::None)?;
+        __map.end()
+    }
+}
+impl<'a> ::buffa::MessageName for GetCSRFTokenRequestView<'a> {
+    const PACKAGE: &'static str = "auth.v2";
+    const NAME: &'static str = "GetCSRFTokenRequest";
+    const FULL_NAME: &'static str = "auth.v2.GetCSRFTokenRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.GetCSRFTokenRequest";
+}
+impl<'v> ::buffa::DefaultViewInstance for GetCSRFTokenRequestView<'v> {
+    fn default_view_instance<'a>() -> &'a Self
+    where
+        Self: 'a,
+    {
+        static VALUE: ::buffa::__private::OnceBox<GetCSRFTokenRequestView<'static>> = ::buffa::__private::OnceBox::new();
+        VALUE
+            .get_or_init(|| ::buffa::alloc::boxed::Box::new(
+                <GetCSRFTokenRequestView<'static>>::default(),
+            ))
+    }
+}
+impl ::buffa::ViewReborrow for GetCSRFTokenRequestView<'static> {
+    type Reborrowed<'b> = GetCSRFTokenRequestView<'b>;
+    fn reborrow<'b>(this: &'b Self) -> &'b Self::Reborrowed<'b> {
+        this
+    }
+}
+/** Self-contained, `'static` owned view of a `GetCSRFTokenRequest` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`GetCSRFTokenRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`GetCSRFTokenRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct GetCSRFTokenRequestOwnedView(
+    ::buffa::OwnedView<GetCSRFTokenRequestView<'static>>,
+);
+impl GetCSRFTokenRequestOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetCSRFTokenRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetCSRFTokenRequestOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::GetCSRFTokenRequest,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetCSRFTokenRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`GetCSRFTokenRequestView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &GetCSRFTokenRequestView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::GetCSRFTokenRequest {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<GetCSRFTokenRequestView<'static>>>
+for GetCSRFTokenRequestOwnedView {
+    fn from(inner: ::buffa::OwnedView<GetCSRFTokenRequestView<'static>>) -> Self {
+        GetCSRFTokenRequestOwnedView(inner)
+    }
+}
+impl ::core::convert::From<GetCSRFTokenRequestOwnedView>
+for ::buffa::OwnedView<GetCSRFTokenRequestView<'static>> {
+    fn from(wrapper: GetCSRFTokenRequestOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<GetCSRFTokenRequestView<'static>>>
+for GetCSRFTokenRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<GetCSRFTokenRequestView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::GetCSRFTokenRequest {
+    type View<'a> = GetCSRFTokenRequestView<'a>;
+    type ViewHandle = GetCSRFTokenRequestOwnedView;
+}
+impl ::serde::Serialize for GetCSRFTokenRequestOwnedView {
+    fn serialize<__S: ::serde::Serializer>(
+        &self,
+        __s: __S,
+    ) -> ::core::result::Result<__S::Ok, __S::Error> {
+        ::serde::Serialize::serialize(&self.0, __s)
+    }
+}
+#[derive(Clone, Debug, Default)]
+pub struct GetCSRFTokenResponseView<'a> {
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> GetCSRFTokenResponseView<'a> {
+    /// Decode from `buf`, enforcing a recursion depth limit for nested messages.
+    ///
+    /// Called by [`::buffa::MessageView::decode_view`] with [`::buffa::RECURSION_LIMIT`]
+    /// and by generated sub-message decode arms with `depth - 1`.
+    ///
+    /// **Not part of the public API.** Named with a leading underscore to
+    /// signal that it is for generated-code use only.
+    #[doc(hidden)]
+    pub fn _decode_depth(
+        buf: &'a [u8],
+        depth: u32,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let mut view = Self::default();
+        view._merge_into_view(buf, depth)?;
+        ::core::result::Result::Ok(view)
+    }
+    /// Merge fields from `buf` into this view (proto merge semantics).
+    ///
+    /// Repeated fields append; singular fields last-wins; singular
+    /// MESSAGE fields merge recursively. Used by sub-message decode
+    /// arms when the same field appears multiple times on the wire.
+    ///
+    /// **Not part of the public API.**
+    #[doc(hidden)]
+    pub fn _merge_into_view(
+        &mut self,
+        buf: &'a [u8],
+        depth: u32,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        let _ = depth;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur: &'a [u8] = buf;
+        while !cur.is_empty() {
+            let before_tag = cur;
+            let tag = ::buffa::encoding::Tag::decode(&mut cur)?;
+            match tag.field_number() {
+                _ => {
+                    ::buffa::encoding::skip_field_depth(tag, &mut cur, depth)?;
+                    let span_len = before_tag.len() - cur.len();
+                    view.__buffa_unknown_fields.push_raw(&before_tag[..span_len]);
+                }
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+}
+impl<'a> ::buffa::MessageView<'a> for GetCSRFTokenResponseView<'a> {
+    type Owned = super::super::GetCSRFTokenResponse;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        Self::_decode_depth(buf, ::buffa::RECURSION_LIMIT)
+    }
+    fn decode_view_with_limit(
+        buf: &'a [u8],
+        depth: u32,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        Self::_decode_depth(buf, depth)
+    }
+    fn to_owned_message(&self) -> super::super::GetCSRFTokenResponse {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> super::super::GetCSRFTokenResponse {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        super::super::GetCSRFTokenResponse {
+            __buffa_unknown_fields: self
+                .__buffa_unknown_fields
+                .to_owned()
+                .unwrap_or_default()
+                .into(),
+            ..::core::default::Default::default()
+        }
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for GetCSRFTokenResponseView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u32;
+        size += self.__buffa_unknown_fields.encoded_len() as u32;
+        size
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::bytes::BufMut,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+/// Serializes this view as protobuf JSON.
+///
+/// Implicit-presence fields with default values are omitted, `required`
+/// fields are always emitted, explicit-presence (`optional`) fields are
+/// emitted only when set, bytes fields are base64-encoded, and enum
+/// values are their proto name strings.
+///
+/// This impl uses `serialize_map(None)` because the number of emitted
+/// fields depends on default-omission rules; serializers that require
+/// known map lengths (e.g. `bincode`) will return a runtime error.
+/// Use the owned message type for those formats.
+impl<'__a> ::serde::Serialize for GetCSRFTokenResponseView<'__a> {
+    fn serialize<__S: ::serde::Serializer>(
+        &self,
+        __s: __S,
+    ) -> ::core::result::Result<__S::Ok, __S::Error> {
+        use ::serde::ser::SerializeMap as _;
+        let mut __map = __s.serialize_map(::core::option::Option::None)?;
+        __map.end()
+    }
+}
+impl<'a> ::buffa::MessageName for GetCSRFTokenResponseView<'a> {
+    const PACKAGE: &'static str = "auth.v2";
+    const NAME: &'static str = "GetCSRFTokenResponse";
+    const FULL_NAME: &'static str = "auth.v2.GetCSRFTokenResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.GetCSRFTokenResponse";
+}
+impl<'v> ::buffa::DefaultViewInstance for GetCSRFTokenResponseView<'v> {
+    fn default_view_instance<'a>() -> &'a Self
+    where
+        Self: 'a,
+    {
+        static VALUE: ::buffa::__private::OnceBox<GetCSRFTokenResponseView<'static>> = ::buffa::__private::OnceBox::new();
+        VALUE
+            .get_or_init(|| ::buffa::alloc::boxed::Box::new(
+                <GetCSRFTokenResponseView<'static>>::default(),
+            ))
+    }
+}
+impl ::buffa::ViewReborrow for GetCSRFTokenResponseView<'static> {
+    type Reborrowed<'b> = GetCSRFTokenResponseView<'b>;
+    fn reborrow<'b>(this: &'b Self) -> &'b Self::Reborrowed<'b> {
+        this
+    }
+}
+/** Self-contained, `'static` owned view of a `GetCSRFTokenResponse` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`GetCSRFTokenResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`GetCSRFTokenResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct GetCSRFTokenResponseOwnedView(
+    ::buffa::OwnedView<GetCSRFTokenResponseView<'static>>,
+);
+impl GetCSRFTokenResponseOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetCSRFTokenResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetCSRFTokenResponseOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::GetCSRFTokenResponse,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetCSRFTokenResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`GetCSRFTokenResponseView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &GetCSRFTokenResponseView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::GetCSRFTokenResponse {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<GetCSRFTokenResponseView<'static>>>
+for GetCSRFTokenResponseOwnedView {
+    fn from(inner: ::buffa::OwnedView<GetCSRFTokenResponseView<'static>>) -> Self {
+        GetCSRFTokenResponseOwnedView(inner)
+    }
+}
+impl ::core::convert::From<GetCSRFTokenResponseOwnedView>
+for ::buffa::OwnedView<GetCSRFTokenResponseView<'static>> {
+    fn from(wrapper: GetCSRFTokenResponseOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<GetCSRFTokenResponseView<'static>>>
+for GetCSRFTokenResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<GetCSRFTokenResponseView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::GetCSRFTokenResponse {
+    type View<'a> = GetCSRFTokenResponseView<'a>;
+    type ViewHandle = GetCSRFTokenResponseOwnedView;
+}
+impl ::serde::Serialize for GetCSRFTokenResponseOwnedView {
+    fn serialize<__S: ::serde::Serializer>(
+        &self,
+        __s: __S,
+    ) -> ::core::result::Result<__S::Ok, __S::Error> {
+        ::serde::Serialize::serialize(&self.0, __s)
+    }
+}

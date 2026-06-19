@@ -2,6 +2,7 @@ mod app_config;
 mod auth_middleware;
 mod auth_service;
 mod connect_result;
+mod csrf_handler;
 mod jwt_signer;
 mod jwt_verifier;
 mod permissions_checking;
@@ -17,21 +18,25 @@ use std::sync::Arc;
 use tower::ServiceBuilder;
 use tower_http::timeout::TimeoutLayer;
 
-use crate::{jwt_signer::GLOBAL_JWT_SIGNER, jwt_verifier::GLOBAL_JWT_VERIFIER};
+use crate::{
+    csrf_handler::{CsrfProtection, GLOBAL_CSRF_PROTECTION},
+    jwt_signer::GLOBAL_JWT_SIGNER,
+    jwt_verifier::GLOBAL_JWT_VERIFIER,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    let cfg = AppConfiguration::INSTANCE();
+    // Force initialization of the JWT public key at startup, so we fail fast if the private key is invalid.
+    let _jwt_public = cfg.jwt_public_key();
+    let _csrf_prot = GLOBAL_CSRF_PROTECTION.generate_token();
+
     let service = Arc::new(AuthServiceImpl {
+        subdomain: format!("auth.{}", cfg.tld),
         signer: &GLOBAL_JWT_SIGNER,
         verifier: &GLOBAL_JWT_VERIFIER,
     });
     let connect = service.register(ConnectRouter::new());
-
-    let cfg = AppConfiguration::INSTANCE();
-    // Force initialization of the JWT public key at startup, so we fail fast if the private key is invalid.
-    let _jwt_public = cfg.jwt_public_key();
-
-    // println!("Encoded JWT: {}", encode_jwt()?);
 
     let app = axum::Router::new()
         .route("/health", get(|| async { "OK" }))
@@ -39,6 +44,7 @@ async fn main() -> Result<()> {
         .layer(
             ServiceBuilder::new()
                 .layer(axum::middleware::from_extractor::<RequireAuthMiddleware>())
+                .layer(axum::middleware::from_fn(CsrfProtection::middleware))
                 .layer(TimeoutLayer::with_status_code(
                     http::StatusCode::REQUEST_TIMEOUT,
                     std::time::Duration::from_secs(5),

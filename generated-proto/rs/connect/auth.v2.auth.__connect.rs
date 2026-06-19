@@ -38,6 +38,14 @@ pub type OwnedLoginRequestView = ::buffa::view::OwnedView<
 pub type OwnedLoginResponseView = ::buffa::view::OwnedView<
     crate::proto::auth::v2::__buffa::view::LoginResponseView<'static>,
 >;
+///Shorthand for `OwnedView<GetCsrfTokenRequestView<'static>>`.
+pub type OwnedGetCsrfTokenRequestView = ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::GetCSRFTokenRequestView<'static>,
+>;
+///Shorthand for `OwnedView<GetCsrfTokenResponseView<'static>>`.
+pub type OwnedGetCsrfTokenResponseView = ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::GetCSRFTokenResponseView<'static>,
+>;
 impl ::connectrpc::Encodable<crate::proto::auth::v2::GetJWTPublicKeyResponse>
 for crate::proto::auth::v2::__buffa::view::GetJWTPublicKeyResponseView<'_> {
     fn encode(
@@ -138,6 +146,26 @@ for ::buffa::view::OwnedView<
         ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
     }
 }
+impl ::connectrpc::Encodable<crate::proto::auth::v2::GetCSRFTokenResponse>
+for crate::proto::auth::v2::__buffa::view::GetCSRFTokenResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::auth::v2::GetCSRFTokenResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::GetCSRFTokenResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+}
 /// Full service name for this service.
 pub const AUTH_SERVICE_SERVICE_NAME: &str = "auth.v2.AuthService";
 /// Static [`Spec`](::connectrpc::Spec) for the server-side `GetJWTPublicKey` RPC.
@@ -182,6 +210,15 @@ pub const AUTH_SERVICE_GET_DEV_TOKEN_SPEC: ::connectrpc::Spec = ::connectrpc::Sp
 /// [`RequestContext::spec`](::connectrpc::RequestContext::spec).
 pub const AUTH_SERVICE_LOGIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/Login",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the server-side `GetCSRFToken` RPC.
+///
+/// The dispatcher surfaces this on
+/// [`RequestContext::spec`](::connectrpc::RequestContext::spec).
+pub const AUTH_SERVICE_GET_CSRF_TOKEN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/auth.v2.AuthService/GetCSRFToken",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
@@ -344,6 +381,29 @@ pub trait AuthService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::auth::v2::LoginResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// Handle the GetCSRFToken RPC.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_csrf_token<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::auth::v2::GetCSRFTokenRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::auth::v2::GetCSRFTokenResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -515,6 +575,35 @@ impl<S: AuthService> AuthServiceExt for S {
                 },
             )
             .with_spec(AUTH_SERVICE_LOGIN_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
+                "GetCSRFToken",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::auth::v2::__buffa::view::GetCSRFTokenRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::auth::v2::GetCSRFTokenRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_csrf_token(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::auth::v2::GetCSRFTokenResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_GET_CSRF_TOKEN_SPEC)
     }
 }
 /// Monomorphic dispatcher for `AuthService`.
@@ -588,6 +677,12 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(AUTH_SERVICE_LOGIN_SPEC),
+                )
+            }
+            "GetCSRFToken" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_GET_CSRF_TOKEN_SPEC),
                 )
             }
             _ => None,
@@ -700,6 +795,25 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                     svc.login(ctx, req)
                         .await?
                         .encode::<crate::proto::auth::v2::LoginResponse>(format)
+                })
+            }
+            "GetCSRFToken" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::auth::v2::GetCSRFTokenRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::auth::v2::__buffa::view::GetCSRFTokenRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::auth::v2::GetCSRFTokenRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_csrf_token(ctx, req)
+                        .await?
+                        .encode::<crate::proto::auth::v2::GetCSRFTokenResponse>(format)
                 })
             }
             _ => ::connectrpc::dispatcher::codegen::unimplemented_unary(path),
@@ -1030,6 +1144,47 @@ where
                 &self.config,
                 AUTH_SERVICE_SERVICE_NAME,
                 "Login",
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the GetCSRFToken RPC. Sends a request to /auth.v2.AuthService/GetCSRFToken.
+    pub async fn get_csrf_token(
+        &self,
+        request: crate::proto::auth::v2::GetCSRFTokenRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::auth::v2::__buffa::view::GetCSRFTokenResponseView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_csrf_token_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetCSRFToken RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_csrf_token_with_options(
+        &self,
+        request: crate::proto::auth::v2::GetCSRFTokenRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::auth::v2::__buffa::view::GetCSRFTokenResponseView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_SERVICE_NAME,
+                "GetCSRFToken",
                 request,
                 options,
             )

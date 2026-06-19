@@ -25,3 +25,6 @@ message JwtClaims {
     optional int64 temporary_recheck_after = 9;
     SmallData data = 10;
 }
+
+message GetCSRFTokenRequest {}
+message GetCSRFTokenResponse {}

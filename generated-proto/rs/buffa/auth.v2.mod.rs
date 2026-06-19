@@ -36,6 +36,8 @@ pub mod __buffa {
         reg.register_json_any(super::__PERMISSIONS_JSON_ANY);
         reg.register_json_any(super::__SMALL_DATA_JSON_ANY);
         reg.register_json_any(super::__JWT_CLAIMS_JSON_ANY);
+        reg.register_json_any(super::__GET_CSRF_TOKEN_REQUEST_JSON_ANY);
+        reg.register_json_any(super::__GET_CSRF_TOKEN_RESPONSE_JSON_ANY);
         reg.register_json_any(super::__DB_USER_JSON_ANY);
         reg.register_json_any(super::__GET_JWT_PUBLIC_KEY_REQUEST_JSON_ANY);
         reg.register_json_any(super::__GET_JWT_PUBLIC_KEY_RESPONSE_JSON_ANY);
@@ -67,6 +69,14 @@ pub use self::__buffa::view::SmallDataOwnedView;
 pub use self::__buffa::view::JwtClaimsView;
 #[doc(inline)]
 pub use self::__buffa::view::JwtClaimsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetCSRFTokenRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetCSRFTokenRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetCSRFTokenResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetCSRFTokenResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::DBUserView;
 #[doc(inline)]
