@@ -12,7 +12,7 @@ pub struct SmallDataView<'a> {
     /// Field 4: `last_name`
     pub last_name: &'a str,
     /// Field 5: `permissions`
-    pub permissions: i32,
+    pub permissions: i64,
     /// Field 6: `promotion`
     pub promotion: i32,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
@@ -103,7 +103,7 @@ impl<'a> SmallDataView<'a> {
                             actual: tag.wire_type() as u8,
                         });
                     }
-                    view.permissions = ::buffa::types::decode_int32(&mut cur)?;
+                    view.permissions = ::buffa::types::decode_int64(&mut cur)?;
                 }
                 6u32 => {
                     if tag.wire_type() != ::buffa::encoding::WireType::Varint {
@@ -181,8 +181,8 @@ impl<'a> ::buffa::ViewEncode<'a> for SmallDataView<'a> {
         if !self.last_name.is_empty() {
             size += 1u32 + ::buffa::types::string_encoded_len(&self.last_name) as u32;
         }
-        if self.permissions != 0i32 {
-            size += 1u32 + ::buffa::types::int32_encoded_len(self.permissions) as u32;
+        if self.permissions != 0i64 {
+            size += 1u32 + ::buffa::types::int64_encoded_len(self.permissions) as u32;
         }
         if self.promotion != 0i32 {
             size += 1u32 + ::buffa::types::int32_encoded_len(self.promotion) as u32;
@@ -227,10 +227,10 @@ impl<'a> ::buffa::ViewEncode<'a> for SmallDataView<'a> {
                 .encode(buf);
             ::buffa::types::encode_string(&self.last_name, buf);
         }
-        if self.permissions != 0i32 {
+        if self.permissions != 0i64 {
             ::buffa::encoding::Tag::new(5u32, ::buffa::encoding::WireType::Varint)
                 .encode(buf);
-            ::buffa::types::encode_int32(self.permissions, buf);
+            ::buffa::types::encode_int64(self.permissions, buf);
         }
         if self.promotion != 0i32 {
             ::buffa::encoding::Tag::new(6u32, ::buffa::encoding::WireType::Varint)
@@ -279,14 +279,14 @@ impl<'__a> ::serde::Serialize for SmallDataView<'__a> {
         if !::buffa::json_helpers::skip_if::is_empty_str(self.last_name) {
             __map.serialize_entry("lastName", self.last_name)?;
         }
-        if !::buffa::json_helpers::skip_if::is_zero_i32(&self.permissions) {
-            struct _W(i32);
+        if !::buffa::json_helpers::skip_if::is_zero_i64(&self.permissions) {
+            struct _W(i64);
             impl ::serde::Serialize for _W {
                 fn serialize<__S: ::serde::Serializer>(
                     &self,
                     __s: __S,
                 ) -> ::core::result::Result<__S::Ok, __S::Error> {
-                    ::buffa::json_helpers::int32::serialize(&self.0, __s)
+                    ::buffa::json_helpers::int64::serialize(&self.0, __s)
                 }
             }
             __map.serialize_entry("permissions", &_W(self.permissions))?;
@@ -424,7 +424,7 @@ impl SmallDataOwnedView {
     }
     /// Field 5: `permissions`
     #[must_use]
-    pub fn permissions(&self) -> i32 {
+    pub fn permissions(&self) -> i64 {
         self.0.reborrow().permissions
     }
     /// Field 6: `promotion`

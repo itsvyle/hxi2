@@ -3,6 +3,11 @@ use ed25519_dalek::pkcs8::EncodePublicKey;
 use once_cell::sync::Lazy;
 use utils::cfg_from_env_or;
 
+pub enum Environnement {
+    Development,
+    Production,
+}
+
 #[allow(unused)]
 pub struct AppConfiguration {
     #[doc = "Domain name and protocol of the **internet facing** auth domain (used for redirecting in case the user isn't logged in, to log in)"]
@@ -27,6 +32,8 @@ pub struct AppConfiguration {
     pub discord_client_id: String,
     #[doc = "Discord client secret"]
     pub discord_client_secret: String,
+    #[doc = "Environment (development or production)"]
+    pub environment: Environnement,
 }
 
 impl AppConfiguration {
@@ -46,6 +53,21 @@ impl AppConfiguration {
             discord_application_id: cfg_from_env_or("CONFIG_DISCORD_APPLICATION_ID", None)?,
             discord_client_id: cfg_from_env_or("CONFIG_DISCORD_CLIENT_ID", None)?,
             discord_client_secret: cfg_from_env_or("CONFIG_DISCORD_CLIENT_SECRET", None)?,
+            environment: match cfg_from_env_or(
+                "CONFIG_ENVIRONMENT",
+                Some("production".to_string()),
+            )?
+            .as_str()
+            {
+                "development" => Environnement::Development,
+                "production" => Environnement::Production,
+                other => {
+                    return Err(anyhow::anyhow!(
+                        "Invalid CONFIG_ENVIRONMENT value: {}. Must be 'development' or 'production'",
+                        other
+                    ));
+                }
+            },
         })
     }
 
@@ -76,8 +98,19 @@ impl AppConfiguration {
     #[allow(non_snake_case)]
     pub fn INSTANCE() -> &'static Self {
         static INSTANCE: Lazy<AppConfiguration> = Lazy::new(|| {
-            AppConfiguration::from_env().expect("Failed to load configuration from environment")
+            let e = AppConfiguration::from_env()
+                .expect("Failed to load configuration from environment");
+            if let Environnement::Development = e.environment {
+                println!(
+                    "=========================================\n WARNING: Running in development mode. This is not secure and should not be used in production.\n========================================="
+                );
+            }
+            e
         });
         &INSTANCE
+    }
+
+    pub fn is_development(&self) -> bool {
+        matches!(self.environment, Environnement::Development)
     }
 }

@@ -39,10 +39,10 @@ pub struct SmallData {
     /// Field 5: `permissions`
     #[serde(
         rename = "permissions",
-        with = "::buffa::json_helpers::int32",
-        skip_serializing_if = "::buffa::json_helpers::skip_if::is_zero_i32"
+        with = "::buffa::json_helpers::int64",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_zero_i64"
     )]
-    pub permissions: i32,
+    pub permissions: i64,
     /// Field 6: `promotion`
     #[serde(
         rename = "promotion",
@@ -108,8 +108,8 @@ impl ::buffa::Message for SmallData {
         if !self.last_name.is_empty() {
             size += 1u32 + ::buffa::types::string_encoded_len(&self.last_name) as u32;
         }
-        if self.permissions != 0i32 {
-            size += 1u32 + ::buffa::types::int32_encoded_len(self.permissions) as u32;
+        if self.permissions != 0i64 {
+            size += 1u32 + ::buffa::types::int64_encoded_len(self.permissions) as u32;
         }
         if self.promotion != 0i32 {
             size += 1u32 + ::buffa::types::int32_encoded_len(self.promotion) as u32;
@@ -153,10 +153,10 @@ impl ::buffa::Message for SmallData {
                 .encode(buf);
             ::buffa::types::encode_string(&self.last_name, buf);
         }
-        if self.permissions != 0i32 {
+        if self.permissions != 0i64 {
             ::buffa::encoding::Tag::new(5u32, ::buffa::encoding::WireType::Varint)
                 .encode(buf);
-            ::buffa::types::encode_int32(self.permissions, buf);
+            ::buffa::types::encode_int64(self.permissions, buf);
         }
         if self.promotion != 0i32 {
             ::buffa::encoding::Tag::new(6u32, ::buffa::encoding::WireType::Varint)
@@ -224,7 +224,7 @@ impl ::buffa::Message for SmallData {
                         actual: tag.wire_type() as u8,
                     });
                 }
-                self.permissions = ::buffa::types::decode_int32(buf)?;
+                self.permissions = ::buffa::types::decode_int64(buf)?;
             }
             6u32 => {
                 if tag.wire_type() != ::buffa::encoding::WireType::Varint {
@@ -248,7 +248,7 @@ impl ::buffa::Message for SmallData {
         self.username.clear();
         self.first_name.clear();
         self.last_name.clear();
-        self.permissions = 0i32;
+        self.permissions = 0i64;
         self.promotion = 0i32;
         self.__buffa_unknown_fields.clear();
     }

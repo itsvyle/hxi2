@@ -119,7 +119,7 @@ fn main() -> Result<()> {
                     compiled_permissions_bitfield: Some(
                         v.allow_roles
                             .iter()
-                            .fold(0, |acc, r| acc | i64::from(r.to_i32())),
+                            .fold(0, |acc, r| acc | (i64::from(r.to_i32()) << 1)),
                     ),
                     ..v.clone()
                 },

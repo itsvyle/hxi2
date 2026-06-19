@@ -1,6 +1,6 @@
 use anyhow::{Context as _, Result};
 use hxi2_proto::proto::auth::v2::JwtClaims;
-use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation, decode, encode};
+use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode};
 
 pub struct JWTVerifier {
     public_key: DecodingKey,
@@ -14,15 +14,18 @@ impl JWTVerifier {
         let key = cfg.jwt_public_key();
 
         let public_key = DecodingKey::from_ed_pem(key.as_bytes()).context("decoding public key")?;
+
+        let mut v = Validation::new(Algorithm::EdDSA);
+        v.set_audience(&[format!("https://{}", cfg.tld)]);
+
         Ok(JWTVerifier {
             public_key,
-            validation_settings: Validation::new(Algorithm::EdDSA),
+            validation_settings: v,
         })
     }
 
     pub fn verify_token(&self, token: &str) -> Result<JwtClaims> {
-        let token_data = decode::<JwtClaims>(token, &self.public_key, &self.validation_settings)
-            .context("verifying token")?;
+        let token_data = decode::<JwtClaims>(token, &self.public_key, &self.validation_settings)?;
         Ok(token_data.claims)
     }
 }
