@@ -61,7 +61,7 @@ async fn main() -> Result<()> {
         .fallback_service(connect.into_axum_service())
         .layer(
             ServiceBuilder::new()
-                // .layer(axum::middleware::from_extractor::<RequireAuthMiddleware>())
+                .layer(axum::middleware::from_extractor::<RequireAuthMiddleware>())
                 .layer(axum::middleware::from_fn(CsrfProtection::middleware))
                 .layer(TimeoutLayer::with_status_code(
                     http::StatusCode::REQUEST_TIMEOUT,
