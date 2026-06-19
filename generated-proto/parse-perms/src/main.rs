@@ -17,12 +17,13 @@ pub struct MethodPermissions {
     #[serde(serialize_with = "serialize_roles_as_ints")]
     pub allow_roles: Vec<Permission>,
     pub is_public: bool,
-    pub public_url: Option<String>,
+    pub public_url: Option<Vec<String>>,
     pub compiled_permissions_bitfield: Option<i64>,
     pub csrf_token_header: Option<String>,
     pub csrf_token_cookie: Option<String>,
     pub response_cors_headers: Option<BTreeMap<String, String>>,
     pub enforce_csrf: bool,
+    pub is_frontend: bool,
 }
 
 fn serialize_roles_as_ints<S>(roles: &[Permission], serializer: S) -> Result<S::Ok, S::Error>
@@ -47,8 +48,8 @@ fn method_permissions_from_permissions(perms_msg: Permissions, base: &mut Method
             .map(|r| r.as_known().unwrap_or(Permission::PermissionUnspecified))
             .filter(|&r| r != Permission::PermissionUnspecified),
     );
-    if let Some(url) = perms_msg.public_url {
-        base.public_url = Some(url);
+    if !perms_msg.public_url.is_empty() {
+        base.public_url = Some(perms_msg.public_url);
     }
     if let Some(header) = perms_msg.csrf_token_header {
         if header.is_empty() {
@@ -72,6 +73,9 @@ fn method_permissions_from_permissions(perms_msg: Permissions, base: &mut Method
         base.response_cors_headers = Some(headers_map);
     }
     base.enforce_csrf = perms_msg.enforce_csrf;
+    if let Some(is_frontend) = perms_msg.is_frontend {
+        base.is_frontend = is_frontend;
+    }
 }
 
 fn get_proto_folder_hash() -> Result<String> {
@@ -106,6 +110,7 @@ fn get_permissions(descriptor_bytes: &[u8]) -> Result<BTreeMap<String, MethodPer
             csrf_token_cookie: None,
             response_cors_headers: None,
             enforce_csrf: false,
+            is_frontend: false,
         };
         if let Some(options) = service.options()
             && let Some(perms_msg) = options.extension(&PERMISSION_LEVEL_SERVICE)

@@ -14,11 +14,12 @@ extend google.protobuf.ServiceOptions {
 message Permissions {
     repeated Permission allow_role = 1;
     optional bool is_public = 2;
-    optional string public_url = 3;
+    repeated string public_url = 3;
     optional string csrf_token_header = 4;
     optional string csrf_token_cookie = 5;
     map<string, string> response_cors_headers = 6;
     bool enforce_csrf = 7;
+    optional bool is_frontend = 8;
 }
 
 enum Permission {

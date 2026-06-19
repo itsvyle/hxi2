@@ -1,6 +1,22 @@
 {
 	"hash": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262",
   "permissions": {
+    "/auth.v2.AuthService/FrontendIndex": {
+      "allow_roles": [
+        1
+      ],
+      "is_public": true,
+      "public_url": [
+        "/",
+        "/index.html"
+      ],
+      "compiled_permissions_bitfield": 2,
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": false,
+      "is_frontend": true
+    },
     "/auth.v2.AuthService/GetCSRFToken": {
       "allow_roles": [
         1
@@ -11,7 +27,8 @@
       "csrf_token_header": "X-CSRF-Token",
       "csrf_token_cookie": "csrf_token",
       "response_cors_headers": null,
-      "enforce_csrf": false
+      "enforce_csrf": false,
+      "is_frontend": false
     },
     "/auth.v2.AuthService/GetDevToken": {
       "allow_roles": [
@@ -23,7 +40,8 @@
       "csrf_token_header": "X-CSRF-Token",
       "csrf_token_cookie": "csrf_token",
       "response_cors_headers": null,
-      "enforce_csrf": false
+      "enforce_csrf": false,
+      "is_frontend": false
     },
     "/auth.v2.AuthService/GetJWTPublicKey": {
       "allow_roles": [
@@ -36,7 +54,8 @@
       "csrf_token_header": "X-CSRF-Token",
       "csrf_token_cookie": "csrf_token",
       "response_cors_headers": null,
-      "enforce_csrf": false
+      "enforce_csrf": false,
+      "is_frontend": false
     },
     "/auth.v2.AuthService/ListUsers": {
       "allow_roles": [
@@ -49,7 +68,8 @@
       "csrf_token_header": "X-CSRF-Token",
       "csrf_token_cookie": "csrf_token",
       "response_cors_headers": null,
-      "enforce_csrf": false
+      "enforce_csrf": false,
+      "is_frontend": false
     },
     "/auth.v2.AuthService/Login": {
       "allow_roles": [
@@ -61,7 +81,8 @@
       "csrf_token_header": "X-CSRF-Token",
       "csrf_token_cookie": "csrf_token",
       "response_cors_headers": null,
-      "enforce_csrf": true
+      "enforce_csrf": true,
+      "is_frontend": false
     },
     "/auth.v2.AuthService/RenewJWT": {
       "allow_roles": [
@@ -74,7 +95,8 @@
       "csrf_token_header": "X-CSRF-Token",
       "csrf_token_cookie": "csrf_token",
       "response_cors_headers": null,
-      "enforce_csrf": false
+      "enforce_csrf": false,
+      "is_frontend": false
     }
   }
 }

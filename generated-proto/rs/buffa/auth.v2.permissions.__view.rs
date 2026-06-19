@@ -11,7 +11,7 @@ pub struct PermissionsView<'a> {
     /// Field 2: `is_public`
     pub is_public: ::core::option::Option<bool>,
     /// Field 3: `public_url`
-    pub public_url: ::core::option::Option<&'a str>,
+    pub public_url: ::buffa::RepeatedView<'a, &'a str>,
     /// Field 4: `csrf_token_header`
     pub csrf_token_header: ::core::option::Option<&'a str>,
     /// Field 5: `csrf_token_cookie`
@@ -20,6 +20,8 @@ pub struct PermissionsView<'a> {
     pub response_cors_headers: ::buffa::MapView<'a, &'a str, &'a str>,
     /// Field 7: `enforce_csrf`
     pub enforce_csrf: bool,
+    /// Field 8: `is_frontend`
+    pub is_frontend: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> PermissionsView<'a> {
@@ -70,16 +72,6 @@ impl<'a> PermissionsView<'a> {
                     }
                     view.is_public = Some(::buffa::types::decode_bool(&mut cur)?);
                 }
-                3u32 => {
-                    if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
-                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                            field_number: 3u32,
-                            expected: 2u8,
-                            actual: tag.wire_type() as u8,
-                        });
-                    }
-                    view.public_url = Some(::buffa::types::borrow_str(&mut cur)?);
-                }
                 4u32 => {
                     if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
                         return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
@@ -110,6 +102,16 @@ impl<'a> PermissionsView<'a> {
                     }
                     view.enforce_csrf = ::buffa::types::decode_bool(&mut cur)?;
                 }
+                8u32 => {
+                    if tag.wire_type() != ::buffa::encoding::WireType::Varint {
+                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                            field_number: 8u32,
+                            expected: 0u8,
+                            actual: tag.wire_type() as u8,
+                        });
+                    }
+                    view.is_frontend = Some(::buffa::types::decode_bool(&mut cur)?);
+                }
                 1u32 => {
                     if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
                         let payload = ::buffa::types::borrow_bytes(&mut cur)?;
@@ -137,6 +139,16 @@ impl<'a> PermissionsView<'a> {
                             actual: tag.wire_type() as u8,
                         });
                     }
+                }
+                3u32 => {
+                    if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
+                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                            field_number: 3u32,
+                            expected: 2u8,
+                            actual: tag.wire_type() as u8,
+                        });
+                    }
+                    view.public_url.push(::buffa::types::borrow_str(&mut cur)?);
                 }
                 6u32 => {
                     if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
@@ -223,7 +235,7 @@ impl<'a> ::buffa::MessageView<'a> for PermissionsView<'a> {
         super::super::Permissions {
             allow_role: self.allow_role.to_vec(),
             is_public: self.is_public,
-            public_url: self.public_url.map(|s| s.to_string()),
+            public_url: self.public_url.iter().map(|s| s.to_string()).collect(),
             csrf_token_header: self.csrf_token_header.map(|s| s.to_string()),
             csrf_token_cookie: self.csrf_token_cookie.map(|s| s.to_string()),
             response_cors_headers: self
@@ -232,6 +244,7 @@ impl<'a> ::buffa::MessageView<'a> for PermissionsView<'a> {
                 .map(|(k, v)| (k.to_string(), v.to_string()))
                 .collect(),
             enforce_csrf: self.enforce_csrf,
+            is_frontend: self.is_frontend,
             __buffa_unknown_fields: self
                 .__buffa_unknown_fields
                 .to_owned()
@@ -259,7 +272,7 @@ impl<'a> ::buffa::ViewEncode<'a> for PermissionsView<'a> {
         if self.is_public.is_some() {
             size += 1u32 + ::buffa::types::BOOL_ENCODED_LEN as u32;
         }
-        if let Some(ref v) = self.public_url {
+        for v in &self.public_url {
             size += 1u32 + ::buffa::types::string_encoded_len(v) as u32;
         }
         if let Some(ref v) = self.csrf_token_header {
@@ -277,6 +290,9 @@ impl<'a> ::buffa::ViewEncode<'a> for PermissionsView<'a> {
                     + entry_size;
         }
         if self.enforce_csrf {
+            size += 1u32 + ::buffa::types::BOOL_ENCODED_LEN as u32;
+        }
+        if self.is_frontend.is_some() {
             size += 1u32 + ::buffa::types::BOOL_ENCODED_LEN as u32;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u32;
@@ -311,7 +327,7 @@ impl<'a> ::buffa::ViewEncode<'a> for PermissionsView<'a> {
                 .encode(buf);
             ::buffa::types::encode_bool(v, buf);
         }
-        if let Some(ref v) = self.public_url {
+        for v in &self.public_url {
             ::buffa::encoding::Tag::new(
                     3u32,
                     ::buffa::encoding::WireType::LengthDelimited,
@@ -362,6 +378,11 @@ impl<'a> ::buffa::ViewEncode<'a> for PermissionsView<'a> {
                 .encode(buf);
             ::buffa::types::encode_bool(self.enforce_csrf, buf);
         }
+        if let Some(v) = self.is_frontend {
+            ::buffa::encoding::Tag::new(8u32, ::buffa::encoding::WireType::Varint)
+                .encode(buf);
+            ::buffa::types::encode_bool(v, buf);
+        }
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
@@ -398,8 +419,8 @@ impl<'__a> ::serde::Serialize for PermissionsView<'__a> {
         if let ::core::option::Option::Some(__v) = self.is_public {
             __map.serialize_entry("isPublic", &__v)?;
         }
-        if let ::core::option::Option::Some(__v) = self.public_url {
-            __map.serialize_entry("publicUrl", __v)?;
+        if !self.public_url.is_empty() {
+            __map.serialize_entry("publicUrl", &*self.public_url)?;
         }
         if let ::core::option::Option::Some(__v) = self.csrf_token_header {
             __map.serialize_entry("csrfTokenHeader", __v)?;
@@ -431,6 +452,9 @@ impl<'__a> ::serde::Serialize for PermissionsView<'__a> {
         }
         if self.enforce_csrf {
             __map.serialize_entry("enforceCsrf", &self.enforce_csrf)?;
+        }
+        if let ::core::option::Option::Some(__v) = self.is_frontend {
+            __map.serialize_entry("isFrontend", &__v)?;
         }
         __map.end()
     }
@@ -545,8 +569,8 @@ impl PermissionsOwnedView {
     }
     /// Field 3: `public_url`
     #[must_use]
-    pub fn public_url(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().public_url
+    pub fn public_url(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().public_url
     }
     /// Field 4: `csrf_token_header`
     #[must_use]
@@ -567,6 +591,11 @@ impl PermissionsOwnedView {
     #[must_use]
     pub fn enforce_csrf(&self) -> bool {
         self.0.reborrow().enforce_csrf
+    }
+    /// Field 8: `is_frontend`
+    #[must_use]
+    pub fn is_frontend(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().is_frontend
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<PermissionsView<'static>>>

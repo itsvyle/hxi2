@@ -27,7 +27,7 @@ pub fn find_permissions_path() -> Result<String> {
 pub struct MethodPermissions {
     allow_roles: Vec<i32>,
     is_public: bool,
-    public_url: Option<String>,
+    public_url: Option<Vec<String>>,
     compiled_permissions_bitfield: i64,
     csrf_token_header: Option<String>,
     csrf_token_cookie: Option<String>,
@@ -48,19 +48,27 @@ fn write_public_to_route(perms: &PermissionsOutput) -> Option<String> {
     let mut if_statements = String::new();
 
     for (route, perms) in &perms.permissions {
-        let match_url = perms.public_url.as_ref().unwrap_or(route);
+        let mut match_url = perms.public_url.clone().unwrap_or_default();
+        match_url.push(route.clone());
 
         if_statements.push_str(&format!(
-            "\tif url == \"{}\" {{ return Some(\"{}\") }}\n",
-            match_url, route
+            r#"{} => return Some("{}"),
+            "#,
+            match_url
+                .iter()
+                .map(|url| format!("\"{}\"", url))
+                .collect::<Vec<_>>()
+                .join(" | "),
+            route
         ));
     }
 
     Some(format!(
         indoc! {r#"
             pub fn get_route_from_public_url(url: &str) -> Option<&'static str> {{
-            {}
-                None
+                match url {{
+                    {}_ => None,
+                }}
             }}
         "#},
         if_statements
@@ -82,7 +90,13 @@ fn write_embedded_structs(perms: &PermissionsOutput) -> Option<String> {
         }
 
         let public_url_val = match &perm_data.public_url {
-            Some(url) => format!("Some(\"{}\")", url),
+            Some(url) => format!(
+                "Some(&[{}])",
+                url.iter()
+                    .map(|s| format!("\"{}\"", s))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
             None => "None".to_string(),
         };
 
@@ -145,7 +159,7 @@ fn write_embedded_structs(perms: &PermissionsOutput) -> Option<String> {
             pub struct MethodPermissions {{
                 pub allow_roles: &'static [Permission],
                 pub is_public: bool,
-                pub public_url: Option<&'static str>,
+                pub public_url: Option<&'static [&'static str]>,
                 pub compiled_permissions_bitfield: i64,
                 pub csrf_token_header: Option<&'static str>,
                 pub csrf_token_cookie: Option<&'static str>,
