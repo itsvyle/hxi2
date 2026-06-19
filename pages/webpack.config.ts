@@ -56,7 +56,6 @@ export default (env, argv) => {
     }
 
     config.plugins.push(
-        //@ts-expect-error
         new CopyPlugin({
             patterns: patterns,
         }),
