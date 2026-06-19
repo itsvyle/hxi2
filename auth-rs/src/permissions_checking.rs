@@ -4,13 +4,13 @@
 pub fn get_route_from_public_url(url: &str) -> Option<&'static str> {
     match url {
         "/" | "/index.html" | "/auth.v2.AuthService/FrontendIndex" => return Some("/auth.v2.AuthService/FrontendIndex"),
-            "/auth.v2.AuthService/GetCSRFToken" => return Some("/auth.v2.AuthService/GetCSRFToken"),
-            "/auth.v2.AuthService/GetDevToken" => return Some("/auth.v2.AuthService/GetDevToken"),
-            "/auth.v2.AuthService/GetJWTPublicKey" => return Some("/auth.v2.AuthService/GetJWTPublicKey"),
-            "/auth.v2.AuthService/ListUsers" => return Some("/auth.v2.AuthService/ListUsers"),
-            "/auth.v2.AuthService/Login" => return Some("/auth.v2.AuthService/Login"),
-            "/auth.v2.AuthService/RenewJWT" => return Some("/auth.v2.AuthService/RenewJWT"),
-            _ => None,
+"/auth.v2.AuthService/GetCSRFToken" => return Some("/auth.v2.AuthService/GetCSRFToken"),
+"/auth.v2.AuthService/GetDevToken" => return Some("/auth.v2.AuthService/GetDevToken"),
+"/auth.v2.AuthService/GetJWTPublicKey" => return Some("/auth.v2.AuthService/GetJWTPublicKey"),
+"/auth.v2.AuthService/ListUsers" => return Some("/auth.v2.AuthService/ListUsers"),
+"/auth.v2.AuthService/Login" => return Some("/auth.v2.AuthService/Login"),
+"/auth.v2.AuthService/RenewJWT" => return Some("/auth.v2.AuthService/RenewJWT"),
+_ => None,
     }
 }
 

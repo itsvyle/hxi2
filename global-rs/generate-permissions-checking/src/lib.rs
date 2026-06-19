@@ -52,22 +52,24 @@ fn write_public_to_route(perms: &PermissionsOutput) -> Option<String> {
         match_url.push(route.clone());
 
         if_statements.push_str(&format!(
-            r#"{} => return Some("{}"),
-            "#,
+            r#"{} => return Some("{}"),{}"#,
             match_url
                 .iter()
                 .map(|url| format!("\"{}\"", url))
                 .collect::<Vec<_>>()
                 .join(" | "),
-            route
+            route,
+            "\n"
         ));
     }
+
+    if_statements.push_str("_ => None,");
 
     Some(format!(
         indoc! {r#"
             pub fn get_route_from_public_url(url: &str) -> Option<&'static str> {{
                 match url {{
-                    {}_ => None,
+                    {}
                 }}
             }}
         "#},
