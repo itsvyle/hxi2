@@ -140,13 +140,14 @@ impl AuthService for AuthServiceImpl {
         let new_token = csrf_manager.generate_token();
 
         let mut set_cookie = format!(
-            "{}={}; HttpOnly; SameSite=Strict; Path=/; Domain={}; Max-Age=86400;",
+            "{}={}; SameSite=Strict; Path=/; Max-Age=86400;",
             perms.csrf_token_cookie.unwrap(),
             new_token,
-            self.subdomain
         );
         if !app_config::AppConfiguration::INSTANCE().is_development() {
             set_cookie.push_str(" Secure");
+            set_cookie.push_str(" ;Domain=");
+            set_cookie.push_str(&self.subdomain);
         }
 
         let mut res = Response::from(GetCSRFTokenResponse {

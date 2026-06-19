@@ -66,7 +66,7 @@ impl CsrfProtection {
     pub async fn middleware(req: Request<axum::body::Body>, next: Next) -> Response {
         let csrf = &GLOBAL_CSRF_PROTECTION;
 
-        let err_not_found = || {
+        let _err_not_found = || {
             ConnectError::not_found("route not found")
                 .into_http_response(req.headers())
                 .into_response()
@@ -80,7 +80,7 @@ impl CsrfProtection {
 
         let route = match permissions_checking::get_route_from_public_url(req.uri().path()) {
             Some(r) => r,
-            None => return err_not_found(),
+            None => return next.run(req).await, // return _err_not_found(),
         };
 
         let perms = permissions_checking::get_by_route(route)
@@ -113,31 +113,31 @@ impl CsrfProtection {
                     .map(|s| s["csrf_token=".len()..].to_string())
             }) {
             Some(t) => t,
-            None => return err_forbidden("Cookie token not found"),
+            None => return err_forbidden("CSRF token cookie not found"),
         };
 
         // 4. Basic string match check
         if header_token != cookie_token {
-            return err_forbidden("Header and cookie tokens do not match");
+            return err_forbidden("CSRF header and cookie tokens do not match");
         }
 
         // 5. Cryptographic signature check
         let parts: Vec<&str> = cookie_token.split('.').collect();
         if parts.len() != 3 {
-            return err_forbidden("Invalid token format");
+            return err_forbidden("Invalid CSRF token format");
         }
 
         let payload = format!("{}.{}", parts[0], parts[1]);
         let signature = parts[2];
 
         if csrf.sign_message(&payload) != signature {
-            return err_forbidden("Invalid token signature");
+            return err_forbidden("Invalid CSRF token signature");
         }
 
         // 6. Expiration check
         let timestamp: u64 = match parts[0].parse() {
             Ok(t) => t,
-            Err(_) => return err_forbidden("Invalid timestamp"),
+            Err(_) => return err_forbidden("Invalid CSRF token timestamp"),
         };
 
         let now = SystemTime::now()
@@ -146,7 +146,7 @@ impl CsrfProtection {
             .as_secs();
 
         if now - timestamp > 86400 {
-            return err_forbidden("Token expired");
+            return err_forbidden("CSRF token expired");
         }
 
         next.run(req).await

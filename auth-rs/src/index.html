@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>CSRF Test Page</title>
+        <style>
+            body {
+                font-family: sans-serif;
+                max-width: 600px;
+                margin: 40px auto;
+                padding: 20px;
+            }
+            button {
+                padding: 10px 15px;
+                margin: 5px 0;
+                cursor: pointer;
+            }
+            .box {
+                border: 1px solid #ccc;
+                padding: 15px;
+                margin: 15px 0;
+                border-radius: 5px;
+            }
+            pre {
+                background: #f4f4f4;
+                padding: 10px;
+                border-radius: 4px;
+                overflow-x: auto;
+            }
+            .success {
+                color: green;
+                font-weight: bold;
+            }
+            .error {
+                color: red;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>CSRF Stateless Flow Test</h2>
+
+        <div class="box">
+            <h3>Step 1: Get Token</h3>
+            <button id="getTokenBtn">POST /api/get_csrf</button>
+        </div>
+
+        <div class="box">
+            <h3>Step 2: Login (Protected Action)</h3>
+            <label for="username">Username:</label>
+            <input type="text" id="username" value="testuser" /><br /><br />
+            <button id="loginBtn">POST /api/login</button>
+        </div>
+
+        <div class="box">
+            <h3>Console Output</h3>
+            <pre id="output">Click a button to start the flow...</pre>
+        </div>
+
+        <script>
+            // --- CONSTANTS ---
+            const COOKIE_NAME = "csrf_token";
+            const HEADER_NAME = "X-CSRF-Token";
+            const ENDPOINT_GET_CSRF = "/auth.v2.AuthService/GetCSRFToken";
+            const ENDPOINT_LOGIN = "/auth.v2.AuthService/Login";
+
+            // Helper function to extract a cookie value by name
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(";").shift();
+                return null;
+            }
+
+            const outputEl = document.getElementById("output");
+            function log(message, isError = false) {
+                outputEl.className = isError ? "error" : "success";
+                outputEl.innerText = `[${new Date().toLocaleTimeString()}] ${message}`;
+            }
+
+            // 1. Call endpoint to fetch token (Sets cookie)
+            document
+                .getElementById("getTokenBtn")
+                .addEventListener("click", async () => {
+                    try {
+                        log(`Sending POST request to ${ENDPOINT_GET_CSRF}...`);
+                        const response = await fetch(ENDPOINT_GET_CSRF, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: "{}",
+                        });
+
+                        if (response.ok) {
+                            const activeCookie = getCookie(COOKIE_NAME);
+                            log(
+                                `Token fetched successfully!\nCookie recorded: ${activeCookie}`,
+                            );
+                        } else {
+                            log(
+                                `Failed to fetch token. Status: ${response.status}`,
+                                true,
+                            );
+                        }
+                    } catch (err) {
+                        log(`Error: ${err.message}`, true);
+                    }
+                });
+
+            // 2. Try to login using the cookie value in the header
+            document
+                .getElementById("loginBtn")
+                .addEventListener("click", async () => {
+                    const token = getCookie(COOKIE_NAME);
+                    const username = document.getElementById("username").value;
+
+                    // if (!token) {
+                    //     log(
+                    //         `Aborting: No cookie found under "${COOKIE_NAME}". Run Step 1 first!`,
+                    //         true,
+                    //     );
+                    //     return;
+                    // }
+
+                    console.log(`Token from cookie: ${token}`);
+
+                    try {
+                        log(
+                            `Sending payload to ${ENDPOINT_LOGIN} with header ${HEADER_NAME}...`,
+                        );
+
+                        const response = await fetch(ENDPOINT_LOGIN, {
+                            method: "POST",
+                            headers: {
+                                [HEADER_NAME]: token,
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ username: username }),
+                        });
+
+                        const text = await response.text();
+                        if (response.ok) {
+                            log(`Login Success! Response: ${text}`);
+                        } else {
+                            log(
+                                `Login Blocked! Status: ${response.status}\nMessage: ${text}`,
+                                true,
+                            );
+                        }
+                    } catch (err) {
+                        log(`Error: ${err.message}`, true);
+                    }
+                });
+        </script>
+    </body>
+</html>

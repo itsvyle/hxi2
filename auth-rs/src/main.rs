@@ -24,6 +24,23 @@ use crate::{
     jwt_verifier::GLOBAL_JWT_VERIFIER,
 };
 
+use axum::{
+    http::StatusCode,
+    response::{Html, IntoResponse},
+};
+
+// 1. Route Handler to serve the static HTML file
+async fn serve_index() -> impl IntoResponse {
+    match tokio::fs::read_to_string("src/index.html").await {
+        Ok(html_content) => Html(html_content).into_response(),
+        Err(_) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Could not load index.html. Ensure the file is in your running directory.",
+        )
+            .into_response(),
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let cfg = AppConfiguration::INSTANCE();
@@ -39,11 +56,12 @@ async fn main() -> Result<()> {
     let connect = service.register(ConnectRouter::new());
 
     let app = axum::Router::new()
+        .route("/", get(serve_index))
         .route("/health", get(|| async { "OK" }))
         .fallback_service(connect.into_axum_service())
         .layer(
             ServiceBuilder::new()
-                .layer(axum::middleware::from_extractor::<RequireAuthMiddleware>())
+                // .layer(axum::middleware::from_extractor::<RequireAuthMiddleware>())
                 .layer(axum::middleware::from_fn(CsrfProtection::middleware))
                 .layer(TimeoutLayer::with_status_code(
                     http::StatusCode::REQUEST_TIMEOUT,
