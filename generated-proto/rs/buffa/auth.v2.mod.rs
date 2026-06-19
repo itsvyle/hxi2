@@ -45,6 +45,8 @@ pub mod __buffa {
         reg.register_json_any(super::__LIST_USERS_RESPONSE_JSON_ANY);
         reg.register_json_any(super::__GET_DEV_TOKEN_REQUEST_JSON_ANY);
         reg.register_json_any(super::__GET_DEV_TOKEN_RESPONSE_JSON_ANY);
+        reg.register_json_any(super::__LOGIN_REQUEST_JSON_ANY);
+        reg.register_json_any(super::__LOGIN_RESPONSE_JSON_ANY);
         reg.register_json_ext(super::__buffa::ext::__PERMISSION_LEVEL_JSON_EXT);
         reg.register_json_ext(super::__buffa::ext::__PERMISSION_LEVEL_SERVICE_JSON_EXT);
     }
@@ -101,5 +103,13 @@ pub use self::__buffa::view::GetDevTokenRequestOwnedView;
 pub use self::__buffa::view::GetDevTokenResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::GetDevTokenResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::LoginRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::LoginRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::LoginResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::LoginResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::register_types;

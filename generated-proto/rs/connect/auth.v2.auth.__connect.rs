@@ -30,6 +30,14 @@ pub type OwnedGetDevTokenRequestView = ::buffa::view::OwnedView<
 pub type OwnedGetDevTokenResponseView = ::buffa::view::OwnedView<
     crate::proto::auth::v2::__buffa::view::GetDevTokenResponseView<'static>,
 >;
+///Shorthand for `OwnedView<LoginRequestView<'static>>`.
+pub type OwnedLoginRequestView = ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::LoginRequestView<'static>,
+>;
+///Shorthand for `OwnedView<LoginResponseView<'static>>`.
+pub type OwnedLoginResponseView = ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::LoginResponseView<'static>,
+>;
 impl ::connectrpc::Encodable<crate::proto::auth::v2::GetJWTPublicKeyResponse>
 for crate::proto::auth::v2::__buffa::view::GetJWTPublicKeyResponseView<'_> {
     fn encode(
@@ -110,6 +118,26 @@ for ::buffa::view::OwnedView<
         ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
     }
 }
+impl ::connectrpc::Encodable<crate::proto::auth::v2::LoginResponse>
+for crate::proto::auth::v2::__buffa::view::LoginResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::auth::v2::LoginResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::LoginResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+}
 /// Full service name for this service.
 pub const AUTH_SERVICE_SERVICE_NAME: &str = "auth.v2.AuthService";
 /// Static [`Spec`](::connectrpc::Spec) for the server-side `GetJWTPublicKey` RPC.
@@ -145,6 +173,15 @@ pub const AUTH_SERVICE_LIST_USERS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec:
 /// [`RequestContext::spec`](::connectrpc::RequestContext::spec).
 pub const AUTH_SERVICE_GET_DEV_TOKEN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/GetDevToken",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the server-side `Login` RPC.
+///
+/// The dispatcher surfaces this on
+/// [`RequestContext::spec`](::connectrpc::RequestContext::spec).
+pub const AUTH_SERVICE_LOGIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/auth.v2.AuthService/Login",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
@@ -290,6 +327,26 @@ pub trait AuthService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
+    /// Handle the Login RPC.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn login<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<'_, crate::proto::auth::v2::LoginRequest>,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::auth::v2::LoginResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
 }
 /// Extension trait for registering a service implementation with a Router.
 ///
@@ -431,6 +488,33 @@ impl<S: AuthService> AuthServiceExt for S {
                 },
             )
             .with_spec(AUTH_SERVICE_GET_DEV_TOKEN_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
+                "Login",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::auth::v2::__buffa::view::LoginRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::auth::v2::LoginRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.login(ctx, sreq)
+                                .await?
+                                .encode::<crate::proto::auth::v2::LoginResponse>(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_LOGIN_SPEC)
     }
 }
 /// Monomorphic dispatcher for `AuthService`.
@@ -498,6 +582,12 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(AUTH_SERVICE_GET_DEV_TOKEN_SPEC),
+                )
+            }
+            "Login" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_LOGIN_SPEC),
                 )
             }
             _ => None,
@@ -591,6 +681,25 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                     svc.get_dev_token(ctx, req)
                         .await?
                         .encode::<crate::proto::auth::v2::GetDevTokenResponse>(format)
+                })
+            }
+            "Login" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::auth::v2::LoginRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::auth::v2::__buffa::view::LoginRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::auth::v2::LoginRequest,
+                    >::from_parts(&req, &body);
+                    svc.login(ctx, req)
+                        .await?
+                        .encode::<crate::proto::auth::v2::LoginResponse>(format)
                 })
             }
             _ => ::connectrpc::dispatcher::codegen::unimplemented_unary(path),
@@ -883,6 +992,44 @@ where
                 &self.config,
                 AUTH_SERVICE_SERVICE_NAME,
                 "GetDevToken",
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the Login RPC. Sends a request to /auth.v2.AuthService/Login.
+    pub async fn login(
+        &self,
+        request: crate::proto::auth::v2::LoginRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::auth::v2::__buffa::view::LoginResponseView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.login_with_options(request, ::connectrpc::client::CallOptions::default())
+            .await
+    }
+    /// Call the Login RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn login_with_options(
+        &self,
+        request: crate::proto::auth::v2::LoginRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::auth::v2::__buffa::view::LoginResponseView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_SERVICE_NAME,
+                "Login",
                 request,
                 options,
             )

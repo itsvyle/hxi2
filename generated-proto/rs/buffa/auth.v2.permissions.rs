@@ -208,6 +208,31 @@ pub struct Permissions {
         skip_serializing_if = "::core::option::Option::is_none"
     )]
     pub public_url: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 4: `csrf_token_header`
+    #[serde(
+        rename = "csrfTokenHeader",
+        alias = "csrf_token_header",
+        skip_serializing_if = "::core::option::Option::is_none"
+    )]
+    pub csrf_token_header: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 5: `csrf_token_cookie`
+    #[serde(
+        rename = "csrfTokenCookie",
+        alias = "csrf_token_cookie",
+        skip_serializing_if = "::core::option::Option::is_none"
+    )]
+    pub csrf_token_cookie: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 6: `response_cors_headers`
+    #[serde(
+        rename = "responseCorsHeaders",
+        alias = "response_cors_headers",
+        skip_serializing_if = "::buffa::__private::HashMap::is_empty",
+        deserialize_with = "::buffa::json_helpers::null_as_default"
+    )]
+    pub response_cors_headers: ::buffa::__private::HashMap<
+        ::buffa::alloc::string::String,
+        ::buffa::alloc::string::String,
+    >,
     #[serde(skip)]
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
@@ -218,6 +243,9 @@ impl ::core::fmt::Debug for Permissions {
             .field("allow_role", &self.allow_role)
             .field("is_public", &self.is_public)
             .field("public_url", &self.public_url)
+            .field("csrf_token_header", &self.csrf_token_header)
+            .field("csrf_token_cookie", &self.csrf_token_cookie)
+            .field("response_cors_headers", &self.response_cors_headers)
             .finish()
     }
 }
@@ -244,6 +272,26 @@ impl Permissions {
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
         self.public_url = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::csrf_token_header`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_csrf_token_header(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.csrf_token_header = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::csrf_token_cookie`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_csrf_token_cookie(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.csrf_token_cookie = Some(value.into());
         self
     }
 }
@@ -285,6 +333,20 @@ impl ::buffa::Message for Permissions {
         if let Some(ref v) = self.public_url {
             size += 1u32 + ::buffa::types::string_encoded_len(v) as u32;
         }
+        if let Some(ref v) = self.csrf_token_header {
+            size += 1u32 + ::buffa::types::string_encoded_len(v) as u32;
+        }
+        if let Some(ref v) = self.csrf_token_cookie {
+            size += 1u32 + ::buffa::types::string_encoded_len(v) as u32;
+        }
+        #[allow(clippy::for_kv_map)]
+        for (k, v) in &self.response_cors_headers {
+            let entry_size: u32 = 1u32 + ::buffa::types::string_encoded_len(k) as u32
+                + 1u32 + ::buffa::types::string_encoded_len(v) as u32;
+            size
+                += 1u32 + ::buffa::encoding::varint_len(entry_size as u64) as u32
+                    + entry_size;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u32;
         size
     }
@@ -319,6 +381,44 @@ impl ::buffa::Message for Permissions {
         if let Some(ref v) = self.public_url {
             ::buffa::encoding::Tag::new(
                     3u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(v, buf);
+        }
+        if let Some(ref v) = self.csrf_token_header {
+            ::buffa::encoding::Tag::new(
+                    4u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(v, buf);
+        }
+        if let Some(ref v) = self.csrf_token_cookie {
+            ::buffa::encoding::Tag::new(
+                    5u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(v, buf);
+        }
+        for (k, v) in &self.response_cors_headers {
+            let entry_size: u32 = 1u32 + ::buffa::types::string_encoded_len(k) as u32
+                + 1u32 + ::buffa::types::string_encoded_len(v) as u32;
+            ::buffa::encoding::Tag::new(
+                    6u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::encoding::encode_varint(entry_size as u64, buf);
+            ::buffa::encoding::Tag::new(
+                    1u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(k, buf);
+            ::buffa::encoding::Tag::new(
+                    2u32,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )
                 .encode(buf);
@@ -401,6 +501,99 @@ impl ::buffa::Message for Permissions {
                     buf,
                 )?;
             }
+            4u32 => {
+                if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
+                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                        field_number: 4u32,
+                        expected: 2u8,
+                        actual: tag.wire_type() as u8,
+                    });
+                }
+                ::buffa::types::merge_string(
+                    self
+                        .csrf_token_header
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            5u32 => {
+                if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
+                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                        field_number: 5u32,
+                        expected: 2u8,
+                        actual: tag.wire_type() as u8,
+                    });
+                }
+                ::buffa::types::merge_string(
+                    self
+                        .csrf_token_cookie
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            6u32 => {
+                if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
+                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                        field_number: 6u32,
+                        expected: 2u8,
+                        actual: tag.wire_type() as u8,
+                    });
+                }
+                let entry_len = ::buffa::encoding::decode_varint(buf)?;
+                let entry_len = usize::try_from(entry_len)
+                    .map_err(|_| ::buffa::DecodeError::MessageTooLarge)?;
+                if buf.remaining() < entry_len {
+                    return ::core::result::Result::Err(
+                        ::buffa::DecodeError::UnexpectedEof,
+                    );
+                }
+                let entry_limit = buf.remaining() - entry_len;
+                let mut key = ::core::default::Default::default();
+                let mut val = ::core::default::Default::default();
+                while buf.remaining() > entry_limit {
+                    let entry_tag = ::buffa::encoding::Tag::decode(buf)?;
+                    match entry_tag.field_number() {
+                        1 => {
+                            if entry_tag.wire_type()
+                                != ::buffa::encoding::WireType::LengthDelimited
+                            {
+                                return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                                    field_number: entry_tag.field_number(),
+                                    expected: 2u8,
+                                    actual: entry_tag.wire_type() as u8,
+                                });
+                            }
+                            key = ::buffa::types::decode_string(buf)?;
+                        }
+                        2 => {
+                            if entry_tag.wire_type()
+                                != ::buffa::encoding::WireType::LengthDelimited
+                            {
+                                return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                                    field_number: entry_tag.field_number(),
+                                    expected: 2u8,
+                                    actual: entry_tag.wire_type() as u8,
+                                });
+                            }
+                            val = ::buffa::types::decode_string(buf)?;
+                        }
+                        _ => {
+                            ::buffa::encoding::skip_field_depth(entry_tag, buf, depth)?;
+                        }
+                    }
+                }
+                if buf.remaining() != entry_limit {
+                    let remaining = buf.remaining();
+                    if remaining > entry_limit {
+                        buf.advance(remaining - entry_limit);
+                    } else {
+                        return ::core::result::Result::Err(
+                            ::buffa::DecodeError::UnexpectedEof,
+                        );
+                    }
+                }
+                self.response_cors_headers.insert(key, val);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, depth)?);
@@ -412,6 +605,9 @@ impl ::buffa::Message for Permissions {
         self.allow_role.clear();
         self.is_public = ::core::option::Option::None;
         self.public_url = ::core::option::Option::None;
+        self.csrf_token_header = ::core::option::Option::None;
+        self.csrf_token_cookie = ::core::option::Option::None;
+        self.response_cors_headers.clear();
         self.__buffa_unknown_fields.clear();
     }
 }

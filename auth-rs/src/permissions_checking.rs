@@ -5,12 +5,14 @@ pub fn get_route_from_public_url(url: &str) -> Option<&'static str> {
 	if url == "/auth.v2.AuthService/GetDevToken" { return Some("/auth.v2.AuthService/GetDevToken") }
 	if url == "/auth.v2.AuthService/GetJWTPublicKey" { return Some("/auth.v2.AuthService/GetJWTPublicKey") }
 	if url == "/auth.v2.AuthService/ListUsers" { return Some("/auth.v2.AuthService/ListUsers") }
+	if url == "/auth.v2.AuthService/Login" { return Some("/auth.v2.AuthService/Login") }
 	if url == "/auth.v2.AuthService/RenewJWT" { return Some("/auth.v2.AuthService/RenewJWT") }
 
     None
 }
 
 
+use std::collections::BTreeMap;
 use hxi2_proto::proto::auth::v2::Permission;
 
 #[derive(Debug, Clone)]
@@ -19,6 +21,9 @@ pub struct MethodPermissions {
     pub is_public: bool,
     pub public_url: Option<&'static str>,
     pub compiled_permissions_bitfield: i64,
+    pub csrf_token_header: Option<&'static str>,
+    pub csrf_token_cookie: Option<&'static str>,
+    pub response_cors_headers: Option<BTreeMap<&'static str, &'static str>>,
 }
 
 pub trait MethodPermissionsOptionExt {
@@ -55,7 +60,8 @@ impl CompiledPermissions {
 				"/auth.v2.AuthService/GetDevToken" => return Some(&self.permissions[0].1),
 				"/auth.v2.AuthService/GetJWTPublicKey" => return Some(&self.permissions[1].1),
 				"/auth.v2.AuthService/ListUsers" => return Some(&self.permissions[2].1),
-				"/auth.v2.AuthService/RenewJWT" => return Some(&self.permissions[3].1),
+				"/auth.v2.AuthService/Login" => return Some(&self.permissions[3].1),
+				"/auth.v2.AuthService/RenewJWT" => return Some(&self.permissions[4].1),
             _ => None,
         }
     }
@@ -71,6 +77,9 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 is_public: true,
                 public_url: None,
                 compiled_permissions_bitfield: 2,
+                csrf_token_header: None,
+                csrf_token_cookie: None,
+                response_cors_headers: None,
             }),
             ("/auth.v2.AuthService/GetJWTPublicKey", MethodPermissions {
                 allow_roles: &[
@@ -80,6 +89,9 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 is_public: false,
                 public_url: None,
                 compiled_permissions_bitfield: 10,
+                csrf_token_header: None,
+                csrf_token_cookie: None,
+                response_cors_headers: None,
             }),
             ("/auth.v2.AuthService/ListUsers", MethodPermissions {
                 allow_roles: &[
@@ -89,6 +101,20 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 is_public: false,
                 public_url: None,
                 compiled_permissions_bitfield: 10,
+                csrf_token_header: None,
+                csrf_token_cookie: None,
+                response_cors_headers: None,
+            }),
+            ("/auth.v2.AuthService/Login", MethodPermissions {
+                allow_roles: &[
+					Permission::PERMISSION_ADMIN,
+                ],
+                is_public: true,
+                public_url: None,
+                compiled_permissions_bitfield: 2,
+                csrf_token_header: Some("X-CSRF-Token"),
+                csrf_token_cookie: Some("csrf_token"),
+                response_cors_headers: None,
             }),
             ("/auth.v2.AuthService/RenewJWT", MethodPermissions {
                 allow_roles: &[
@@ -98,6 +124,9 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 is_public: false,
                 public_url: None,
                 compiled_permissions_bitfield: 10,
+                csrf_token_header: None,
+                csrf_token_cookie: None,
+                response_cors_headers: None,
             }),
         ],
         hash: "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262",

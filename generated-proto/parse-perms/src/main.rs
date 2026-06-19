@@ -19,6 +19,9 @@ pub struct MethodPermissions {
     pub is_public: bool,
     pub public_url: Option<String>,
     pub compiled_permissions_bitfield: Option<i64>,
+    pub csrf_token_header: Option<String>,
+    pub csrf_token_cookie: Option<String>,
+    pub response_cors_headers: Option<BTreeMap<String, String>>,
 }
 
 fn serialize_roles_as_ints<S>(roles: &[Permission], serializer: S) -> Result<S::Ok, S::Error>
@@ -45,6 +48,27 @@ fn method_permissions_from_permissions(perms_msg: Permissions, base: &mut Method
     );
     if let Some(url) = perms_msg.public_url {
         base.public_url = Some(url);
+    }
+    if let Some(header) = perms_msg.csrf_token_header {
+        if header.is_empty() {
+            base.csrf_token_header = None;
+        } else {
+            base.csrf_token_header = Some(header);
+        }
+    }
+    if let Some(cookie) = perms_msg.csrf_token_cookie {
+        if cookie.is_empty() {
+            base.csrf_token_cookie = None;
+        } else {
+            base.csrf_token_cookie = Some(cookie);
+        }
+    }
+    if !perms_msg.response_cors_headers.is_empty() {
+        let mut headers_map = BTreeMap::new();
+        for (key, value) in perms_msg.response_cors_headers {
+            headers_map.insert(key, value);
+        }
+        base.response_cors_headers = Some(headers_map);
     }
 }
 
@@ -76,6 +100,9 @@ fn get_permissions(descriptor_bytes: &[u8]) -> Result<BTreeMap<String, MethodPer
             is_public: false,
             public_url: None,
             compiled_permissions_bitfield: None,
+            csrf_token_header: None,
+            csrf_token_cookie: None,
+            response_cors_headers: None,
         };
         if let Some(options) = service.options()
             && let Some(perms_msg) = options.extension(&PERMISSION_LEVEL_SERVICE)

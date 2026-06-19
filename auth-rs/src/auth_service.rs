@@ -7,7 +7,7 @@ use connectrpc::{
 pub use hxi2_proto::connect::auth::v2::AuthServiceExt;
 use hxi2_proto::proto::auth::v2::{
     GetJWTPublicKeyRequest, GetJWTPublicKeyResponse, ListUsersRequest, ListUsersResponse,
-    RenewJWTRequest, RenewJWTResponse, SmallData,
+    LoginRequest, LoginResponse, RenewJWTRequest, RenewJWTResponse, SmallData,
 };
 use hxi2_proto::{
     connect::auth::v2::AuthService,
@@ -107,6 +107,16 @@ impl AuthService for AuthServiceImpl {
     ) -> ServiceResult<RenewJWTResponse> {
         Err(ConnectError::unimplemented(
             "renew_jwt is not implemented yet".to_string(),
+        ))
+    }
+
+    async fn login(
+        &self,
+        _ctx: RequestContext,
+        _request: ServiceRequest<'_, LoginRequest>,
+    ) -> ServiceResult<LoginResponse> {
+        Err(ConnectError::unimplemented(
+            "login is not implemented yet".to_string(),
         ))
     }
 

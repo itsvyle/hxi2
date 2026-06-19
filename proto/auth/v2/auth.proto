@@ -27,6 +27,13 @@ service AuthService {
     rpc GetDevToken(GetDevTokenRequest) returns (GetDevTokenResponse) {
         option (permission_level).is_public = true;
     }
+
+    rpc Login(LoginRequest) returns (LoginResponse) {
+        option (permission_level).is_public = true;
+        option (permission_level).csrf_token_header = "X-CSRF-Token";
+        option (permission_level).csrf_token_cookie = "csrf_token";
+        // option (permission_level).response_cors_headers = {key: "ACL," value: "123"};
+    }
 }
 
 message GetJWTPublicKeyRequest {}
@@ -61,4 +68,16 @@ message GetDevTokenResponse {
     string jwt = 1;
     string refresh_token = 2;
     google.protobuf.Timestamp refresh_token_expiry = 3;
+}
+
+message LoginRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    string jwt = 1;
+    string refresh_token = 2;
+    google.protobuf.Timestamp refresh_token_expiry = 3;
+    optional SmallData small_data = 4;
 }

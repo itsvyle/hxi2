@@ -29,6 +29,9 @@ pub struct MethodPermissions {
     is_public: bool,
     public_url: Option<String>,
     compiled_permissions_bitfield: i64,
+    pub csrf_token_header: Option<String>,
+    pub csrf_token_cookie: Option<String>,
+    pub response_cors_headers: Option<BTreeMap<String, String>>,
 }
 
 #[derive(serde::Deserialize, Clone, Debug)]
@@ -90,6 +93,9 @@ fn write_embedded_structs(perms: &PermissionsOutput) -> Option<String> {
                             is_public: {is_public},
                             public_url: {public_url},
                             compiled_permissions_bitfield: {bitfield},
+                            csrf_token_header: {csrf_header},
+                            csrf_token_cookie: {csrf_cookie},
+                            response_cors_headers: {cors_headers},
                         }}),
             "#},
             route = route,
@@ -97,6 +103,25 @@ fn write_embedded_structs(perms: &PermissionsOutput) -> Option<String> {
             is_public = perm_data.is_public,
             public_url = public_url_val,
             bitfield = perm_data.compiled_permissions_bitfield,
+            csrf_header = match &perm_data.csrf_token_header {
+                Some(header) => format!("Some(\"{}\")", header),
+                None => "None".to_string(),
+            },
+            csrf_cookie = match &perm_data.csrf_token_cookie {
+                Some(cookie) => format!("Some(\"{}\")", cookie),
+                None => "None".to_string(),
+            },
+            cors_headers = match &perm_data.response_cors_headers {
+                Some(headers) => {
+                    let mut headers_str = String::from("Some(BTreeMap::from([");
+                    for (key, value) in headers {
+                        headers_str.push_str(&format!("(\"{}\", \"{}\"), ", key, value));
+                    }
+                    headers_str.push_str("]))");
+                    headers_str
+                }
+                None => "None".to_string(),
+            }
         ));
     }
 
@@ -110,6 +135,7 @@ fn write_embedded_structs(perms: &PermissionsOutput) -> Option<String> {
 
     Some(format!(
         indoc! {r#"
+            use std::collections::BTreeMap;
             use hxi2_proto::proto::auth::v2::Permission;
 
             #[derive(Debug, Clone)]
@@ -118,6 +144,9 @@ fn write_embedded_structs(perms: &PermissionsOutput) -> Option<String> {
                 pub is_public: bool,
                 pub public_url: Option<&'static str>,
                 pub compiled_permissions_bitfield: i64,
+                pub csrf_token_header: Option<&'static str>,
+                pub csrf_token_cookie: Option<&'static str>,
+                pub response_cors_headers: Option<BTreeMap<&'static str, &'static str>>,
             }}
 
             pub trait MethodPermissionsOptionExt {{
