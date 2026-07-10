@@ -18,6 +18,7 @@ export HXI2_COOKIES_DOMAIN := "localhost"
 export CONFIG_ENVIRONMENT := "development"
 export CONFIG_CSRF_SIGNING_KEY := "PAFXpBAmnyWvpeYK0FoaCSe3QrOp4OZygusAquc4Zho="
 PORT := "8080"
+export CONFIG_RUNNING_PORT := PORT
 
 init: 
     @just _utils-check-program "cargo" 1

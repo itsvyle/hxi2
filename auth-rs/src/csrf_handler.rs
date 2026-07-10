@@ -17,6 +17,8 @@ type HmacSha256 = Hmac<Sha256>;
 pub static GLOBAL_CSRF_PROTECTION: once_cell::sync::Lazy<CsrfProtection> =
     once_cell::sync::Lazy::new(CsrfProtection::from_env);
 
+const CSRF_TOKEN_EXPIRATION_SECONDS: u64 = 86400; // 24 hours
+
 #[derive(Clone)]
 pub struct CsrfProtection {
     signing_key: Vec<u8>,
@@ -145,7 +147,7 @@ impl CsrfProtection {
             .unwrap()
             .as_secs();
 
-        if now - timestamp > 86400 {
+        if now - timestamp > CSRF_TOKEN_EXPIRATION_SECONDS {
             return err_forbidden("CSRF token expired");
         }
 

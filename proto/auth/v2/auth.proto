@@ -10,6 +10,7 @@ import "google/protobuf/empty.proto";
 
 
 service AuthService {
+    // Defaults
     option (permission_level_service) = {
         allow_role: PERMISSION_ADMIN
     };
