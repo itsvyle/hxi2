@@ -20,6 +20,7 @@ message Permissions {
     map<string, string> response_cors_headers = 6;
     bool enforce_csrf = 7;
     optional bool is_frontend = 8;
+		optional string frontend_staic_file = 9;
 }
 
 enum Permission {
