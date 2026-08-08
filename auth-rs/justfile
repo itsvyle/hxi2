@@ -67,3 +67,9 @@ generate-jwt-token:
 #         -H "Content-Type: application/json" \
 #         -d '{}' \
 #         http://localhost:8080/auth.v2.AuthService/GetJWTPublicKey
+
+prepare_sqlx:
+    # create a new database file at temp.db, and execute schema.sql in it to create the schema
+    sqlite3 temp.db < schema.sql
+    DATABASE_URL="sqlite://temp.db" SQLX_OFFLINE=false cargo sqlx prepare --workspace
+    rm temp.db

@@ -16,9 +16,9 @@ use hxi2_proto::{
     proto::auth::v2::{GetDevTokenRequest, GetDevTokenResponse},
 };
 
+use crate::app_config::AppConfiguration;
 use crate::connect_result::ToConnectError;
 use crate::{app_config, permissions_checking};
-use crate::{app_config::AppConfiguration, auth_middleware::ReqAuthState};
 
 pub struct AuthServiceImpl {
     pub subdomain: String,
@@ -41,25 +41,27 @@ macro_rules! impl_unimplemented_rpc {
     };
 }
 
+macro_rules! impl_otherplace_rpc {
+    ($name:ident, $req_type:ty, $res_type:ty) => {
+        async fn $name(
+            &self,
+            _ctx: connectrpc::RequestContext,
+            _request: connectrpc::ServiceRequest<'_, $req_type>,
+        ) -> connectrpc::ServiceResult<$res_type> {
+            Err(connectrpc::ConnectError::unimplemented(
+                concat!(stringify!($name), " is implemented some place else").to_string(),
+            ))
+        }
+    };
+}
+
 #[allow(refining_impl_trait)]
 impl AuthService for AuthServiceImpl {
     async fn get_jwt_public_key(
         &self,
-        ctx: RequestContext,
+        _ctx: RequestContext,
         _request: ServiceRequest<'_, GetJWTPublicKeyRequest>,
     ) -> ServiceResult<GetJWTPublicKeyResponse> {
-        let user = ctx
-            .extensions()
-            .get::<ReqAuthState>()
-            .ok_or_else(|| {
-                ConnectError::new(
-                    ErrorCode::Internal,
-                    "auth layer did not attach ReqAuthState - middleware misconfigured",
-                )
-            })?
-            .clone();
-
-        println!("get_jwt_public_key called by user: {:?}", user.claims);
         Response::ok(GetJWTPublicKeyResponse {
             public_key: AppConfiguration::INSTANCE().jwt_public_key().to_string(),
             ..Default::default()
@@ -160,8 +162,38 @@ impl AuthService for AuthServiceImpl {
         Ok(res)
     }
 
+    async fn list_users(
+        &self,
+        _ctx: connectrpc::RequestContext,
+        _request: connectrpc::ServiceRequest<'_, ListUsersRequest>,
+    ) -> connectrpc::ServiceResult<ListUsersResponse> {
+        let db = app_config::AppConfiguration::INSTANCE().db().await;
+        let users = db
+            .list_users()
+            .await
+            .context("listing users")
+            .obfuscate()
+            .to_connect_internal()?;
+        Response::ok(ListUsersResponse {
+            users: users
+                .into_iter()
+                .map(|u| hxi2_proto::proto::auth::v2::DBUser {
+                    id: u.id,
+                    username: u.username,
+                    first_name: u.first_name,
+                    last_name: u.last_name,
+                    permissions: u.permissions,
+                    promotion: u.promotion,
+                    discord_id: u.discord_id,
+                    ..Default::default()
+                })
+                .collect(),
+            ..Default::default()
+        })
+    }
+
     impl_unimplemented_rpc!(renew_jwt, RenewJWTRequest, RenewJWTResponse);
     impl_unimplemented_rpc!(login, LoginRequest, LoginResponse);
-    impl_unimplemented_rpc!(list_users, ListUsersRequest, ListUsersResponse);
-    impl_unimplemented_rpc!(frontend_index, Empty, Empty);
+    impl_otherplace_rpc!(frontend_index, Empty, Empty);
+    impl_otherplace_rpc!(discord_callback, Empty, Empty);
 }

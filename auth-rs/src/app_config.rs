@@ -1,9 +1,13 @@
+use std::fs;
+
 use anyhow::{Context, Result};
 use ed25519_dalek::pkcs8::EncodePublicKey;
 use once_cell::sync::Lazy;
+use sqlx::{AssertSqlSafe, Execute};
+use tokio::sync::OnceCell;
 use utils::cfg_from_env_or;
 
-use crate::jwt_verifier::JWTVerifier;
+use crate::{database::DatabaseManager, jwt_verifier::JWTVerifier};
 
 pub enum Environnement {
     Development,
@@ -36,6 +40,8 @@ pub struct AppConfiguration {
     pub discord_client_secret: String,
     #[doc = "Environment (development or production)"]
     pub environment: Environnement,
+
+    db_manager: OnceCell<DatabaseManager>,
 }
 
 impl AppConfiguration {
@@ -70,6 +76,8 @@ impl AppConfiguration {
                     ));
                 }
             },
+
+            db_manager: OnceCell::new(),
         })
     }
 
@@ -95,6 +103,36 @@ impl AppConfiguration {
             cfg.jwt_public_key_().expect("Failed to get JWT public key")
         });
         &JWT_PUBLIC_KEY
+    }
+
+    pub async fn db(&self) -> &DatabaseManager {
+        if !std::path::Path::new(&self.db_path).exists() {
+            std::fs::File::create(&self.db_path).expect("Failed to create database file");
+        }
+
+        self.db_manager
+            .get_or_init(|| async {
+                let pool = sqlx::SqlitePool::connect(&self.db_path)
+                    .await
+                    .expect("Failed to connect to SQLite database");
+
+                let schema = fs::read_to_string("schema.sql")
+                    .context("reading schema.sql")
+                    .expect("Failed to read schema.sql");
+
+                sqlx::query(AssertSqlSafe(schema))
+                    .execute(&pool)
+                    .await
+                    .context("creating database schema")
+                    .expect("Failed to create database schema");
+
+                let manager = DatabaseManager::new(pool);
+
+                manager.start_one_time_code_cleanup_timer();
+
+                manager
+            })
+            .await
     }
 
     #[allow(non_snake_case)]

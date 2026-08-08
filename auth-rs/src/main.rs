@@ -3,6 +3,7 @@ mod auth_middleware;
 mod auth_service;
 mod connect_result;
 mod csrf_handler;
+mod database;
 mod jwt_signer;
 mod jwt_verifier;
 mod permissions_checking;
@@ -47,6 +48,7 @@ async fn main() -> Result<()> {
     // Force initialization of the JWT public key at startup, so we fail fast if the private key is invalid.
     let _jwt_public = cfg.jwt_public_key();
     let _csrf_prot = GLOBAL_CSRF_PROTECTION.generate_token();
+    let _db = cfg.db().await;
 
     let service = Arc::new(AuthServiceImpl {
         subdomain: format!("auth.{}", cfg.tld),

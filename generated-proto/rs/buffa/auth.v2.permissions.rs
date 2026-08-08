@@ -249,6 +249,13 @@ pub struct Permissions {
         skip_serializing_if = "::core::option::Option::is_none"
     )]
     pub is_frontend: ::core::option::Option<bool>,
+    /// Field 9: `frontend_static_file`
+    #[serde(
+        rename = "frontendStaticFile",
+        alias = "frontend_static_file",
+        skip_serializing_if = "::core::option::Option::is_none"
+    )]
+    pub frontend_static_file: ::core::option::Option<::buffa::alloc::string::String>,
     #[serde(skip)]
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
@@ -264,6 +271,7 @@ impl ::core::fmt::Debug for Permissions {
             .field("response_cors_headers", &self.response_cors_headers)
             .field("enforce_csrf", &self.enforce_csrf)
             .field("is_frontend", &self.is_frontend)
+            .field("frontend_static_file", &self.frontend_static_file)
             .finish()
     }
 }
@@ -307,6 +315,16 @@ impl Permissions {
     ///Sets [`Self::is_frontend`] to `Some(value)`, consuming and returning `self`.
     pub fn with_is_frontend(mut self, value: bool) -> Self {
         self.is_frontend = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::frontend_static_file`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_frontend_static_file(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.frontend_static_file = Some(value.into());
         self
     }
 }
@@ -367,6 +385,9 @@ impl ::buffa::Message for Permissions {
         }
         if self.is_frontend.is_some() {
             size += 1u32 + ::buffa::types::BOOL_ENCODED_LEN as u32;
+        }
+        if let Some(ref v) = self.frontend_static_file {
+            size += 1u32 + ::buffa::types::string_encoded_len(v) as u32;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u32;
         size
@@ -454,6 +475,14 @@ impl ::buffa::Message for Permissions {
             ::buffa::encoding::Tag::new(8u32, ::buffa::encoding::WireType::Varint)
                 .encode(buf);
             ::buffa::types::encode_bool(v, buf);
+        }
+        if let Some(ref v) = self.frontend_static_file {
+            ::buffa::encoding::Tag::new(
+                    9u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -642,6 +671,21 @@ impl ::buffa::Message for Permissions {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            9u32 => {
+                if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
+                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                        field_number: 9u32,
+                        expected: 2u8,
+                        actual: tag.wire_type() as u8,
+                    });
+                }
+                ::buffa::types::merge_string(
+                    self
+                        .frontend_static_file
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, depth)?);
@@ -658,6 +702,7 @@ impl ::buffa::Message for Permissions {
         self.response_cors_headers.clear();
         self.enforce_csrf = false;
         self.is_frontend = ::core::option::Option::None;
+        self.frontend_static_file = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

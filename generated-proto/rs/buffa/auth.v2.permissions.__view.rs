@@ -22,6 +22,8 @@ pub struct PermissionsView<'a> {
     pub enforce_csrf: bool,
     /// Field 8: `is_frontend`
     pub is_frontend: ::core::option::Option<bool>,
+    /// Field 9: `frontend_static_file`
+    pub frontend_static_file: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> PermissionsView<'a> {
@@ -111,6 +113,18 @@ impl<'a> PermissionsView<'a> {
                         });
                     }
                     view.is_frontend = Some(::buffa::types::decode_bool(&mut cur)?);
+                }
+                9u32 => {
+                    if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
+                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
+                            field_number: 9u32,
+                            expected: 2u8,
+                            actual: tag.wire_type() as u8,
+                        });
+                    }
+                    view.frontend_static_file = Some(
+                        ::buffa::types::borrow_str(&mut cur)?,
+                    );
                 }
                 1u32 => {
                     if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
@@ -245,6 +259,7 @@ impl<'a> ::buffa::MessageView<'a> for PermissionsView<'a> {
                 .collect(),
             enforce_csrf: self.enforce_csrf,
             is_frontend: self.is_frontend,
+            frontend_static_file: self.frontend_static_file.map(|s| s.to_string()),
             __buffa_unknown_fields: self
                 .__buffa_unknown_fields
                 .to_owned()
@@ -294,6 +309,9 @@ impl<'a> ::buffa::ViewEncode<'a> for PermissionsView<'a> {
         }
         if self.is_frontend.is_some() {
             size += 1u32 + ::buffa::types::BOOL_ENCODED_LEN as u32;
+        }
+        if let Some(ref v) = self.frontend_static_file {
+            size += 1u32 + ::buffa::types::string_encoded_len(v) as u32;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u32;
         size
@@ -383,6 +401,14 @@ impl<'a> ::buffa::ViewEncode<'a> for PermissionsView<'a> {
                 .encode(buf);
             ::buffa::types::encode_bool(v, buf);
         }
+        if let Some(ref v) = self.frontend_static_file {
+            ::buffa::encoding::Tag::new(
+                    9u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(v, buf);
+        }
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
@@ -455,6 +481,9 @@ impl<'__a> ::serde::Serialize for PermissionsView<'__a> {
         }
         if let ::core::option::Option::Some(__v) = self.is_frontend {
             __map.serialize_entry("isFrontend", &__v)?;
+        }
+        if let ::core::option::Option::Some(__v) = self.frontend_static_file {
+            __map.serialize_entry("frontendStaticFile", __v)?;
         }
         __map.end()
     }
@@ -596,6 +625,11 @@ impl PermissionsOwnedView {
     #[must_use]
     pub fn is_frontend(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().is_frontend
+    }
+    /// Field 9: `frontend_static_file`
+    #[must_use]
+    pub fn frontend_static_file(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().frontend_static_file
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<PermissionsView<'static>>>
