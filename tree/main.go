@@ -121,6 +121,7 @@ func main() {
 	staticsManager.RegisterChunkHandlers(router)
 
 	addHTML, addJS, addCSS := staticsManager.WholeRouteHandlers("add")
+
 	router.Handle("/dist/add.bundle.js", addJS)
 	if addCSS != nil {
 		router.Handle("/dist/add.bundle.css", addCSS)
@@ -139,7 +140,9 @@ func main() {
 	if treeCSS != nil {
 		router.Handle("/dist/tree.bundle.css", treeCSS)
 	}
-
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/tree", http.StatusFound)
+	})
 	router.HandleFunc("/tree", func(w http.ResponseWriter, r *http.Request) {
 		c, err := authManager.AuthenticateHTTPRequest(w, r, false)
 		if err != nil || !c.CheckPermHTTP(w, ggu.RoleStudent) {
