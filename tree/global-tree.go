@@ -303,6 +303,7 @@ func GetMermaidCompiler() (*ChromeCompiler[string, mermaidCompilationResponse], 
 
 	// Create the compiler.
 	compiler, err := CreateChromeCompiler(&ChromeCompilerConfig[string, mermaidCompilationResponse]{
+		NoSandbox: true,
 		JSSource: mermaidJSSource,
 		JSInit:   init.String(),
 		JSExtra:  mermaidExtraJS,
