@@ -27,6 +27,8 @@ var treeBackgroundColors = map[int]string{
 	2022: "#00c0c6",
 	2023: "#a05fdd",
 	2024: "#48e675",
+	2025: "#e67e22",
+	2026: "#f1c40f",
 }
 
 type PeopleSet map[int64]struct{}
@@ -304,9 +306,9 @@ func GetMermaidCompiler() (*ChromeCompiler[string, mermaidCompilationResponse], 
 	// Create the compiler.
 	compiler, err := CreateChromeCompiler(&ChromeCompilerConfig[string, mermaidCompilationResponse]{
 		NoSandbox: true,
-		JSSource: mermaidJSSource,
-		JSInit:   init.String(),
-		JSExtra:  mermaidExtraJS,
+		JSSource:  mermaidJSSource,
+		JSInit:    init.String(),
+		JSExtra:   mermaidExtraJS,
 		OutputProcessor: func(s *string) (*mermaidCompilationResponse, error) {
 			var resp mermaidCompilationResponse
 			if err := json.Unmarshal([]byte(*s), &resp); err != nil {
