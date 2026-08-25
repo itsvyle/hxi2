@@ -78,6 +78,6 @@ func Filter[T any](ss []T, test func(T) bool) (ret []T) {
 
 func GetPromotionsRange() (int, int) {
 	const minp = 2021
-	const maxp = 2025
+	const maxp = 2026
 	return minp, maxp
 }
