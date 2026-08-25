@@ -407,7 +407,7 @@ func ExtractUserGraph(userID int64, baseGraph *RelationsGraph) (*RelationsGraph,
 	// 1. Add requested target user
 	g.Users[userID] = copyUser(me)
 
-	// 2. Extract ALL Filleuls Downward (Recursive / Iterative BFS)
+	// 2. Extract ALL Filleuls Downward
 	filleulQueue := []int64{userID}
 	for len(filleulQueue) > 0 {
 		currID := filleulQueue[0]
@@ -428,7 +428,7 @@ func ExtractUserGraph(userID int64, baseGraph *RelationsGraph) (*RelationsGraph,
 		}
 	}
 
-	// 3. Extract ALL Parrains Upward (Recursive / Iterative BFS)
+	// 3. Extract ALL Parrains Upward
 	parrainQueue := []int64{userID}
 	for len(parrainQueue) > 0 {
 		currID := parrainQueue[0]
@@ -475,79 +475,3 @@ func ExtractUserGraph(userID int64, baseGraph *RelationsGraph) (*RelationsGraph,
 
 	return g, nil
 }
-
-/*
-// On veut: filleuls direct, filleuls de mes parrains, parrains en remontant
-func ExtractUserGraph(userID int64, baseGraph *RelationsGraph) (*RelationsGraph, error) {
-	me, ok := baseGraph.Users[userID]
-	if !ok {
-		return nil, fmt.Errorf("user %d not found in graph", userID)
-	}
-	g := &RelationsGraph{
-		MinGen: baseGraph.MinGen,
-		MaxGen: baseGraph.MaxGen,
-		Users:  make(map[int64]*RelationGraphUser),
-	}
-	g.Users[userID] = me
-	// Extract filleuls
-	for filleulID := range me.Filleuls {
-		filleul, ok := baseGraph.Users[filleulID]
-		if !ok {
-			continue
-		}
-		g.Users[filleulID] = &RelationGraphUser{
-			ID:        filleul.ID,
-			Promotion: filleul.Promotion,
-		}
-	}
-
-	var allAboveParrains func(user *RelationGraphUser) PeopleSet
-	allAboveParrains = func(user *RelationGraphUser) PeopleSet {
-		for parrainID := range user.Parrains {
-			parrain, ok := baseGraph.Users[parrainID]
-			if !ok {
-				continue
-			}
-			if _, ok := g.Users[parrain.ID]; !ok {
-				g.Users[parrain.ID] = &RelationGraphUser{
-					ID:        parrain.ID,
-					Promotion: parrain.Promotion,
-					Filleuls:  parrain.Filleuls,
-					Parrains:  allAboveParrains(parrain),
-				}
-			}
-		}
-		return user.Parrains
-	}
-
-	// Extract direct parrains, and cofilleuls
-	for parrainID := range me.Parrains {
-		parrain, ok := baseGraph.Users[parrainID]
-		if !ok {
-			continue
-		}
-		g.Users[parrainID] = &RelationGraphUser{
-			ID:        parrain.ID,
-			Promotion: parrain.Promotion,
-			Filleuls:  parrain.Filleuls,
-			Parrains:  allAboveParrains(parrain),
-		}
-		for coFilleulID := range parrain.Filleuls {
-			if _, ok := g.Users[coFilleulID]; ok {
-				continue
-			}
-			coFilleul, ok := baseGraph.Users[coFilleulID]
-			if !ok || coFilleul.Promotion != me.Promotion {
-				continue
-			}
-			g.Users[coFilleulID] = &RelationGraphUser{
-				ID:        coFilleul.ID,
-				Promotion: coFilleul.Promotion,
-				Parrains:  CommonKeys(coFilleul.Parrains, me.Parrains),
-			}
-		}
-	}
-
-	return g, nil
-}
-*/
