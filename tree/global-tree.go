@@ -371,7 +371,8 @@ func CommonKeys[K comparable, V1 any, V2 any](map1 map[K]V1, map2 map[K]V2) map[
 }
 
 // ExtractUserGraph extracts the entire downward tree (all filleuls recursively),
-// the entire upward lineage (all parrains recursively), and co-filleuls.
+// the entire upward lineage (all parrains recursively), co-filleuls, and any
+// cross-links (e.g. if a co-filleul is a parrain to a filleul or a filleul to a parrain).
 func ExtractUserGraph(userID int64, baseGraph *RelationsGraph) (*RelationsGraph, error) {
 	me, ok := baseGraph.Users[userID]
 	if !ok {
@@ -407,7 +408,7 @@ func ExtractUserGraph(userID int64, baseGraph *RelationsGraph) (*RelationsGraph,
 	// 1. Add requested target user
 	g.Users[userID] = copyUser(me)
 
-	// 2. Extract ALL Filleuls Downward
+	// 2. Extract ALL Filleuls Downward (Recursive / Iterative BFS)
 	filleulQueue := []int64{userID}
 	for len(filleulQueue) > 0 {
 		currID := filleulQueue[0]
@@ -428,7 +429,7 @@ func ExtractUserGraph(userID int64, baseGraph *RelationsGraph) (*RelationsGraph,
 		}
 	}
 
-	// 3. Extract ALL Parrains Upward
+	// 3. Extract ALL Parrains Upward (Recursive / Iterative BFS)
 	parrainQueue := []int64{userID}
 	for len(parrainQueue) > 0 {
 		currID := parrainQueue[0]
@@ -465,10 +466,36 @@ func ExtractUserGraph(userID int64, baseGraph *RelationsGraph) (*RelationsGraph,
 				continue
 			}
 
-			g.Users[coFilleulID] = &RelationGraphUser{
-				ID:        coFilleul.ID,
-				Promotion: coFilleul.Promotion,
-				Parrains:  CommonKeys(coFilleul.Parrains, me.Parrains),
+			g.Users[coFilleulID] = copyUser(coFilleul)
+		}
+	}
+
+	// 5. Cross-Link Pass: Connect any missing edges between extracted nodes.
+	// This ensures that if node A (e.g. co-filleul) has a relationship with node B
+	// (e.g. a downstream filleul), the link is preserved in g.Users.
+	for extractedID, userNode := range g.Users {
+		baseNode, ok := baseGraph.Users[extractedID]
+		if !ok {
+			continue
+		}
+
+		// Ensure all parrains of extracted users that exist in g are linked
+		for parrainID := range baseNode.Parrains {
+			if _, exists := g.Users[parrainID]; exists {
+				if userNode.Parrains == nil {
+					userNode.Parrains = make(PeopleSet)
+				}
+				userNode.Parrains[parrainID] = baseNode.Parrains[parrainID]
+			}
+		}
+
+		// Ensure all filleuls of extracted users that exist in g are linked
+		for filleulID := range baseNode.Filleuls {
+			if _, exists := g.Users[filleulID]; exists {
+				if userNode.Filleuls == nil {
+					userNode.Filleuls = make(PeopleSet)
+				}
+				userNode.Filleuls[filleulID] = baseNode.Filleuls[filleulID]
 			}
 		}
 	}
