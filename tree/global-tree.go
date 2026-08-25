@@ -370,6 +370,106 @@ func CommonKeys[K comparable, V1 any, V2 any](map1 map[K]V1, map2 map[K]V2) map[
 	return result
 }
 
+// ExtractUserGraph extracts direct filleuls, co-filleuls (same promotion under same parrains),
+// and the entire upward lineage of parrains.
+func ExtractUserGraph(userID int64, baseGraph *RelationsGraph) (*RelationsGraph, error) {
+	me, ok := baseGraph.Users[userID]
+	if !ok {
+		return nil, fmt.Errorf("user %d not found in graph", userID)
+	}
+
+	g := &RelationsGraph{
+		MinGen: baseGraph.MinGen,
+		MaxGen: baseGraph.MaxGen,
+		Users:  make(map[int64]*RelationGraphUser),
+	}
+
+	// Helper for safe pointer/set copy to break reference links
+	copyUser := func(src *RelationGraphUser) *RelationGraphUser {
+		newUser := &RelationGraphUser{
+			ID:        src.ID,
+			Promotion: src.Promotion,
+		}
+		if src.Parrains != nil {
+			newUser.Parrains = make(PeopleSet, len(src.Parrains))
+			for k, v := range src.Parrains {
+				newUser.Parrains[k] = v
+			}
+		}
+		if src.Filleuls != nil {
+			newUser.Filleuls = make(PeopleSet, len(src.Filleuls))
+			for k, v := range src.Filleuls {
+				newUser.Filleuls[k] = v
+			}
+		}
+		return newUser
+	}
+
+	// 1. Add requested target user
+	g.Users[userID] = copyUser(me)
+
+	// 2. Extract Direct Filleuls (Downwards - Step 1)
+	for filleulID := range me.Filleuls {
+		filleul, ok := baseGraph.Users[filleulID]
+		if !ok {
+			continue
+		}
+		g.Users[filleulID] = &RelationGraphUser{
+			ID:        filleul.ID,
+			Promotion: filleul.Promotion,
+		}
+	}
+
+	// 3. Extract Ancestors/Parrains (Upwards - All Generations)
+	// Iterative queue avoids infinite stack loops on circular references
+	queue := []int64{userID}
+	for len(queue) > 0 {
+		currID := queue[0]
+		queue = queue[1:]
+
+		currUser, ok := baseGraph.Users[currID]
+		if !ok {
+			continue
+		}
+
+		for parrainID := range currUser.Parrains {
+			if _, exists := g.Users[parrainID]; !exists {
+				if parrain, ok := baseGraph.Users[parrainID]; ok {
+					g.Users[parrainID] = copyUser(parrain)
+					queue = append(queue, parrainID)
+				}
+			}
+		}
+	}
+
+	// 4. Extract Co-Filleuls (Filleuls of direct Parrains in the same promotion)
+	for parrainID := range me.Parrains {
+		parrain, ok := baseGraph.Users[parrainID]
+		if !ok {
+			continue
+		}
+
+		for coFilleulID := range parrain.Filleuls {
+			if _, exists := g.Users[coFilleulID]; exists {
+				continue
+			}
+			coFilleul, ok := baseGraph.Users[coFilleulID]
+			if !ok || coFilleul.Promotion != me.Promotion {
+				continue
+			}
+
+			g.Users[coFilleulID] = &RelationGraphUser{
+				ID:        coFilleul.ID,
+				Promotion: coFilleul.Promotion,
+				Parrains:  CommonKeys(coFilleul.Parrains, me.Parrains),
+			}
+		}
+	}
+
+	return g, nil
+}
+
+/*
 // On veut: filleuls direct, filleuls de mes parrains, parrains en remontant
 func ExtractUserGraph(userID int64, baseGraph *RelationsGraph) (*RelationsGraph, error) {
 	me, ok := baseGraph.Users[userID]
@@ -443,3 +543,4 @@ func ExtractUserGraph(userID int64, baseGraph *RelationsGraph) (*RelationsGraph,
 
 	return g, nil
 }
+*/
