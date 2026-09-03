@@ -203,6 +203,9 @@ graph TD;
 				}
 				fi = append(fi, fmt.Sprintf("%d:::%s", f, studentNodeClass))
 			}
+			if len(fi) == 0 {
+				continue
+			}
 			tree += fmt.Sprintf("    %d:::%s --> %s\n", u.ID, studentNodeClass, strings.Join(fi, " & "))
 		}
 	}
