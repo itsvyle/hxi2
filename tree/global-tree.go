@@ -58,6 +58,16 @@ func BuildRelationsGraph(BaseRelationsPTR *[]Parrainage) *RelationsGraph {
 		Users:  make(map[int64]*RelationGraphUser),
 	}
 
+	// get min and max gen from allUsersMap
+	for _, u := range allUsersMap {
+		if u.Promotion < g.MinGen {
+			g.MinGen = u.Promotion
+		}
+		if u.Promotion > g.MaxGen {
+			g.MaxGen = u.Promotion
+		}
+	}
+
 	for i := range BaseRelations {
 		r := &BaseRelations[i]
 
@@ -73,13 +83,6 @@ func BuildRelationsGraph(BaseRelationsPTR *[]Parrainage) *RelationsGraph {
 					Promotion: u.Promotion,
 					Parrains:  PeopleSet{},
 					Filleuls:  PeopleSet{},
-				}
-
-				if u.Promotion < g.MinGen {
-					g.MinGen = u.Promotion
-				}
-				if u.Promotion > g.MaxGen {
-					g.MaxGen = u.Promotion
 				}
 
 			} else {
