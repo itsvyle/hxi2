@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fmt, fs};
 
 use anyhow::{Context, Result};
 use ed25519_dalek::pkcs8::EncodePublicKey;
@@ -9,6 +9,7 @@ use utils::cfg_from_env_or;
 
 use crate::{database::DatabaseManager, jwt_verifier::JWTVerifier};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Environnement {
     Development,
     Production,
@@ -42,6 +43,28 @@ pub struct AppConfiguration {
     pub environment: Environnement,
 
     db_manager: OnceCell<DatabaseManager>,
+}
+
+impl fmt::Debug for AppConfiguration {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("AppConfiguration")
+            .field("auth_url", &self.auth_url)
+            .field("auth_endpoint", &self.auth_endpoint)
+            .field("cookies_domain", &self.cookies_domain)
+            .field("tld", &self.tld)
+            .field("default_redirect_url", &self.default_redirect_url)
+            .field("running_port", &self.running_port)
+            // Censor secrets
+            .field("jwt_private_key", &"[REDACTED]")
+            .field("discord_client_secret", &"[REDACTED]")
+            // Non-sensitive fields
+            .field("db_path", &self.db_path)
+            .field("discord_application_id", &self.discord_application_id)
+            .field("discord_client_id", &self.discord_client_id)
+            .field("environment", &self.environment)
+            // .field("db_manager", &self.db_manager)
+            .finish()
+    }
 }
 
 impl AppConfiguration {

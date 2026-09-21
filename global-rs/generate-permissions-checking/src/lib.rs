@@ -33,6 +33,8 @@ pub struct MethodPermissions {
     csrf_token_cookie: Option<String>,
     response_cors_headers: Option<BTreeMap<String, String>>,
     enforce_csrf: bool,
+    is_frontend: bool,
+    frontend_static_file: Option<String>,
 }
 
 #[derive(serde::Deserialize, Clone, Debug)]
@@ -114,6 +116,8 @@ fn write_embedded_structs(perms: &PermissionsOutput) -> Option<String> {
                             csrf_token_cookie: {csrf_cookie},
                             response_cors_headers: {cors_headers},
                             enforce_csrf: {enforce_csrf},
+                            is_frontend: {is_frontend},
+                            frontend_static_file: {frontend_static_file},
                         }}),
             "#},
             route = route,
@@ -140,7 +144,12 @@ fn write_embedded_structs(perms: &PermissionsOutput) -> Option<String> {
                 }
                 None => "None".to_string(),
             },
-            enforce_csrf = perm_data.enforce_csrf
+            enforce_csrf = perm_data.enforce_csrf,
+            is_frontend = perm_data.is_frontend,
+            frontend_static_file = match &perm_data.frontend_static_file {
+                Some(file) => format!("Some(\"{}\")", file),
+                None => "None".to_string(),
+            },
         ));
     }
 
@@ -167,6 +176,8 @@ fn write_embedded_structs(perms: &PermissionsOutput) -> Option<String> {
                 pub csrf_token_cookie: Option<&'static str>,
                 pub response_cors_headers: Option<BTreeMap<&'static str, &'static str>>,
                 pub enforce_csrf: bool,
+                pub is_frontend: bool,
+                pub frontend_static_file: Option<&'static str>,
             }}
 
             pub trait MethodPermissionsOptionExt {{
@@ -223,10 +234,16 @@ fn write_embedded_structs(perms: &PermissionsOutput) -> Option<String> {
     ))
 }
 
-pub fn main(path: &str) -> Result<String> {
+pub fn main(path: &str, required_prefixes: Option<&[&str]>) -> Result<String> {
     let contents = std::fs::read_to_string(path).context("Failed to read permissions file")?;
-    let perms: PermissionsOutput =
+    let mut perms: PermissionsOutput =
         serde_json::from_str(&contents).context("Failed to parse permissions JSON")?;
+
+    if let Some(prefixes) = required_prefixes {
+        perms
+            .permissions
+            .retain(|k, _| prefixes.iter().any(|p| k.starts_with(p)));
+    }
 
     let mut s = String::new();
 

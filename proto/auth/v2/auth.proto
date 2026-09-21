@@ -42,8 +42,14 @@ service AuthService {
         option (permission_level).is_public = true;
     }
 
+    rpc DiscordLogin(google.protobuf.Empty) returns (google.protobuf.Empty) {
+        option (permission_level).is_public = true;
+        option (permission_level).public_url = "/api/login";
+    }
+
     rpc DiscordCallback(google.protobuf.Empty) returns (google.protobuf.Empty) {
         option (permission_level).is_public = true;
+        option (permission_level).public_url = "/api/discord_callback";
     }
 
     // FRONTEND PAGES
@@ -52,6 +58,7 @@ service AuthService {
         option (permission_level).is_frontend = true;
         option (permission_level).public_url = "/";
         option (permission_level).public_url = "/index.html";
+        option (permission_level).frontend_static_file = "index.html";
     }
 }
 

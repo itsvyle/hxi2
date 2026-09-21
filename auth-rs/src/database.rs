@@ -3,6 +3,7 @@ use rand::Rng;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use sqlx::{FromRow, sqlite::SqlitePool};
+use tracing::error;
 
 const ONE_TIME_CODE_VALIDITY_DURATION_MINS: i64 = 10;
 
@@ -294,12 +295,14 @@ impl DatabaseManager {
             .add_refresh_token_pair(rt.associated_user_id, &new_refresh_token, &new_jti)
             .await
         {
+            error!(error = ?e, "Failed to add new refresh token pair");
             return Err(DbError::Internal(
                 "failed to add new refresh token pair".into(),
             ));
         }
 
         if let Err(e) = self.delete_refresh_token_hash(&refresh_token_hash).await {
+            error!(error = ?e, "Failed to delete old refresh token");
             return Err(DbError::Internal(
                 "failed to delete old refresh token".into(),
             ));
@@ -359,7 +362,6 @@ impl DatabaseManager {
     pub fn start_one_time_code_cleanup_timer(&self) {
         let pool = self.pool.clone();
 
-        // This takes the place of your goroutine
         tokio::spawn(async move {
             let mut interval = tokio::time::interval(std::time::Duration::from_secs(5 * 60));
             loop {
@@ -371,9 +373,9 @@ impl DatabaseManager {
                     .execute(&pool)
                     .await;
 
-                // if let Err(e) = res {
-                //     error!(error = ?e, "Failed to clean up expired one-time codes");
-                // }
+                if let Err(e) = res {
+                    error!(error = ?e, "Failed to clean up expired one-time codes");
+                }
             }
         });
     }

@@ -6,13 +6,32 @@
         1
       ],
       "is_public": true,
-      "public_url": null,
+      "public_url": [
+        "/api/discord_callback"
+      ],
       "compiled_permissions_bitfield": 2,
       "csrf_token_header": "X-CSRF-Token",
       "csrf_token_cookie": "csrf_token",
       "response_cors_headers": null,
       "enforce_csrf": false,
-      "is_frontend": false
+      "is_frontend": false,
+      "frontend_static_file": null
+    },
+    "/auth.v2.AuthService/DiscordLogin": {
+      "allow_roles": [
+        1
+      ],
+      "is_public": true,
+      "public_url": [
+        "/api/login"
+      ],
+      "compiled_permissions_bitfield": 2,
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": false,
+      "is_frontend": false,
+      "frontend_static_file": null
     },
     "/auth.v2.AuthService/FrontendIndex": {
       "allow_roles": [
@@ -28,7 +47,8 @@
       "csrf_token_cookie": "csrf_token",
       "response_cors_headers": null,
       "enforce_csrf": false,
-      "is_frontend": true
+      "is_frontend": true,
+      "frontend_static_file": "index.html"
     },
     "/auth.v2.AuthService/GetCSRFToken": {
       "allow_roles": [
@@ -41,7 +61,8 @@
       "csrf_token_cookie": "csrf_token",
       "response_cors_headers": null,
       "enforce_csrf": false,
-      "is_frontend": false
+      "is_frontend": false,
+      "frontend_static_file": null
     },
     "/auth.v2.AuthService/GetDevToken": {
       "allow_roles": [
@@ -54,7 +75,8 @@
       "csrf_token_cookie": "csrf_token",
       "response_cors_headers": null,
       "enforce_csrf": false,
-      "is_frontend": false
+      "is_frontend": false,
+      "frontend_static_file": null
     },
     "/auth.v2.AuthService/GetJWTPublicKey": {
       "allow_roles": [
@@ -68,7 +90,8 @@
       "csrf_token_cookie": "csrf_token",
       "response_cors_headers": null,
       "enforce_csrf": false,
-      "is_frontend": false
+      "is_frontend": false,
+      "frontend_static_file": null
     },
     "/auth.v2.AuthService/ListUsers": {
       "allow_roles": [
@@ -82,7 +105,8 @@
       "csrf_token_cookie": "csrf_token",
       "response_cors_headers": null,
       "enforce_csrf": false,
-      "is_frontend": false
+      "is_frontend": false,
+      "frontend_static_file": null
     },
     "/auth.v2.AuthService/Login": {
       "allow_roles": [
@@ -95,7 +119,8 @@
       "csrf_token_cookie": "csrf_token",
       "response_cors_headers": null,
       "enforce_csrf": true,
-      "is_frontend": false
+      "is_frontend": false,
+      "frontend_static_file": null
     },
     "/auth.v2.AuthService/RenewJWT": {
       "allow_roles": [
@@ -109,7 +134,8 @@
       "csrf_token_cookie": "csrf_token",
       "response_cors_headers": null,
       "enforce_csrf": false,
-      "is_frontend": false
+      "is_frontend": false,
+      "frontend_static_file": null
     }
   }
 }

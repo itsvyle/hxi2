@@ -24,6 +24,7 @@ pub struct MethodPermissions {
     pub response_cors_headers: Option<BTreeMap<String, String>>,
     pub enforce_csrf: bool,
     pub is_frontend: bool,
+    pub frontend_static_file: Option<String>,
 }
 
 fn serialize_roles_as_ints<S>(roles: &[Permission], serializer: S) -> Result<S::Ok, S::Error>
@@ -76,6 +77,13 @@ fn method_permissions_from_permissions(perms_msg: Permissions, base: &mut Method
     if let Some(is_frontend) = perms_msg.is_frontend {
         base.is_frontend = is_frontend;
     }
+    if let Some(frontend_static_file) = perms_msg.frontend_static_file {
+        if frontend_static_file.is_empty() {
+            base.frontend_static_file = None;
+        } else {
+            base.frontend_static_file = Some(frontend_static_file);
+        }
+    }
 }
 
 fn get_proto_folder_hash() -> Result<String> {
@@ -111,6 +119,7 @@ fn get_permissions(descriptor_bytes: &[u8]) -> Result<BTreeMap<String, MethodPer
             response_cors_headers: None,
             enforce_csrf: false,
             is_frontend: false,
+            frontend_static_file: None,
         };
         if let Some(options) = service.options()
             && let Some(perms_msg) = options.extension(&PERMISSION_LEVEL_SERVICE)

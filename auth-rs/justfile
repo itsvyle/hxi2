@@ -20,6 +20,10 @@ export CONFIG_CSRF_SIGNING_KEY := "PAFXpBAmnyWvpeYK0FoaCSe3QrOp4OZygusAquc4Zho="
 PORT := "8080"
 export CONFIG_RUNNING_PORT := PORT
 
+jwt_token_payload := '{"user_id": "42", "roles": [
+    "PERMISSION_API_JWT"
+]}'
+
 init: 
     @just _utils-check-program "cargo" 1
     @just _utils-check-program "volta" 0
@@ -39,10 +43,6 @@ dev:
 
 run $HXI2_AUTH_URL="http://localhost:8080" $HXI2_AUTH_ENDPOINT="http://localhost:8080" $CONFIG_JWT_PRIVATE_KEY=test_private_key $CONFIG_DB_PATH=CONFIG_DB_PATH:
     cargo run .
-
-jwt_token_payload := '{"user_id": "42", "roles": [
-    "PERMISSION_API_JWT"
-]}'
 
 get_jwt:
     curl -s -X POST \

@@ -4,6 +4,7 @@ mod auth_service;
 mod connect_result;
 mod csrf_handler;
 mod database;
+mod discord_login;
 mod jwt_signer;
 mod jwt_verifier;
 mod permissions_checking;
@@ -21,30 +22,25 @@ use tower_http::timeout::TimeoutLayer;
 
 use crate::{
     csrf_handler::{CsrfProtection, GLOBAL_CSRF_PROTECTION},
+    discord_login::DiscordLoginManager,
     jwt_signer::GLOBAL_JWT_SIGNER,
     jwt_verifier::GLOBAL_JWT_VERIFIER,
 };
 
-use axum::{
-    http::StatusCode,
-    response::{Html, IntoResponse},
-};
-
-// 1. Route Handler to serve the static HTML file
-async fn serve_index() -> impl IntoResponse {
-    match tokio::fs::read_to_string("src/index.html").await {
-        Ok(html_content) => Html(html_content).into_response(),
-        Err(_) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "Could not load index.html. Ensure the file is in your running directory.",
-        )
-            .into_response(),
-    }
-}
+use axum::{http::StatusCode, response::Html};
+use tracing::{debug, error, info};
+use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    let filter = EnvFilter::builder()
+        .with_default_directive(tracing_subscriber::filter::LevelFilter::INFO.into())
+        .from_env_lossy()
+        .add_directive("sqlx=warn".parse().unwrap());
+
+    tracing_subscriber::fmt().with_env_filter(filter).init();
     let cfg = AppConfiguration::INSTANCE();
+    debug!(cfg = ?cfg,"Loaded configuration");
     // Force initialization of the JWT public key at startup, so we fail fast if the private key is invalid.
     let _jwt_public = cfg.jwt_public_key();
     let _csrf_prot = GLOBAL_CSRF_PROTECTION.generate_token();
@@ -57,8 +53,38 @@ async fn main() -> Result<()> {
     });
     let connect = service.register(ConnectRouter::new());
 
-    let app = axum::Router::new()
-        .route("/", get(serve_index))
+    let discord_manager = DiscordLoginManager::new(cfg)?;
+
+    let mut app = axum::Router::new().merge(discord_manager.router());
+    for (_, method_perms) in permissions_checking::get_compiled_permissions().permissions {
+        if method_perms.is_frontend
+            && method_perms.is_public
+            && let Some(file_path) = method_perms.frontend_static_file
+        {
+            for url in method_perms.public_url.unwrap_or(&[]) {
+                app = app.route(
+                    url,
+                    get(move || async move {
+                        let file_content = tokio::fs::read(format!("./src/{file_path}"))
+                            .await
+                            .map_err(|err| {
+                                error!(
+                                    error = %err,
+                                    file_path = "./src/{file_path}",
+                                    "Failed to read file from disk"
+                                );
+                                (StatusCode::INTERNAL_SERVER_ERROR, "Failed to read file")
+                            })?;
+
+                        Ok::<_, (StatusCode, &'static str)>(Html(file_content))
+                    }),
+                );
+                debug!("Registered static file route: {} -> {}", url, file_path);
+            }
+        }
+    }
+
+    app = app
         .route("/health", get(|| async { "OK" }))
         .fallback_service(connect.into_axum_service())
         .layer(
@@ -75,7 +101,7 @@ async fn main() -> Result<()> {
         .await
         .context("bind TCP listener")?;
 
-    println!("Auth service listening on {}", listener.local_addr()?);
+    info!(port = ?listener.local_addr()?, "Auth service listening");
 
     axum::serve(listener, app).await?;
     Ok(())

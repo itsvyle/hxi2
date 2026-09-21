@@ -15,6 +15,7 @@ use hxi2_proto::{
     connect::auth::v2::AuthService,
     proto::auth::v2::{GetDevTokenRequest, GetDevTokenResponse},
 };
+use tracing::{info, instrument};
 
 use crate::app_config::AppConfiguration;
 use crate::connect_result::ToConnectError;
@@ -196,4 +197,5 @@ impl AuthService for AuthServiceImpl {
     impl_unimplemented_rpc!(login, LoginRequest, LoginResponse);
     impl_otherplace_rpc!(frontend_index, Empty, Empty);
     impl_otherplace_rpc!(discord_callback, Empty, Empty);
+    impl_otherplace_rpc!(discord_login, Empty, Empty);
 }

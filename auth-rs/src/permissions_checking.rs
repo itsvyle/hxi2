@@ -3,7 +3,8 @@
 
 pub fn get_route_from_public_url(url: &str) -> Option<&'static str> {
     match url {
-        "/auth.v2.AuthService/DiscordCallback" => return Some("/auth.v2.AuthService/DiscordCallback"),
+        "/api/discord_callback" | "/auth.v2.AuthService/DiscordCallback" => return Some("/auth.v2.AuthService/DiscordCallback"),
+"/api/login" | "/auth.v2.AuthService/DiscordLogin" => return Some("/auth.v2.AuthService/DiscordLogin"),
 "/" | "/index.html" | "/auth.v2.AuthService/FrontendIndex" => return Some("/auth.v2.AuthService/FrontendIndex"),
 "/auth.v2.AuthService/GetCSRFToken" => return Some("/auth.v2.AuthService/GetCSRFToken"),
 "/auth.v2.AuthService/GetDevToken" => return Some("/auth.v2.AuthService/GetDevToken"),
@@ -29,6 +30,8 @@ pub struct MethodPermissions {
     pub csrf_token_cookie: Option<&'static str>,
     pub response_cors_headers: Option<BTreeMap<&'static str, &'static str>>,
     pub enforce_csrf: bool,
+    pub is_frontend: bool,
+    pub frontend_static_file: Option<&'static str>,
 }
 
 pub trait MethodPermissionsOptionExt {
@@ -63,13 +66,14 @@ impl CompiledPermissions {
     pub fn get_by_route(&self, route: &str) -> Option<&MethodPermissions> {
         match route {
 				"/auth.v2.AuthService/DiscordCallback" => return Some(&self.permissions[0].1),
-				"/auth.v2.AuthService/FrontendIndex" => return Some(&self.permissions[1].1),
-				"/auth.v2.AuthService/GetCSRFToken" => return Some(&self.permissions[2].1),
-				"/auth.v2.AuthService/GetDevToken" => return Some(&self.permissions[3].1),
-				"/auth.v2.AuthService/GetJWTPublicKey" => return Some(&self.permissions[4].1),
-				"/auth.v2.AuthService/ListUsers" => return Some(&self.permissions[5].1),
-				"/auth.v2.AuthService/Login" => return Some(&self.permissions[6].1),
-				"/auth.v2.AuthService/RenewJWT" => return Some(&self.permissions[7].1),
+				"/auth.v2.AuthService/DiscordLogin" => return Some(&self.permissions[1].1),
+				"/auth.v2.AuthService/FrontendIndex" => return Some(&self.permissions[2].1),
+				"/auth.v2.AuthService/GetCSRFToken" => return Some(&self.permissions[3].1),
+				"/auth.v2.AuthService/GetDevToken" => return Some(&self.permissions[4].1),
+				"/auth.v2.AuthService/GetJWTPublicKey" => return Some(&self.permissions[5].1),
+				"/auth.v2.AuthService/ListUsers" => return Some(&self.permissions[6].1),
+				"/auth.v2.AuthService/Login" => return Some(&self.permissions[7].1),
+				"/auth.v2.AuthService/RenewJWT" => return Some(&self.permissions[8].1),
             _ => None,
         }
     }
@@ -83,12 +87,28 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
 					Permission::PERMISSION_ADMIN,
                 ],
                 is_public: true,
-                public_url: None,
+                public_url: Some(&["/api/discord_callback"]),
                 compiled_permissions_bitfield: 2,
                 csrf_token_header: Some("X-CSRF-Token"),
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
                 enforce_csrf: false,
+                is_frontend: false,
+                frontend_static_file: None,
+            }),
+            ("/auth.v2.AuthService/DiscordLogin", MethodPermissions {
+                allow_roles: &[
+					Permission::PERMISSION_ADMIN,
+                ],
+                is_public: true,
+                public_url: Some(&["/api/login"]),
+                compiled_permissions_bitfield: 2,
+                csrf_token_header: Some("X-CSRF-Token"),
+                csrf_token_cookie: Some("csrf_token"),
+                response_cors_headers: None,
+                enforce_csrf: false,
+                is_frontend: false,
+                frontend_static_file: None,
             }),
             ("/auth.v2.AuthService/FrontendIndex", MethodPermissions {
                 allow_roles: &[
@@ -101,6 +121,8 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
                 enforce_csrf: false,
+                is_frontend: true,
+                frontend_static_file: Some("index.html"),
             }),
             ("/auth.v2.AuthService/GetCSRFToken", MethodPermissions {
                 allow_roles: &[
@@ -113,6 +135,8 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
                 enforce_csrf: false,
+                is_frontend: false,
+                frontend_static_file: None,
             }),
             ("/auth.v2.AuthService/GetDevToken", MethodPermissions {
                 allow_roles: &[
@@ -125,6 +149,8 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
                 enforce_csrf: false,
+                is_frontend: false,
+                frontend_static_file: None,
             }),
             ("/auth.v2.AuthService/GetJWTPublicKey", MethodPermissions {
                 allow_roles: &[
@@ -138,6 +164,8 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
                 enforce_csrf: false,
+                is_frontend: false,
+                frontend_static_file: None,
             }),
             ("/auth.v2.AuthService/ListUsers", MethodPermissions {
                 allow_roles: &[
@@ -151,6 +179,8 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
                 enforce_csrf: false,
+                is_frontend: false,
+                frontend_static_file: None,
             }),
             ("/auth.v2.AuthService/Login", MethodPermissions {
                 allow_roles: &[
@@ -163,6 +193,8 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
                 enforce_csrf: true,
+                is_frontend: false,
+                frontend_static_file: None,
             }),
             ("/auth.v2.AuthService/RenewJWT", MethodPermissions {
                 allow_roles: &[
@@ -176,6 +208,8 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
                 enforce_csrf: false,
+                is_frontend: false,
+                frontend_static_file: None,
             }),
         ],
         hash: "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262",
