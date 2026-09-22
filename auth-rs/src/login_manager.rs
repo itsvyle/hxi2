@@ -60,7 +60,7 @@ impl LoginManager {
         let small_data = self.small_data_from_user(&user);
         let (token, claims) = self.signer.new_token(
             &format!("{}", user.id),
-            small_data,
+            &small_data,
             &JWTSignerOptions::default(),
         )?;
 
@@ -69,7 +69,7 @@ impl LoginManager {
         Ok(LoginResponse {
             token,
             refresh_token,
-            small_data: &claims.data.,
+            small_data: claims.data.expect("claims.data should be present"),
         })
     }
 }

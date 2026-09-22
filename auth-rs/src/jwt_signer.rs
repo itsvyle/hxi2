@@ -46,7 +46,7 @@ impl JWTSigner {
     pub fn new_token(
         &self,
         sub: &str,
-        data: SmallData,
+        data: &SmallData,
         options: &JWTSignerOptions,
     ) -> Result<(String, JwtClaims)> {
         let cfg = AppConfiguration::INSTANCE();
