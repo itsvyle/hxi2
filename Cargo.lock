@@ -1237,6 +1237,7 @@ name = "hxi2-proto"
 version = "0.1.0"
 dependencies = [
  "buffa",
+ "buffa-descriptor",
  "buffa-types",
  "connectrpc",
  "http 1.4.2",

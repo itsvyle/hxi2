@@ -6,9 +6,7 @@ plugins:
       opt:
           - views=true
           - json=true
-          - reflect=true
-          - minimum_edition=2021
-          - maximum_edition=2023
+          - reflection=true
     - local: protoc-gen-buffa-packaging
       out: generated-proto/rs/buffa
       strategy: all

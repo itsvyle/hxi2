@@ -99,7 +99,7 @@ impl AuthService for AuthServiceImpl {
             .signer
             .new_token(
                 &format!("{}", data.user_id),
-                data,
+                &data,
                 &crate::jwt_signer::JWTSignerOptions::default()
                     .with_validity(time::Duration::from_hours(24)),
             )

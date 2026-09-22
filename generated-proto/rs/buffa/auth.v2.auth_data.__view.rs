@@ -27,195 +27,149 @@ pub struct DBUserView<'a> {
     pub permissions: i64,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> DBUserView<'a> {
-    /// Decode from `buf`, enforcing a recursion depth limit for nested messages.
-    ///
-    /// Called by [`::buffa::MessageView::decode_view`] with [`::buffa::RECURSION_LIMIT`]
-    /// and by generated sub-message decode arms with `depth - 1`.
-    ///
-    /// **Not part of the public API.** Named with a leading underscore to
-    /// signal that it is for generated-code use only.
-    #[doc(hidden)]
-    pub fn _decode_depth(
-        buf: &'a [u8],
-        depth: u32,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        let mut view = Self::default();
-        view._merge_into_view(buf, depth)?;
-        ::core::result::Result::Ok(view)
-    }
-    /// Merge fields from `buf` into this view (proto merge semantics).
-    ///
-    /// Repeated fields append; singular fields last-wins; singular
-    /// MESSAGE fields merge recursively. Used by sub-message decode
-    /// arms when the same field appears multiple times on the wire.
-    ///
-    /// **Not part of the public API.**
-    #[doc(hidden)]
-    pub fn _merge_into_view(
-        &mut self,
-        buf: &'a [u8],
-        depth: u32,
-    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
-        let _ = depth;
-        #[allow(unused_variables)]
-        let view = self;
-        let mut cur: &'a [u8] = buf;
-        while !cur.is_empty() {
-            let before_tag = cur;
-            let tag = ::buffa::encoding::Tag::decode(&mut cur)?;
-            match tag.field_number() {
-                1u32 => {
-                    if tag.wire_type() != ::buffa::encoding::WireType::Varint {
-                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                            field_number: 1u32,
-                            expected: 0u8,
-                            actual: tag.wire_type() as u8,
-                        });
-                    }
-                    view.id = ::buffa::types::decode_int64(&mut cur)?;
-                }
-                2u32 => {
-                    if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
-                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                            field_number: 2u32,
-                            expected: 2u8,
-                            actual: tag.wire_type() as u8,
-                        });
-                    }
-                    view.username = ::buffa::types::borrow_str(&mut cur)?;
-                }
-                3u32 => {
-                    if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
-                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                            field_number: 3u32,
-                            expected: 2u8,
-                            actual: tag.wire_type() as u8,
-                        });
-                    }
-                    view.first_name = ::buffa::types::borrow_str(&mut cur)?;
-                }
-                4u32 => {
-                    if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
-                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                            field_number: 4u32,
-                            expected: 2u8,
-                            actual: tag.wire_type() as u8,
-                        });
-                    }
-                    view.last_name = Some(::buffa::types::borrow_str(&mut cur)?);
-                }
-                5u32 => {
-                    if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
-                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                            field_number: 5u32,
-                            expected: 2u8,
-                            actual: tag.wire_type() as u8,
-                        });
-                    }
-                    view.discord_id = ::buffa::types::borrow_str(&mut cur)?;
-                }
-                6u32 => {
-                    if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
-                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                            field_number: 6u32,
-                            expected: 2u8,
-                            actual: tag.wire_type() as u8,
-                        });
-                    }
-                    if depth == 0 {
-                        return Err(::buffa::DecodeError::RecursionLimitExceeded);
-                    }
-                    let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                    match view.account_created_date.as_mut() {
-                        Some(existing) => existing._merge_into_view(sub, depth - 1)?,
-                        None => {
-                            view.account_created_date = ::buffa::MessageFieldView::set(
-                                ::buffa_types::google::protobuf::__buffa::view::TimestampView::_decode_depth(
-                                    sub,
-                                    depth - 1,
-                                )?,
-                            );
-                        }
-                    }
-                }
-                7u32 => {
-                    if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
-                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                            field_number: 7u32,
-                            expected: 2u8,
-                            actual: tag.wire_type() as u8,
-                        });
-                    }
-                    if depth == 0 {
-                        return Err(::buffa::DecodeError::RecursionLimitExceeded);
-                    }
-                    let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                    match view.account_modified_date.as_mut() {
-                        Some(existing) => existing._merge_into_view(sub, depth - 1)?,
-                        None => {
-                            view.account_modified_date = ::buffa::MessageFieldView::set(
-                                ::buffa_types::google::protobuf::__buffa::view::TimestampView::_decode_depth(
-                                    sub,
-                                    depth - 1,
-                                )?,
-                            );
-                        }
-                    }
-                }
-                8u32 => {
-                    if tag.wire_type() != ::buffa::encoding::WireType::Varint {
-                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                            field_number: 8u32,
-                            expected: 0u8,
-                            actual: tag.wire_type() as u8,
-                        });
-                    }
-                    view.promotion = ::buffa::types::decode_int32(&mut cur)?;
-                }
-                9u32 => {
-                    if tag.wire_type() != ::buffa::encoding::WireType::Varint {
-                        return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                            field_number: 9u32,
-                            expected: 0u8,
-                            actual: tag.wire_type() as u8,
-                        });
-                    }
-                    view.permissions = ::buffa::types::decode_int64(&mut cur)?;
-                }
-                _ => {
-                    ::buffa::encoding::skip_field_depth(tag, &mut cur, depth)?;
-                    let span_len = before_tag.len() - cur.len();
-                    view.__buffa_unknown_fields.push_raw(&before_tag[..span_len]);
-                }
-            }
-        }
-        ::core::result::Result::Ok(())
-    }
-}
 impl<'a> ::buffa::MessageView<'a> for DBUserView<'a> {
     type Owned = super::super::DBUser;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        Self::_decode_depth(buf, ::buffa::RECURSION_LIMIT)
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
     }
-    fn decode_view_with_limit(
+    fn decode_view_with_ctx(
         buf: &'a [u8],
-        depth: u32,
+        ctx: ::buffa::DecodeContext<'_>,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        Self::_decode_depth(buf, depth)
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
     }
-    fn to_owned_message(&self) -> super::super::DBUser {
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.id = ::buffa::types::decode_int64(&mut cur)?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.username = ::buffa::types::borrow_str(&mut cur)?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.first_name = ::buffa::types::borrow_str(&mut cur)?;
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.last_name = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.discord_id = ::buffa::types::borrow_str(&mut cur)?;
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.account_created_date.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.account_created_date = ::buffa::MessageFieldView::set(
+                            <::buffa_types::google::protobuf::__buffa::view::TimestampView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.account_modified_date.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.account_modified_date = ::buffa::MessageFieldView::set(
+                            <::buffa_types::google::protobuf::__buffa::view::TimestampView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.promotion = ::buffa::types::decode_int32(&mut cur)?;
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.permissions = ::buffa::types::decode_int64(&mut cur)?;
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<super::super::DBUser, ::buffa::DecodeError> {
         self.to_owned_from_source(None)
     }
     #[allow(clippy::useless_conversion, clippy::needless_update)]
     fn to_owned_from_source(
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> super::super::DBUser {
+    ) -> ::core::result::Result<super::super::DBUser, ::buffa::DecodeError> {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        super::super::DBUser {
+        ::core::result::Result::Ok(super::super::DBUser {
             id: self.id,
             username: self.username.to_string(),
             first_name: self.first_name.to_string(),
@@ -225,7 +179,8 @@ impl<'a> ::buffa::MessageView<'a> for DBUserView<'a> {
                 Some(v) => {
                     ::buffa::MessageField::<
                         ::buffa_types::google::protobuf::Timestamp,
-                    >::some(v.to_owned_from_source(__buffa_src))
+                        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
                 }
                 None => ::buffa::MessageField::none(),
             },
@@ -233,19 +188,16 @@ impl<'a> ::buffa::MessageView<'a> for DBUserView<'a> {
                 Some(v) => {
                     ::buffa::MessageField::<
                         ::buffa_types::google::protobuf::Timestamp,
-                    >::some(v.to_owned_from_source(__buffa_src))
+                        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
                 }
                 None => ::buffa::MessageField::none(),
             },
             promotion: self.promotion,
             permissions: self.permissions,
-            __buffa_unknown_fields: self
-                .__buffa_unknown_fields
-                .to_owned()
-                .unwrap_or_default()
-                .into(),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
-        }
+        })
     }
 }
 impl<'a> ::buffa::ViewEncode<'a> for DBUserView<'a> {
@@ -253,119 +205,91 @@ impl<'a> ::buffa::ViewEncode<'a> for DBUserView<'a> {
     fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        let mut size = 0u32;
+        let mut size = 0u64;
         if self.id != 0i64 {
-            size += 1u32 + ::buffa::types::int64_encoded_len(self.id) as u32;
+            size += 1u64 + ::buffa::types::int64_encoded_len(self.id) as u64;
         }
         if !self.username.is_empty() {
-            size += 1u32 + ::buffa::types::string_encoded_len(&self.username) as u32;
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.username) as u64;
         }
         if !self.first_name.is_empty() {
-            size += 1u32 + ::buffa::types::string_encoded_len(&self.first_name) as u32;
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.first_name) as u64;
         }
         if let Some(ref v) = self.last_name {
-            size += 1u32 + ::buffa::types::string_encoded_len(v) as u32;
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         if !self.discord_id.is_empty() {
-            size += 1u32 + ::buffa::types::string_encoded_len(&self.discord_id) as u32;
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.discord_id) as u64;
         }
         if self.account_created_date.is_set() {
             let __slot = __cache.reserve();
             let inner_size = self.account_created_date.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
-                += 1u32 + ::buffa::encoding::varint_len(inner_size as u64) as u32
-                    + inner_size;
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
         if self.account_modified_date.is_set() {
             let __slot = __cache.reserve();
             let inner_size = self.account_modified_date.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
-                += 1u32 + ::buffa::encoding::varint_len(inner_size as u64) as u32
-                    + inner_size;
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
         if self.promotion != 0i32 {
-            size += 1u32 + ::buffa::types::int32_encoded_len(self.promotion) as u32;
+            size += 1u64 + ::buffa::types::int32_encoded_len(self.promotion) as u64;
         }
         if self.permissions != 0i64 {
-            size += 1u32 + ::buffa::types::int64_encoded_len(self.permissions) as u32;
+            size += 1u64 + ::buffa::types::int64_encoded_len(self.permissions) as u64;
         }
-        size += self.__buffa_unknown_fields.encoded_len() as u32;
-        size
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
     }
     #[allow(clippy::needless_borrow)]
     fn write_to(
         &self,
         __cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::bytes::BufMut,
+        buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         if self.id != 0i64 {
-            ::buffa::encoding::Tag::new(1u32, ::buffa::encoding::WireType::Varint)
-                .encode(buf);
-            ::buffa::types::encode_int64(self.id, buf);
+            ::buffa::types::put_int64_field(1u32, self.id, buf);
         }
         if !self.username.is_empty() {
-            ::buffa::encoding::Tag::new(
-                    2u32,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )
-                .encode(buf);
-            ::buffa::types::encode_string(&self.username, buf);
+            ::buffa::types::put_string_field(2u32, &self.username, buf);
         }
         if !self.first_name.is_empty() {
-            ::buffa::encoding::Tag::new(
-                    3u32,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )
-                .encode(buf);
-            ::buffa::types::encode_string(&self.first_name, buf);
+            ::buffa::types::put_string_field(3u32, &self.first_name, buf);
         }
         if let Some(ref v) = self.last_name {
-            ::buffa::encoding::Tag::new(
-                    4u32,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )
-                .encode(buf);
-            ::buffa::types::encode_string(v, buf);
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         if !self.discord_id.is_empty() {
-            ::buffa::encoding::Tag::new(
-                    5u32,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )
-                .encode(buf);
-            ::buffa::types::encode_string(&self.discord_id, buf);
+            ::buffa::types::put_string_field(5u32, &self.discord_id, buf);
         }
         if self.account_created_date.is_set() {
-            ::buffa::encoding::Tag::new(
-                    6u32,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )
-                .encode(buf);
-            ::buffa::encoding::encode_varint(__cache.consume_next() as u64, buf);
+            ::buffa::types::put_len_delimited_header(
+                6u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
             self.account_created_date.write_to(__cache, buf);
         }
         if self.account_modified_date.is_set() {
-            ::buffa::encoding::Tag::new(
-                    7u32,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )
-                .encode(buf);
-            ::buffa::encoding::encode_varint(__cache.consume_next() as u64, buf);
+            ::buffa::types::put_len_delimited_header(
+                7u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
             self.account_modified_date.write_to(__cache, buf);
         }
         if self.promotion != 0i32 {
-            ::buffa::encoding::Tag::new(8u32, ::buffa::encoding::WireType::Varint)
-                .encode(buf);
-            ::buffa::types::encode_int32(self.promotion, buf);
+            ::buffa::types::put_int32_field(8u32, self.promotion, buf);
         }
         if self.permissions != 0i64 {
-            ::buffa::encoding::Tag::new(9u32, ::buffa::encoding::WireType::Varint)
-                .encode(buf);
-            ::buffa::types::encode_int64(self.permissions, buf);
+            ::buffa::types::put_int64_field(9u32, self.permissions, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -389,16 +313,7 @@ impl<'__a> ::serde::Serialize for DBUserView<'__a> {
         use ::serde::ser::SerializeMap as _;
         let mut __map = __s.serialize_map(::core::option::Option::None)?;
         if !::buffa::json_helpers::skip_if::is_zero_i64(&self.id) {
-            struct _W(i64);
-            impl ::serde::Serialize for _W {
-                fn serialize<__S: ::serde::Serializer>(
-                    &self,
-                    __s: __S,
-                ) -> ::core::result::Result<__S::Ok, __S::Error> {
-                    ::buffa::json_helpers::int64::serialize(&self.0, __s)
-                }
-            }
-            __map.serialize_entry("id", &_W(self.id))?;
+            __map.serialize_entry("id", &::buffa::json_helpers::ProtoJson(&self.id))?;
         }
         if !::buffa::json_helpers::skip_if::is_empty_str(self.username) {
             __map.serialize_entry("username", self.username)?;
@@ -429,28 +344,18 @@ impl<'__a> ::serde::Serialize for DBUserView<'__a> {
             }
         }
         if !::buffa::json_helpers::skip_if::is_zero_i32(&self.promotion) {
-            struct _W(i32);
-            impl ::serde::Serialize for _W {
-                fn serialize<__S: ::serde::Serializer>(
-                    &self,
-                    __s: __S,
-                ) -> ::core::result::Result<__S::Ok, __S::Error> {
-                    ::buffa::json_helpers::int32::serialize(&self.0, __s)
-                }
-            }
-            __map.serialize_entry("promotion", &_W(self.promotion))?;
+            __map
+                .serialize_entry(
+                    "promotion",
+                    &::buffa::json_helpers::ProtoJson(&self.promotion),
+                )?;
         }
         if !::buffa::json_helpers::skip_if::is_zero_i64(&self.permissions) {
-            struct _W(i64);
-            impl ::serde::Serialize for _W {
-                fn serialize<__S: ::serde::Serializer>(
-                    &self,
-                    __s: __S,
-                ) -> ::core::result::Result<__S::Ok, __S::Error> {
-                    ::buffa::json_helpers::int64::serialize(&self.0, __s)
-                }
-            }
-            __map.serialize_entry("permissions", &_W(self.permissions))?;
+            __map
+                .serialize_entry(
+                    "permissions",
+                    &::buffa::json_helpers::ProtoJson(&self.permissions),
+                )?;
         }
         __map.end()
     }
@@ -461,24 +366,8 @@ impl<'a> ::buffa::MessageName for DBUserView<'a> {
     const FULL_NAME: &'static str = "auth.v2.DBUser";
     const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.DBUser";
 }
-impl<'v> ::buffa::DefaultViewInstance for DBUserView<'v> {
-    fn default_view_instance<'a>() -> &'a Self
-    where
-        Self: 'a,
-    {
-        static VALUE: ::buffa::__private::OnceBox<DBUserView<'static>> = ::buffa::__private::OnceBox::new();
-        VALUE
-            .get_or_init(|| ::buffa::alloc::boxed::Box::new(
-                <DBUserView<'static>>::default(),
-            ))
-    }
-}
-impl ::buffa::ViewReborrow for DBUserView<'static> {
-    type Reborrowed<'b> = DBUserView<'b>;
-    fn reborrow<'b>(this: &'b Self) -> &'b Self::Reborrowed<'b> {
-        this
-    }
-}
+::buffa::impl_default_view_instance!(DBUserView);
+::buffa::impl_view_reborrow!(DBUserView);
 /** Self-contained, `'static` owned view of a `DBUser` message.
 
  Wraps [`::buffa::OwnedView`]`<`[`DBUserView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
@@ -520,7 +409,9 @@ impl DBUserOwnedView {
     ///
     /// # Errors
     ///
-    /// Returns [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
         msg: &super::super::DBUser,
@@ -533,6 +424,12 @@ impl DBUserOwnedView {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
     #[must_use]
     pub fn to_owned_message(&self) -> super::super::DBUser {
         self.0.to_owned_message()
@@ -627,5 +524,131 @@ impl ::serde::Serialize for DBUserOwnedView {
         __s: __S,
     ) -> ::core::result::Result<__S::Ok, __S::Error> {
         ::serde::Serialize::serialize(&self.0, __s)
+    }
+}
+impl<'a> ::buffa_descriptor::reflect::ReflectMessage for DBUserView<'a> {
+    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+        super::super::__buffa::reflect::descriptor_pool()
+            .message(Self::__buffa_reflect_message_index())
+    }
+    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+        super::super::__buffa::reflect::descriptor_pool()
+    }
+    fn get(
+        &self,
+        field: &::buffa_descriptor::FieldDescriptor,
+    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match field.number() {
+            1u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.id),
+            2u32 => ::buffa_descriptor::reflect::ValueRef::String(self.username),
+            3u32 => ::buffa_descriptor::reflect::ValueRef::String(self.first_name),
+            4u32 => {
+                ::buffa_descriptor::reflect::ValueRef::String(
+                    self.last_name.unwrap_or(""),
+                )
+            }
+            5u32 => ::buffa_descriptor::reflect::ValueRef::String(self.discord_id),
+            6u32 => {
+                ::buffa_descriptor::reflect::ValueRef::Message(
+                    ::buffa_descriptor::reflect::ReflectCow::Borrowed(
+                        &*self.account_created_date,
+                    ),
+                )
+            }
+            7u32 => {
+                ::buffa_descriptor::reflect::ValueRef::Message(
+                    ::buffa_descriptor::reflect::ReflectCow::Borrowed(
+                        &*self.account_modified_date,
+                    ),
+                )
+            }
+            8u32 => ::buffa_descriptor::reflect::ValueRef::I32(self.promotion),
+            9u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.permissions),
+            _ => {
+                ::core::debug_assert!(
+                    false,
+                    "field number {} is not a member of this view's reflect get()", field
+                    .number(),
+                );
+                ::buffa_descriptor::reflect::ValueRef::Bool(false)
+            }
+        }
+    }
+    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+        match field.number() {
+            1u32 => self.id != 0,
+            2u32 => !self.username.is_empty(),
+            3u32 => !self.first_name.is_empty(),
+            4u32 => self.last_name.is_some(),
+            5u32 => !self.discord_id.is_empty(),
+            6u32 => self.account_created_date.is_set(),
+            7u32 => self.account_modified_date.is_set(),
+            8u32 => self.promotion != 0,
+            9u32 => self.permissions != 0,
+            _ => false,
+        }
+    }
+    fn for_each_set(
+        &self,
+        f: &mut dyn ::core::ops::FnMut(
+            &::buffa_descriptor::FieldDescriptor,
+            ::buffa_descriptor::reflect::ValueRef<'_>,
+        ),
+    ) {
+        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
+        for fd in md.fields() {
+            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+            }
+        }
+    }
+    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+        let bytes = ::buffa::ViewEncode::encode_to_vec(self);
+        let options = ::buffa::DecodeOptions::new()
+            .with_element_memory_limit(
+                bytes
+                    .len()
+                    .saturating_mul(128)
+                    .max(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT),
+            )
+            .with_unknown_field_limit(
+                bytes.len().max(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT),
+            );
+        ::buffa_descriptor::reflect::DynamicMessage::decode_with_options(
+                ::buffa::alloc::sync::Arc::clone(
+                    super::super::__buffa::reflect::descriptor_pool(),
+                ),
+                Self::__buffa_reflect_message_index(),
+                &bytes,
+                &options,
+            )
+            .expect("view re-encodes to bytes decodable against its own descriptor")
+    }
+}
+impl<'a> ::buffa_descriptor::reflect::ReflectElement for DBUserView<'a> {
+    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        ::buffa_descriptor::reflect::ValueRef::Message(
+            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+        )
+    }
+}
+impl<'a> DBUserView<'a> {
+    /// Memoized `MessageIndex` for this view's message type, resolved
+    /// once against the package's embedded descriptor pool. An inherent
+    /// associated fn (not a free fn) so sibling views in the same module
+    /// do not collide.
+    #[doc(hidden)]
+    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+        *IDX
+            .get_or_init(|| {
+                super::super::__buffa::reflect::descriptor_pool()
+                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                    .expect(
+                        "generated view type is registered in the embedded descriptor pool",
+                    )
+            })
     }
 }

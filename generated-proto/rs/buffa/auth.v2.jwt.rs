@@ -84,10 +84,109 @@ impl SmallData {
         self
     }
 }
-impl ::buffa::DefaultInstance for SmallData {
-    fn default_instance() -> &'static Self {
-        static VALUE: ::buffa::__private::OnceBox<SmallData> = ::buffa::__private::OnceBox::new();
-        VALUE.get_or_init(|| ::buffa::alloc::boxed::Box::new(Self::default()))
+::buffa::impl_default_instance!(SmallData);
+impl ::buffa_descriptor::reflect::ReflectMessage for SmallData {
+    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+        __buffa::reflect::descriptor_pool()
+            .message(Self::__buffa_reflect_message_index())
+    }
+    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+        __buffa::reflect::descriptor_pool()
+    }
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn get(
+        &self,
+        field: &::buffa_descriptor::FieldDescriptor,
+    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match field.number() {
+            1u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.user_id),
+            2u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.username),
+            3u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.first_name),
+            4u32 => {
+                ::buffa_descriptor::reflect::ValueRef::String(
+                    self.last_name.as_deref().unwrap_or(""),
+                )
+            }
+            5u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.permissions),
+            6u32 => ::buffa_descriptor::reflect::ValueRef::I32(self.promotion),
+            _ => {
+                ::core::debug_assert!(
+                    false,
+                    "field number {} is not a member of this message's reflect get()",
+                    field.number(),
+                );
+                ::buffa_descriptor::reflect::ValueRef::Bool(false)
+            }
+        }
+    }
+    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+        match field.number() {
+            1u32 => self.user_id != 0,
+            2u32 => !self.username.is_empty(),
+            3u32 => !self.first_name.is_empty(),
+            4u32 => self.last_name.is_some(),
+            5u32 => self.permissions != 0,
+            6u32 => self.promotion != 0,
+            _ => false,
+        }
+    }
+    fn for_each_set(
+        &self,
+        f: &mut dyn ::core::ops::FnMut(
+            &::buffa_descriptor::FieldDescriptor,
+            ::buffa_descriptor::reflect::ValueRef<'_>,
+        ),
+    ) {
+        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
+        for fd in md.fields() {
+            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+            }
+        }
+    }
+    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+        ::buffa_descriptor::reflect::DynamicMessage::from_message(
+            self,
+            ::buffa::alloc::sync::Arc::clone(__buffa::reflect::descriptor_pool()),
+            Self::__buffa_reflect_message_index(),
+        )
+    }
+}
+impl ::buffa_descriptor::reflect::ReflectElement for SmallData {
+    #[inline]
+    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        ::buffa_descriptor::reflect::ValueRef::Message(
+            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+        )
+    }
+}
+impl SmallData {
+    /// Memoized `MessageIndex` for this message type, resolved once
+    /// against the package's embedded descriptor pool.
+    #[doc(hidden)]
+    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+        *IDX
+            .get_or_init(|| {
+                __buffa::reflect::descriptor_pool()
+                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                    .expect(
+                        "generated message is registered in the embedded descriptor pool",
+                    )
+            })
+    }
+}
+impl ::buffa_descriptor::reflect::Reflectable for SmallData {
+    /// Vtable-mode reflective handle: borrows `self` directly. No
+    /// encode/decode round-trip and no allocation — the reflective
+    /// accessors read this message's fields in place.
+    #[inline]
+    fn reflect(&self) -> ::buffa_descriptor::reflect::ReflectCow<'_> {
+        ::buffa_descriptor::reflect::ReflectCow::Borrowed(self)
     }
 }
 impl ::buffa::MessageName for SmallData {
@@ -99,80 +198,61 @@ impl ::buffa::MessageName for SmallData {
 impl ::buffa::Message for SmallData {
     /// Returns the total encoded size in bytes.
     ///
-    /// The result is a `u32`; the protobuf specification requires all
-    /// messages to fit within 2 GiB (2,147,483,647 bytes), so a
-    /// compliant message will never overflow this type.
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
     #[allow(clippy::let_and_return)]
     fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        let mut size = 0u32;
+        let mut size = 0u64;
         if self.user_id != 0i64 {
-            size += 1u32 + ::buffa::types::int64_encoded_len(self.user_id) as u32;
+            size += 1u64 + ::buffa::types::int64_encoded_len(self.user_id) as u64;
         }
         if !self.username.is_empty() {
-            size += 1u32 + ::buffa::types::string_encoded_len(&self.username) as u32;
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.username) as u64;
         }
         if !self.first_name.is_empty() {
-            size += 1u32 + ::buffa::types::string_encoded_len(&self.first_name) as u32;
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.first_name) as u64;
         }
         if let Some(ref v) = self.last_name {
-            size += 1u32 + ::buffa::types::string_encoded_len(v) as u32;
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         if self.permissions != 0i64 {
-            size += 1u32 + ::buffa::types::int64_encoded_len(self.permissions) as u32;
+            size += 1u64 + ::buffa::types::int64_encoded_len(self.permissions) as u64;
         }
         if self.promotion != 0i32 {
-            size += 1u32 + ::buffa::types::int32_encoded_len(self.promotion) as u32;
+            size += 1u64 + ::buffa::types::int32_encoded_len(self.promotion) as u64;
         }
-        size += self.__buffa_unknown_fields.encoded_len() as u32;
-        size
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
     }
     fn write_to(
         &self,
         _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::bytes::BufMut,
+        buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         if self.user_id != 0i64 {
-            ::buffa::encoding::Tag::new(1u32, ::buffa::encoding::WireType::Varint)
-                .encode(buf);
-            ::buffa::types::encode_int64(self.user_id, buf);
+            ::buffa::types::put_int64_field(1u32, self.user_id, buf);
         }
         if !self.username.is_empty() {
-            ::buffa::encoding::Tag::new(
-                    2u32,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )
-                .encode(buf);
-            ::buffa::types::encode_string(&self.username, buf);
+            ::buffa::types::put_string_field(2u32, &self.username, buf);
         }
         if !self.first_name.is_empty() {
-            ::buffa::encoding::Tag::new(
-                    3u32,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )
-                .encode(buf);
-            ::buffa::types::encode_string(&self.first_name, buf);
+            ::buffa::types::put_string_field(3u32, &self.first_name, buf);
         }
         if let Some(ref v) = self.last_name {
-            ::buffa::encoding::Tag::new(
-                    4u32,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )
-                .encode(buf);
-            ::buffa::types::encode_string(v, buf);
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         if self.permissions != 0i64 {
-            ::buffa::encoding::Tag::new(5u32, ::buffa::encoding::WireType::Varint)
-                .encode(buf);
-            ::buffa::types::encode_int64(self.permissions, buf);
+            ::buffa::types::put_int64_field(5u32, self.permissions, buf);
         }
         if self.promotion != 0i32 {
-            ::buffa::encoding::Tag::new(6u32, ::buffa::encoding::WireType::Varint)
-                .encode(buf);
-            ::buffa::types::encode_int32(self.promotion, buf);
+            ::buffa::types::put_int32_field(6u32, self.promotion, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -180,7 +260,7 @@ impl ::buffa::Message for SmallData {
         &mut self,
         tag: ::buffa::encoding::Tag,
         buf: &mut impl ::buffa::bytes::Buf,
-        depth: u32,
+        ctx: ::buffa::DecodeContext<'_>,
     ) -> ::core::result::Result<(), ::buffa::DecodeError> {
         #[allow(unused_imports)]
         use ::buffa::bytes::Buf as _;
@@ -188,43 +268,31 @@ impl ::buffa::Message for SmallData {
         use ::buffa::Enumeration as _;
         match tag.field_number() {
             1u32 => {
-                if tag.wire_type() != ::buffa::encoding::WireType::Varint {
-                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 1u32,
-                        expected: 0u8,
-                        actual: tag.wire_type() as u8,
-                    });
-                }
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
                 self.user_id = ::buffa::types::decode_int64(buf)?;
             }
             2u32 => {
-                if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
-                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 2u32,
-                        expected: 2u8,
-                        actual: tag.wire_type() as u8,
-                    });
-                }
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
                 ::buffa::types::merge_string(&mut self.username, buf)?;
             }
             3u32 => {
-                if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
-                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 3u32,
-                        expected: 2u8,
-                        actual: tag.wire_type() as u8,
-                    });
-                }
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
                 ::buffa::types::merge_string(&mut self.first_name, buf)?;
             }
             4u32 => {
-                if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
-                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 4u32,
-                        expected: 2u8,
-                        actual: tag.wire_type() as u8,
-                    });
-                }
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
                 ::buffa::types::merge_string(
                     self
                         .last_name
@@ -233,28 +301,22 @@ impl ::buffa::Message for SmallData {
                 )?;
             }
             5u32 => {
-                if tag.wire_type() != ::buffa::encoding::WireType::Varint {
-                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 5u32,
-                        expected: 0u8,
-                        actual: tag.wire_type() as u8,
-                    });
-                }
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
                 self.permissions = ::buffa::types::decode_int64(buf)?;
             }
             6u32 => {
-                if tag.wire_type() != ::buffa::encoding::WireType::Varint {
-                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 6u32,
-                        expected: 0u8,
-                        actual: tag.wire_type() as u8,
-                    });
-                }
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
                 self.promotion = ::buffa::types::decode_int32(buf)?;
             }
             _ => {
                 self.__buffa_unknown_fields
-                    .push(::buffa::encoding::decode_unknown_field(tag, buf, depth)?);
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
             }
         }
         ::core::result::Result::Ok(())
@@ -385,7 +447,7 @@ pub struct JwtClaims {
         rename = "data",
         skip_serializing_if = "::buffa::json_helpers::skip_if::is_unset_message_field"
     )]
-    pub data: ::buffa::MessageField<SmallData>,
+    pub data: ::buffa::MessageField<SmallData, ::buffa::Inline<SmallData>>,
     #[serde(skip)]
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
@@ -422,10 +484,121 @@ impl JwtClaims {
         self
     }
 }
-impl ::buffa::DefaultInstance for JwtClaims {
-    fn default_instance() -> &'static Self {
-        static VALUE: ::buffa::__private::OnceBox<JwtClaims> = ::buffa::__private::OnceBox::new();
-        VALUE.get_or_init(|| ::buffa::alloc::boxed::Box::new(Self::default()))
+::buffa::impl_default_instance!(JwtClaims);
+impl ::buffa_descriptor::reflect::ReflectMessage for JwtClaims {
+    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+        __buffa::reflect::descriptor_pool()
+            .message(Self::__buffa_reflect_message_index())
+    }
+    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+        __buffa::reflect::descriptor_pool()
+    }
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn get(
+        &self,
+        field: &::buffa_descriptor::FieldDescriptor,
+    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match field.number() {
+            1u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.iss),
+            2u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.sub),
+            3u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.aud),
+            4u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.exp),
+            5u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.nbf),
+            6u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.iat),
+            7u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.jti),
+            8u32 => ::buffa_descriptor::reflect::ValueRef::Bool(self.temporary),
+            9u32 => {
+                ::buffa_descriptor::reflect::ValueRef::I64(
+                    self.temporary_recheck_after.unwrap_or(0),
+                )
+            }
+            10u32 => {
+                ::buffa_descriptor::reflect::ValueRef::Message(
+                    ::buffa_descriptor::reflect::Reflectable::reflect(&*self.data),
+                )
+            }
+            _ => {
+                ::core::debug_assert!(
+                    false,
+                    "field number {} is not a member of this message's reflect get()",
+                    field.number(),
+                );
+                ::buffa_descriptor::reflect::ValueRef::Bool(false)
+            }
+        }
+    }
+    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+        match field.number() {
+            1u32 => !self.iss.is_empty(),
+            2u32 => !self.sub.is_empty(),
+            3u32 => !self.aud.is_empty(),
+            4u32 => self.exp != 0,
+            5u32 => self.nbf != 0,
+            6u32 => self.iat != 0,
+            7u32 => !self.jti.is_empty(),
+            8u32 => self.temporary,
+            9u32 => self.temporary_recheck_after.is_some(),
+            10u32 => self.data.is_set(),
+            _ => false,
+        }
+    }
+    fn for_each_set(
+        &self,
+        f: &mut dyn ::core::ops::FnMut(
+            &::buffa_descriptor::FieldDescriptor,
+            ::buffa_descriptor::reflect::ValueRef<'_>,
+        ),
+    ) {
+        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
+        for fd in md.fields() {
+            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+            }
+        }
+    }
+    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+        ::buffa_descriptor::reflect::DynamicMessage::from_message(
+            self,
+            ::buffa::alloc::sync::Arc::clone(__buffa::reflect::descriptor_pool()),
+            Self::__buffa_reflect_message_index(),
+        )
+    }
+}
+impl ::buffa_descriptor::reflect::ReflectElement for JwtClaims {
+    #[inline]
+    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        ::buffa_descriptor::reflect::ValueRef::Message(
+            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+        )
+    }
+}
+impl JwtClaims {
+    /// Memoized `MessageIndex` for this message type, resolved once
+    /// against the package's embedded descriptor pool.
+    #[doc(hidden)]
+    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+        *IDX
+            .get_or_init(|| {
+                __buffa::reflect::descriptor_pool()
+                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                    .expect(
+                        "generated message is registered in the embedded descriptor pool",
+                    )
+            })
+    }
+}
+impl ::buffa_descriptor::reflect::Reflectable for JwtClaims {
+    /// Vtable-mode reflective handle: borrows `self` directly. No
+    /// encode/decode round-trip and no allocation — the reflective
+    /// accessors read this message's fields in place.
+    #[inline]
+    fn reflect(&self) -> ::buffa_descriptor::reflect::ReflectCow<'_> {
+        ::buffa_descriptor::reflect::ReflectCow::Borrowed(self)
     }
 }
 impl ::buffa::MessageName for JwtClaims {
@@ -437,123 +610,94 @@ impl ::buffa::MessageName for JwtClaims {
 impl ::buffa::Message for JwtClaims {
     /// Returns the total encoded size in bytes.
     ///
-    /// The result is a `u32`; the protobuf specification requires all
-    /// messages to fit within 2 GiB (2,147,483,647 bytes), so a
-    /// compliant message will never overflow this type.
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
     #[allow(clippy::let_and_return)]
     fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        let mut size = 0u32;
+        let mut size = 0u64;
         if !self.iss.is_empty() {
-            size += 1u32 + ::buffa::types::string_encoded_len(&self.iss) as u32;
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.iss) as u64;
         }
         if !self.sub.is_empty() {
-            size += 1u32 + ::buffa::types::string_encoded_len(&self.sub) as u32;
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.sub) as u64;
         }
         if !self.aud.is_empty() {
-            size += 1u32 + ::buffa::types::string_encoded_len(&self.aud) as u32;
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.aud) as u64;
         }
         if self.exp != 0i64 {
-            size += 1u32 + ::buffa::types::int64_encoded_len(self.exp) as u32;
+            size += 1u64 + ::buffa::types::int64_encoded_len(self.exp) as u64;
         }
         if self.nbf != 0i64 {
-            size += 1u32 + ::buffa::types::int64_encoded_len(self.nbf) as u32;
+            size += 1u64 + ::buffa::types::int64_encoded_len(self.nbf) as u64;
         }
         if self.iat != 0i64 {
-            size += 1u32 + ::buffa::types::int64_encoded_len(self.iat) as u32;
+            size += 1u64 + ::buffa::types::int64_encoded_len(self.iat) as u64;
         }
         if !self.jti.is_empty() {
-            size += 1u32 + ::buffa::types::string_encoded_len(&self.jti) as u32;
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.jti) as u64;
         }
         if self.temporary {
-            size += 1u32 + ::buffa::types::BOOL_ENCODED_LEN as u32;
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         if let Some(v) = self.temporary_recheck_after {
-            size += 1u32 + ::buffa::types::int64_encoded_len(v) as u32;
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
         }
         if self.data.is_set() {
             let __slot = __cache.reserve();
             let inner_size = self.data.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
-                += 1u32 + ::buffa::encoding::varint_len(inner_size as u64) as u32
-                    + inner_size;
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
-        size += self.__buffa_unknown_fields.encoded_len() as u32;
-        size
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
     }
     fn write_to(
         &self,
         __cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::bytes::BufMut,
+        buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         if !self.iss.is_empty() {
-            ::buffa::encoding::Tag::new(
-                    1u32,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )
-                .encode(buf);
-            ::buffa::types::encode_string(&self.iss, buf);
+            ::buffa::types::put_string_field(1u32, &self.iss, buf);
         }
         if !self.sub.is_empty() {
-            ::buffa::encoding::Tag::new(
-                    2u32,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )
-                .encode(buf);
-            ::buffa::types::encode_string(&self.sub, buf);
+            ::buffa::types::put_string_field(2u32, &self.sub, buf);
         }
         if !self.aud.is_empty() {
-            ::buffa::encoding::Tag::new(
-                    3u32,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )
-                .encode(buf);
-            ::buffa::types::encode_string(&self.aud, buf);
+            ::buffa::types::put_string_field(3u32, &self.aud, buf);
         }
         if self.exp != 0i64 {
-            ::buffa::encoding::Tag::new(4u32, ::buffa::encoding::WireType::Varint)
-                .encode(buf);
-            ::buffa::types::encode_int64(self.exp, buf);
+            ::buffa::types::put_int64_field(4u32, self.exp, buf);
         }
         if self.nbf != 0i64 {
-            ::buffa::encoding::Tag::new(5u32, ::buffa::encoding::WireType::Varint)
-                .encode(buf);
-            ::buffa::types::encode_int64(self.nbf, buf);
+            ::buffa::types::put_int64_field(5u32, self.nbf, buf);
         }
         if self.iat != 0i64 {
-            ::buffa::encoding::Tag::new(6u32, ::buffa::encoding::WireType::Varint)
-                .encode(buf);
-            ::buffa::types::encode_int64(self.iat, buf);
+            ::buffa::types::put_int64_field(6u32, self.iat, buf);
         }
         if !self.jti.is_empty() {
-            ::buffa::encoding::Tag::new(
-                    7u32,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )
-                .encode(buf);
-            ::buffa::types::encode_string(&self.jti, buf);
+            ::buffa::types::put_string_field(7u32, &self.jti, buf);
         }
         if self.temporary {
-            ::buffa::encoding::Tag::new(8u32, ::buffa::encoding::WireType::Varint)
-                .encode(buf);
-            ::buffa::types::encode_bool(self.temporary, buf);
+            ::buffa::types::put_bool_field(8u32, self.temporary, buf);
         }
         if let Some(v) = self.temporary_recheck_after {
-            ::buffa::encoding::Tag::new(9u32, ::buffa::encoding::WireType::Varint)
-                .encode(buf);
-            ::buffa::types::encode_int64(v, buf);
+            ::buffa::types::put_int64_field(9u32, v, buf);
         }
         if self.data.is_set() {
-            ::buffa::encoding::Tag::new(
-                    10u32,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )
-                .encode(buf);
-            ::buffa::encoding::encode_varint(__cache.consume_next() as u64, buf);
+            ::buffa::types::put_len_delimited_header(
+                10u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
             self.data.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
@@ -562,7 +706,7 @@ impl ::buffa::Message for JwtClaims {
         &mut self,
         tag: ::buffa::encoding::Tag,
         buf: &mut impl ::buffa::bytes::Buf,
-        depth: u32,
+        ctx: ::buffa::DecodeContext<'_>,
     ) -> ::core::result::Result<(), ::buffa::DecodeError> {
         #[allow(unused_imports)]
         use ::buffa::bytes::Buf as _;
@@ -570,114 +714,84 @@ impl ::buffa::Message for JwtClaims {
         use ::buffa::Enumeration as _;
         match tag.field_number() {
             1u32 => {
-                if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
-                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 1u32,
-                        expected: 2u8,
-                        actual: tag.wire_type() as u8,
-                    });
-                }
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
                 ::buffa::types::merge_string(&mut self.iss, buf)?;
             }
             2u32 => {
-                if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
-                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 2u32,
-                        expected: 2u8,
-                        actual: tag.wire_type() as u8,
-                    });
-                }
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
                 ::buffa::types::merge_string(&mut self.sub, buf)?;
             }
             3u32 => {
-                if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
-                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 3u32,
-                        expected: 2u8,
-                        actual: tag.wire_type() as u8,
-                    });
-                }
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
                 ::buffa::types::merge_string(&mut self.aud, buf)?;
             }
             4u32 => {
-                if tag.wire_type() != ::buffa::encoding::WireType::Varint {
-                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 4u32,
-                        expected: 0u8,
-                        actual: tag.wire_type() as u8,
-                    });
-                }
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
                 self.exp = ::buffa::types::decode_int64(buf)?;
             }
             5u32 => {
-                if tag.wire_type() != ::buffa::encoding::WireType::Varint {
-                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 5u32,
-                        expected: 0u8,
-                        actual: tag.wire_type() as u8,
-                    });
-                }
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
                 self.nbf = ::buffa::types::decode_int64(buf)?;
             }
             6u32 => {
-                if tag.wire_type() != ::buffa::encoding::WireType::Varint {
-                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 6u32,
-                        expected: 0u8,
-                        actual: tag.wire_type() as u8,
-                    });
-                }
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
                 self.iat = ::buffa::types::decode_int64(buf)?;
             }
             7u32 => {
-                if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
-                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 7u32,
-                        expected: 2u8,
-                        actual: tag.wire_type() as u8,
-                    });
-                }
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
                 ::buffa::types::merge_string(&mut self.jti, buf)?;
             }
             8u32 => {
-                if tag.wire_type() != ::buffa::encoding::WireType::Varint {
-                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 8u32,
-                        expected: 0u8,
-                        actual: tag.wire_type() as u8,
-                    });
-                }
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
                 self.temporary = ::buffa::types::decode_bool(buf)?;
             }
             9u32 => {
-                if tag.wire_type() != ::buffa::encoding::WireType::Varint {
-                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 9u32,
-                        expected: 0u8,
-                        actual: tag.wire_type() as u8,
-                    });
-                }
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
                 self.temporary_recheck_after = ::core::option::Option::Some(
                     ::buffa::types::decode_int64(buf)?,
                 );
             }
             10u32 => {
-                if tag.wire_type() != ::buffa::encoding::WireType::LengthDelimited {
-                    return ::core::result::Result::Err(::buffa::DecodeError::WireTypeMismatch {
-                        field_number: 10u32,
-                        expected: 2u8,
-                        actual: tag.wire_type() as u8,
-                    });
-                }
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
                 ::buffa::Message::merge_length_delimited(
                     self.data.get_or_insert_default(),
                     buf,
-                    depth,
+                    ctx,
                 )?;
             }
             _ => {
                 self.__buffa_unknown_fields
-                    .push(::buffa::encoding::decode_unknown_field(tag, buf, depth)?);
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
             }
         }
         ::core::result::Result::Ok(())
@@ -745,10 +859,93 @@ impl GetCSRFTokenRequest {
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
     pub const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.GetCSRFTokenRequest";
 }
-impl ::buffa::DefaultInstance for GetCSRFTokenRequest {
-    fn default_instance() -> &'static Self {
-        static VALUE: ::buffa::__private::OnceBox<GetCSRFTokenRequest> = ::buffa::__private::OnceBox::new();
-        VALUE.get_or_init(|| ::buffa::alloc::boxed::Box::new(Self::default()))
+::buffa::impl_default_instance!(GetCSRFTokenRequest);
+impl ::buffa_descriptor::reflect::ReflectMessage for GetCSRFTokenRequest {
+    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+        __buffa::reflect::descriptor_pool()
+            .message(Self::__buffa_reflect_message_index())
+    }
+    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+        __buffa::reflect::descriptor_pool()
+    }
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn get(
+        &self,
+        field: &::buffa_descriptor::FieldDescriptor,
+    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match field.number() {
+            _ => {
+                ::core::debug_assert!(
+                    false,
+                    "field number {} is not a member of this message's reflect get()",
+                    field.number(),
+                );
+                ::buffa_descriptor::reflect::ValueRef::Bool(false)
+            }
+        }
+    }
+    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+        match field.number() {
+            _ => false,
+        }
+    }
+    fn for_each_set(
+        &self,
+        f: &mut dyn ::core::ops::FnMut(
+            &::buffa_descriptor::FieldDescriptor,
+            ::buffa_descriptor::reflect::ValueRef<'_>,
+        ),
+    ) {
+        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
+        for fd in md.fields() {
+            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+            }
+        }
+    }
+    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+        ::buffa_descriptor::reflect::DynamicMessage::from_message(
+            self,
+            ::buffa::alloc::sync::Arc::clone(__buffa::reflect::descriptor_pool()),
+            Self::__buffa_reflect_message_index(),
+        )
+    }
+}
+impl ::buffa_descriptor::reflect::ReflectElement for GetCSRFTokenRequest {
+    #[inline]
+    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        ::buffa_descriptor::reflect::ValueRef::Message(
+            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+        )
+    }
+}
+impl GetCSRFTokenRequest {
+    /// Memoized `MessageIndex` for this message type, resolved once
+    /// against the package's embedded descriptor pool.
+    #[doc(hidden)]
+    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+        *IDX
+            .get_or_init(|| {
+                __buffa::reflect::descriptor_pool()
+                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                    .expect(
+                        "generated message is registered in the embedded descriptor pool",
+                    )
+            })
+    }
+}
+impl ::buffa_descriptor::reflect::Reflectable for GetCSRFTokenRequest {
+    /// Vtable-mode reflective handle: borrows `self` directly. No
+    /// encode/decode round-trip and no allocation — the reflective
+    /// accessors read this message's fields in place.
+    #[inline]
+    fn reflect(&self) -> ::buffa_descriptor::reflect::ReflectCow<'_> {
+        ::buffa_descriptor::reflect::ReflectCow::Borrowed(self)
     }
 }
 impl ::buffa::MessageName for GetCSRFTokenRequest {
@@ -760,21 +957,23 @@ impl ::buffa::MessageName for GetCSRFTokenRequest {
 impl ::buffa::Message for GetCSRFTokenRequest {
     /// Returns the total encoded size in bytes.
     ///
-    /// The result is a `u32`; the protobuf specification requires all
-    /// messages to fit within 2 GiB (2,147,483,647 bytes), so a
-    /// compliant message will never overflow this type.
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
     #[allow(clippy::let_and_return)]
     fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        let mut size = 0u32;
-        size += self.__buffa_unknown_fields.encoded_len() as u32;
-        size
+        let mut size = 0u64;
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
     }
     fn write_to(
         &self,
         _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::bytes::BufMut,
+        buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
@@ -784,7 +983,7 @@ impl ::buffa::Message for GetCSRFTokenRequest {
         &mut self,
         tag: ::buffa::encoding::Tag,
         buf: &mut impl ::buffa::bytes::Buf,
-        depth: u32,
+        ctx: ::buffa::DecodeContext<'_>,
     ) -> ::core::result::Result<(), ::buffa::DecodeError> {
         #[allow(unused_imports)]
         use ::buffa::bytes::Buf as _;
@@ -793,7 +992,7 @@ impl ::buffa::Message for GetCSRFTokenRequest {
         match tag.field_number() {
             _ => {
                 self.__buffa_unknown_fields
-                    .push(::buffa::encoding::decode_unknown_field(tag, buf, depth)?);
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
             }
         }
         ::core::result::Result::Ok(())
@@ -851,10 +1050,93 @@ impl GetCSRFTokenResponse {
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
     pub const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.GetCSRFTokenResponse";
 }
-impl ::buffa::DefaultInstance for GetCSRFTokenResponse {
-    fn default_instance() -> &'static Self {
-        static VALUE: ::buffa::__private::OnceBox<GetCSRFTokenResponse> = ::buffa::__private::OnceBox::new();
-        VALUE.get_or_init(|| ::buffa::alloc::boxed::Box::new(Self::default()))
+::buffa::impl_default_instance!(GetCSRFTokenResponse);
+impl ::buffa_descriptor::reflect::ReflectMessage for GetCSRFTokenResponse {
+    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+        __buffa::reflect::descriptor_pool()
+            .message(Self::__buffa_reflect_message_index())
+    }
+    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+        __buffa::reflect::descriptor_pool()
+    }
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn get(
+        &self,
+        field: &::buffa_descriptor::FieldDescriptor,
+    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match field.number() {
+            _ => {
+                ::core::debug_assert!(
+                    false,
+                    "field number {} is not a member of this message's reflect get()",
+                    field.number(),
+                );
+                ::buffa_descriptor::reflect::ValueRef::Bool(false)
+            }
+        }
+    }
+    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+        match field.number() {
+            _ => false,
+        }
+    }
+    fn for_each_set(
+        &self,
+        f: &mut dyn ::core::ops::FnMut(
+            &::buffa_descriptor::FieldDescriptor,
+            ::buffa_descriptor::reflect::ValueRef<'_>,
+        ),
+    ) {
+        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
+        for fd in md.fields() {
+            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+            }
+        }
+    }
+    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+        ::buffa_descriptor::reflect::DynamicMessage::from_message(
+            self,
+            ::buffa::alloc::sync::Arc::clone(__buffa::reflect::descriptor_pool()),
+            Self::__buffa_reflect_message_index(),
+        )
+    }
+}
+impl ::buffa_descriptor::reflect::ReflectElement for GetCSRFTokenResponse {
+    #[inline]
+    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        ::buffa_descriptor::reflect::ValueRef::Message(
+            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+        )
+    }
+}
+impl GetCSRFTokenResponse {
+    /// Memoized `MessageIndex` for this message type, resolved once
+    /// against the package's embedded descriptor pool.
+    #[doc(hidden)]
+    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+        *IDX
+            .get_or_init(|| {
+                __buffa::reflect::descriptor_pool()
+                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                    .expect(
+                        "generated message is registered in the embedded descriptor pool",
+                    )
+            })
+    }
+}
+impl ::buffa_descriptor::reflect::Reflectable for GetCSRFTokenResponse {
+    /// Vtable-mode reflective handle: borrows `self` directly. No
+    /// encode/decode round-trip and no allocation — the reflective
+    /// accessors read this message's fields in place.
+    #[inline]
+    fn reflect(&self) -> ::buffa_descriptor::reflect::ReflectCow<'_> {
+        ::buffa_descriptor::reflect::ReflectCow::Borrowed(self)
     }
 }
 impl ::buffa::MessageName for GetCSRFTokenResponse {
@@ -866,21 +1148,23 @@ impl ::buffa::MessageName for GetCSRFTokenResponse {
 impl ::buffa::Message for GetCSRFTokenResponse {
     /// Returns the total encoded size in bytes.
     ///
-    /// The result is a `u32`; the protobuf specification requires all
-    /// messages to fit within 2 GiB (2,147,483,647 bytes), so a
-    /// compliant message will never overflow this type.
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
     #[allow(clippy::let_and_return)]
     fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        let mut size = 0u32;
-        size += self.__buffa_unknown_fields.encoded_len() as u32;
-        size
+        let mut size = 0u64;
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
     }
     fn write_to(
         &self,
         _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::bytes::BufMut,
+        buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
@@ -890,7 +1174,7 @@ impl ::buffa::Message for GetCSRFTokenResponse {
         &mut self,
         tag: ::buffa::encoding::Tag,
         buf: &mut impl ::buffa::bytes::Buf,
-        depth: u32,
+        ctx: ::buffa::DecodeContext<'_>,
     ) -> ::core::result::Result<(), ::buffa::DecodeError> {
         #[allow(unused_imports)]
         use ::buffa::bytes::Buf as _;
@@ -899,7 +1183,7 @@ impl ::buffa::Message for GetCSRFTokenResponse {
         match tag.field_number() {
             _ => {
                 self.__buffa_unknown_fields
-                    .push(::buffa::encoding::decode_unknown_field(tag, buf, depth)?);
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
             }
         }
         ::core::result::Result::Ok(())

@@ -9,6 +9,7 @@ path = "src/lib.rs"
 
 [dependencies]
 buffa = { workspace = true }
+buffa-descriptor = { workspace = true }
 buffa-types = { workspace = true }
 connectrpc = { workspace = true }
 http = { workspace = true }

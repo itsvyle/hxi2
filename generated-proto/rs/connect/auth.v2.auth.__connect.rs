@@ -69,6 +69,20 @@ for ::buffa::view::OwnedView<
     ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
         ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
     }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
 }
 impl ::connectrpc::Encodable<crate::proto::auth::v2::RenewJWTResponse>
 for crate::proto::auth::v2::__buffa::view::RenewJWTResponseView<'_> {
@@ -88,6 +102,20 @@ for ::buffa::view::OwnedView<
         codec: ::connectrpc::CodecFormat,
     ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
         ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
     }
 }
 impl ::connectrpc::Encodable<crate::proto::auth::v2::ListUsersResponse>
@@ -109,6 +137,20 @@ for ::buffa::view::OwnedView<
     ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
         ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
     }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
 }
 impl ::connectrpc::Encodable<crate::proto::auth::v2::GetDevTokenResponse>
 for crate::proto::auth::v2::__buffa::view::GetDevTokenResponseView<'_> {
@@ -128,6 +170,20 @@ for ::buffa::view::OwnedView<
         codec: ::connectrpc::CodecFormat,
     ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
         ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
     }
 }
 impl ::connectrpc::Encodable<crate::proto::auth::v2::LoginResponse>
@@ -149,6 +205,20 @@ for ::buffa::view::OwnedView<
     ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
         ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
     }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
 }
 impl ::connectrpc::Encodable<crate::proto::auth::v2::GetCSRFTokenResponse>
 for crate::proto::auth::v2::__buffa::view::GetCSRFTokenResponseView<'_> {
@@ -169,85 +239,72 @@ for ::buffa::view::OwnedView<
     ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
         ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
     }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
 }
 /// Full service name for this service.
 pub const AUTH_SERVICE_SERVICE_NAME: &str = "auth.v2.AuthService";
-/// Static [`Spec`](::connectrpc::Spec) for the server-side `GetJWTPublicKey` RPC.
-///
-/// The dispatcher surfaces this on
-/// [`RequestContext::spec`](::connectrpc::RequestContext::spec).
+/// Static [`Spec`](::connectrpc::Spec) for the `GetJWTPublicKey` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_GET_JWT_PUBLIC_KEY_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/GetJWTPublicKey",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
-/// Static [`Spec`](::connectrpc::Spec) for the server-side `RenewJWT` RPC.
-///
-/// The dispatcher surfaces this on
-/// [`RequestContext::spec`](::connectrpc::RequestContext::spec).
+/// Static [`Spec`](::connectrpc::Spec) for the `RenewJWT` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_RENEW_JWT_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/RenewJWT",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// Static [`Spec`](::connectrpc::Spec) for the server-side `ListUsers` RPC.
-///
-/// The dispatcher surfaces this on
-/// [`RequestContext::spec`](::connectrpc::RequestContext::spec).
+/// Static [`Spec`](::connectrpc::Spec) for the `ListUsers` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_LIST_USERS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/ListUsers",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// Static [`Spec`](::connectrpc::Spec) for the server-side `GetDevToken` RPC.
-///
-/// The dispatcher surfaces this on
-/// [`RequestContext::spec`](::connectrpc::RequestContext::spec).
+/// Static [`Spec`](::connectrpc::Spec) for the `GetDevToken` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_GET_DEV_TOKEN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/GetDevToken",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// Static [`Spec`](::connectrpc::Spec) for the server-side `Login` RPC.
-///
-/// The dispatcher surfaces this on
-/// [`RequestContext::spec`](::connectrpc::RequestContext::spec).
+/// Static [`Spec`](::connectrpc::Spec) for the `Login` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_LOGIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/Login",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// Static [`Spec`](::connectrpc::Spec) for the server-side `GetCSRFToken` RPC.
-///
-/// The dispatcher surfaces this on
-/// [`RequestContext::spec`](::connectrpc::RequestContext::spec).
+/// Static [`Spec`](::connectrpc::Spec) for the `GetCSRFToken` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_GET_CSRF_TOKEN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/GetCSRFToken",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// Static [`Spec`](::connectrpc::Spec) for the server-side `DiscordLogin` RPC.
-///
-/// The dispatcher surfaces this on
-/// [`RequestContext::spec`](::connectrpc::RequestContext::spec).
+/// Static [`Spec`](::connectrpc::Spec) for the `DiscordLogin` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_DISCORD_LOGIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/DiscordLogin",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// Static [`Spec`](::connectrpc::Spec) for the server-side `DiscordCallback` RPC.
-///
-/// The dispatcher surfaces this on
-/// [`RequestContext::spec`](::connectrpc::RequestContext::spec).
+/// Static [`Spec`](::connectrpc::Spec) for the `DiscordCallback` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_DISCORD_CALLBACK_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/DiscordCallback",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// Static [`Spec`](::connectrpc::Spec) for the server-side `FrontendIndex` RPC.
-///
-/// The dispatcher surfaces this on
-/// [`RequestContext::spec`](::connectrpc::RequestContext::spec).
+/// Static [`Spec`](::connectrpc::Spec) for the `FrontendIndex` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_FRONTEND_INDEX_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/FrontendIndex",
         ::connectrpc::StreamType::Unary,
@@ -271,7 +328,8 @@ pub const AUTH_SERVICE_FRONTEND_INDEX_SPEC: ::connectrpc::Spec = ::connectrpc::S
 /// first.
 ///
 /// **Client-streaming and bidi requests** arrive as
-/// `ServiceStream<`[`StreamMessage<Req>`](::connectrpc::StreamMessage)`>`.
+/// [`InboundStream<Req>`](::connectrpc::InboundStream) — a
+/// `ServiceStream` of [`StreamMessage`](::connectrpc::StreamMessage)s.
 /// Each item owns its decoded buffer and is `Send + 'static`, so items
 /// can be buffered or moved into spawned tasks; read fields zero-copy
 /// through the generated accessor methods (`item.name()`) or `.view()`,
@@ -280,7 +338,7 @@ pub const AUTH_SERVICE_FRONTEND_INDEX_SPEC: ::connectrpc::Spec = ::connectrpc::S
 ///
 /// Request types resolved through `extern_path` (e.g. well-known types
 /// from another crate) use the same wrappers; the crate that owns the
-/// type must be generated with buffa ≥ 0.7.0 and views enabled so the
+/// type must be generated with buffa ≥ 0.9.0 and views enabled so the
 /// backing `HasMessageView` impl exists.
 ///
 /// The `impl Encodable<Out>` return bound accepts the owned `Out`, the
@@ -502,6 +560,9 @@ pub trait AuthService: Send + Sync + 'static {
 /// Extension trait for registering a service implementation with a Router.
 ///
 /// This trait is automatically implemented for all types that implement the service trait.
+/// Prefer [`Router::add_service`](::connectrpc::Router::add_service) for
+/// top-down registration; `register` remains available for compatibility
+/// and cases where the service-first call shape is more convenient.
 ///
 /// # Example
 ///
@@ -778,6 +839,15 @@ impl<S: AuthService> AuthServiceExt for S {
             .with_spec(AUTH_SERVICE_FRONTEND_INDEX_SPEC)
     }
 }
+/// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
+#[doc(hidden)]
+pub struct AuthServiceRegisterMarker;
+impl<S: AuthService> ::connectrpc::ServiceRegister<AuthServiceRegisterMarker>
+for ::std::sync::Arc<S> {
+    fn register_service(self, router: ::connectrpc::Router) -> ::connectrpc::Router {
+        <S as AuthServiceExt>::register(self, router)
+    }
+}
 /// Monomorphic dispatcher for `AuthService`.
 ///
 /// Unlike `.register(Router)` which type-erases each method into an `Arc<dyn ErasedHandler>` stored in a `HashMap`, this struct dispatches via a compile-time `match` on method name: no vtable, no hash lookup.
@@ -900,6 +970,7 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
+                        ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
                         crate::proto::auth::v2::GetJWTPublicKeyRequest,
@@ -921,6 +992,7 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
+                        ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
                         crate::proto::auth::v2::RenewJWTRequest,
@@ -940,6 +1012,7 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
+                        ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
                         crate::proto::auth::v2::ListUsersRequest,
@@ -959,6 +1032,7 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
+                        ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
                         crate::proto::auth::v2::GetDevTokenRequest,
@@ -978,6 +1052,7 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
+                        ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
                         crate::proto::auth::v2::LoginRequest,
@@ -997,6 +1072,7 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
+                        ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
                         crate::proto::auth::v2::GetCSRFTokenRequest,
@@ -1016,6 +1092,7 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
+                        ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
                         ::buffa_types::google::protobuf::Empty,
@@ -1035,6 +1112,7 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
+                        ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
                         ::buffa_types::google::protobuf::Empty,
@@ -1054,6 +1132,7 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
+                        ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
                         ::buffa_types::google::protobuf::Empty,
@@ -1165,9 +1244,10 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
 ///
 /// [`into_view()`](::connectrpc::client::UnaryResponse::into_view) keeps the
 /// zero-copy decoded body (an `OwnedView`) without copying; field access on it
-/// goes through `.reborrow()`. Streaming responses yield one `OwnedView` per
-/// received message from `.message().await` — bind `msg.reborrow()` for field
-/// access, or convert with `.to_owned_message()`.
+/// goes through `.reborrow()`. Streaming responses yield one
+/// [`StreamMessage`](::connectrpc::StreamMessage) per received message from
+/// `.message().await` — read fields zero-copy through the generated accessor
+/// methods (`msg.name()`) or `.view()`, or convert with `.to_owned_message()`.
 #[derive(Clone)]
 pub struct AuthServiceClient<T> {
     transport: T,
@@ -1176,7 +1256,7 @@ pub struct AuthServiceClient<T> {
 impl<T> AuthServiceClient<T>
 where
     T: ::connectrpc::client::ClientTransport,
-    <T::ResponseBody as ::http_body::Body>::Error: ::std::fmt::Display,
+    <T::ResponseBody as ::connectrpc::http_body::Body>::Error: ::std::fmt::Display,
 {
     /// Create a new client with the given transport and configuration.
     pub fn new(transport: T, config: ::connectrpc::client::ClientConfig) -> Self {
@@ -1228,8 +1308,8 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                AUTH_SERVICE_SERVICE_NAME,
-                "GetJWTPublicKey",
+                AUTH_SERVICE_GET_JWT_PUBLIC_KEY_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )
@@ -1269,8 +1349,8 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                AUTH_SERVICE_SERVICE_NAME,
-                "RenewJWT",
+                AUTH_SERVICE_RENEW_JWT_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )
@@ -1310,8 +1390,8 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                AUTH_SERVICE_SERVICE_NAME,
-                "ListUsers",
+                AUTH_SERVICE_LIST_USERS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )
@@ -1351,8 +1431,8 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                AUTH_SERVICE_SERVICE_NAME,
-                "GetDevToken",
+                AUTH_SERVICE_GET_DEV_TOKEN_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )
@@ -1389,8 +1469,7 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                AUTH_SERVICE_SERVICE_NAME,
-                "Login",
+                AUTH_SERVICE_LOGIN_SPEC.with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )
@@ -1430,8 +1509,8 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                AUTH_SERVICE_SERVICE_NAME,
-                "GetCSRFToken",
+                AUTH_SERVICE_GET_CSRF_TOKEN_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )
@@ -1471,8 +1550,8 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                AUTH_SERVICE_SERVICE_NAME,
-                "DiscordLogin",
+                AUTH_SERVICE_DISCORD_LOGIN_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )
@@ -1512,8 +1591,8 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                AUTH_SERVICE_SERVICE_NAME,
-                "DiscordCallback",
+                AUTH_SERVICE_DISCORD_CALLBACK_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )
@@ -1553,8 +1632,8 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                AUTH_SERVICE_SERVICE_NAME,
-                "FrontendIndex",
+                AUTH_SERVICE_FRONTEND_INDEX_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )

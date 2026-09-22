@@ -13,9 +13,23 @@ pub const __PERMISSION_LEVEL_JSON_EXT: ::buffa::type_registry::JsonExtEntry = ::
     to_json: ::buffa::extension_registry::helpers::message_to_json::<
         super::super::Permissions,
     >,
-    from_json: ::buffa::extension_registry::helpers::message_from_json::<
-        super::super::Permissions,
-    >,
+    from_json: {
+        fn __from_json(
+            value: ::buffa::serde_json::Value,
+            number: u32,
+        ) -> ::core::result::Result<
+            ::buffa::alloc::vec::Vec<::buffa::UnknownField>,
+            ::buffa::alloc::string::String,
+        > {
+            if value.is_null() {
+                return ::core::result::Result::Ok(::buffa::alloc::vec::Vec::new());
+            }
+            ::buffa::extension_registry::helpers::message_from_json::<
+                super::super::Permissions,
+            >(value, number)
+        }
+        __from_json
+    },
 };
 ///Extension `permission_level_service` on `.google.protobuf.ServiceOptions` (field 50802).
 pub const PERMISSION_LEVEL_SERVICE: ::buffa::Extension<
@@ -29,7 +43,21 @@ pub const __PERMISSION_LEVEL_SERVICE_JSON_EXT: ::buffa::type_registry::JsonExtEn
     to_json: ::buffa::extension_registry::helpers::message_to_json::<
         super::super::Permissions,
     >,
-    from_json: ::buffa::extension_registry::helpers::message_from_json::<
-        super::super::Permissions,
-    >,
+    from_json: {
+        fn __from_json(
+            value: ::buffa::serde_json::Value,
+            number: u32,
+        ) -> ::core::result::Result<
+            ::buffa::alloc::vec::Vec<::buffa::UnknownField>,
+            ::buffa::alloc::string::String,
+        > {
+            if value.is_null() {
+                return ::core::result::Result::Ok(::buffa::alloc::vec::Vec::new());
+            }
+            ::buffa::extension_registry::helpers::message_from_json::<
+                super::super::Permissions,
+            >(value, number)
+        }
+        __from_json
+    },
 };
