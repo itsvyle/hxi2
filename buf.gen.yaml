@@ -1,4 +1,4 @@
-# note: run cargo install --locked connectrpc-codegen protoc-gen-buffa protoc-gen-buffa-packaging
+# note: cargo install --locked connectrpc-codegen protoc-gen-buffa protoc-gen-buffa-packaging
 version: v2
 plugins:
     - local: protoc-gen-buffa
@@ -7,6 +7,8 @@ plugins:
           - views=true
           - json=true
           - reflect=true
+          - minimum_edition=2021
+          - maximum_edition=2023
     - local: protoc-gen-buffa-packaging
       out: generated-proto/rs/buffa
       strategy: all
