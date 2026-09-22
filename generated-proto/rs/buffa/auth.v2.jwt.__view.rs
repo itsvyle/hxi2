@@ -10,7 +10,7 @@ pub struct SmallDataView<'a> {
     /// Field 3: `first_name`
     pub first_name: &'a str,
     /// Field 4: `last_name`
-    pub last_name: &'a str,
+    pub last_name: ::core::option::Option<&'a str>,
     /// Field 5: `permissions`
     pub permissions: i64,
     /// Field 6: `promotion`
@@ -93,7 +93,7 @@ impl<'a> SmallDataView<'a> {
                             actual: tag.wire_type() as u8,
                         });
                     }
-                    view.last_name = ::buffa::types::borrow_str(&mut cur)?;
+                    view.last_name = Some(::buffa::types::borrow_str(&mut cur)?);
                 }
                 5u32 => {
                     if tag.wire_type() != ::buffa::encoding::WireType::Varint {
@@ -151,7 +151,7 @@ impl<'a> ::buffa::MessageView<'a> for SmallDataView<'a> {
             user_id: self.user_id,
             username: self.username.to_string(),
             first_name: self.first_name.to_string(),
-            last_name: self.last_name.to_string(),
+            last_name: self.last_name.map(|s| s.to_string()),
             permissions: self.permissions,
             promotion: self.promotion,
             __buffa_unknown_fields: self
@@ -178,8 +178,8 @@ impl<'a> ::buffa::ViewEncode<'a> for SmallDataView<'a> {
         if !self.first_name.is_empty() {
             size += 1u32 + ::buffa::types::string_encoded_len(&self.first_name) as u32;
         }
-        if !self.last_name.is_empty() {
-            size += 1u32 + ::buffa::types::string_encoded_len(&self.last_name) as u32;
+        if let Some(ref v) = self.last_name {
+            size += 1u32 + ::buffa::types::string_encoded_len(v) as u32;
         }
         if self.permissions != 0i64 {
             size += 1u32 + ::buffa::types::int64_encoded_len(self.permissions) as u32;
@@ -219,13 +219,13 @@ impl<'a> ::buffa::ViewEncode<'a> for SmallDataView<'a> {
                 .encode(buf);
             ::buffa::types::encode_string(&self.first_name, buf);
         }
-        if !self.last_name.is_empty() {
+        if let Some(ref v) = self.last_name {
             ::buffa::encoding::Tag::new(
                     4u32,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )
                 .encode(buf);
-            ::buffa::types::encode_string(&self.last_name, buf);
+            ::buffa::types::encode_string(v, buf);
         }
         if self.permissions != 0i64 {
             ::buffa::encoding::Tag::new(5u32, ::buffa::encoding::WireType::Varint)
@@ -276,8 +276,8 @@ impl<'__a> ::serde::Serialize for SmallDataView<'__a> {
         if !::buffa::json_helpers::skip_if::is_empty_str(self.first_name) {
             __map.serialize_entry("firstName", self.first_name)?;
         }
-        if !::buffa::json_helpers::skip_if::is_empty_str(self.last_name) {
-            __map.serialize_entry("lastName", self.last_name)?;
+        if let ::core::option::Option::Some(__v) = self.last_name {
+            __map.serialize_entry("lastName", __v)?;
         }
         if !::buffa::json_helpers::skip_if::is_zero_i64(&self.permissions) {
             struct _W(i64);
@@ -419,7 +419,7 @@ impl SmallDataOwnedView {
     }
     /// Field 4: `last_name`
     #[must_use]
-    pub fn last_name(&self) -> &'_ str {
+    pub fn last_name(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().last_name
     }
     /// Field 5: `permissions`

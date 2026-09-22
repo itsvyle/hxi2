@@ -32,10 +32,9 @@ pub struct SmallData {
     #[serde(
         rename = "lastName",
         alias = "last_name",
-        with = "::buffa::json_helpers::proto_string",
-        skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_str"
+        skip_serializing_if = "::core::option::Option::is_none"
     )]
-    pub last_name: ::buffa::alloc::string::String,
+    pub last_name: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 5: `permissions`
     #[serde(
         rename = "permissions",
@@ -73,6 +72,18 @@ impl SmallData {
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
     pub const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.SmallData";
 }
+impl SmallData {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::last_name`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_last_name(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.last_name = Some(value.into());
+        self
+    }
+}
 impl ::buffa::DefaultInstance for SmallData {
     fn default_instance() -> &'static Self {
         static VALUE: ::buffa::__private::OnceBox<SmallData> = ::buffa::__private::OnceBox::new();
@@ -105,8 +116,8 @@ impl ::buffa::Message for SmallData {
         if !self.first_name.is_empty() {
             size += 1u32 + ::buffa::types::string_encoded_len(&self.first_name) as u32;
         }
-        if !self.last_name.is_empty() {
-            size += 1u32 + ::buffa::types::string_encoded_len(&self.last_name) as u32;
+        if let Some(ref v) = self.last_name {
+            size += 1u32 + ::buffa::types::string_encoded_len(v) as u32;
         }
         if self.permissions != 0i64 {
             size += 1u32 + ::buffa::types::int64_encoded_len(self.permissions) as u32;
@@ -145,13 +156,13 @@ impl ::buffa::Message for SmallData {
                 .encode(buf);
             ::buffa::types::encode_string(&self.first_name, buf);
         }
-        if !self.last_name.is_empty() {
+        if let Some(ref v) = self.last_name {
             ::buffa::encoding::Tag::new(
                     4u32,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )
                 .encode(buf);
-            ::buffa::types::encode_string(&self.last_name, buf);
+            ::buffa::types::encode_string(v, buf);
         }
         if self.permissions != 0i64 {
             ::buffa::encoding::Tag::new(5u32, ::buffa::encoding::WireType::Varint)
@@ -214,7 +225,12 @@ impl ::buffa::Message for SmallData {
                         actual: tag.wire_type() as u8,
                     });
                 }
-                ::buffa::types::merge_string(&mut self.last_name, buf)?;
+                ::buffa::types::merge_string(
+                    self
+                        .last_name
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
             }
             5u32 => {
                 if tag.wire_type() != ::buffa::encoding::WireType::Varint {
@@ -247,7 +263,7 @@ impl ::buffa::Message for SmallData {
         self.user_id = 0i64;
         self.username.clear();
         self.first_name.clear();
-        self.last_name.clear();
+        self.last_name = ::core::option::Option::None;
         self.permissions = 0i64;
         self.promotion = 0i32;
         self.__buffa_unknown_fields.clear();

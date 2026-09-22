@@ -67,7 +67,7 @@ impl JWTSigner {
             jti: self.generate_jti(),
             temporary: false,
             temporary_recheck_after: None,
-            data: data.into(),
+            data: data.clone().into(),
             ..Default::default()
         };
         let claims_json = self

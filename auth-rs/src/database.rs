@@ -38,23 +38,22 @@ impl std::fmt::Display for DbError {
 
 impl std::error::Error for DbError {}
 
-// -----------------------------------------------------------------------------
-// Mocked external dependencies (equivalent to your `ggu` and `jwt` packages)
-// -----------------------------------------------------------------------------
-pub struct Hxi2JwtClaims {/* ... */}
-pub struct SmallData {/* ... */}
 fn generate_32bits_number() -> Result<i64, DbError> {
+    unimplemented!("Implement a secure random 32-bit number generator here");
     Ok(1)
     // Ok(rand::thread_rng().gen_range(1..i32::MAX as i64))
 }
 fn generate_6_digit_number() -> Result<String, DbError> {
+    unimplemented!("Implement a secure random 6-digit number generator here");
     Ok("123456".into())
     // Ok(format!("{:06}", rand::thread_rng().gen_range(0..999999)))
 }
 fn jwt_generate_refresh_token() -> Result<String, DbError> {
+    unimplemented!("Implement a secure random refresh token generator here");
     Ok("mock_refresh_token".into())
 }
 fn jwt_generate_jti_token() -> Result<String, DbError> {
+    unimplemented!("Implement a secure random JTI token generator here");
     Ok("mock_jti".into())
 }
 const REFRESH_TOKEN_VALIDITY_DAYS: i64 = 7;
@@ -110,14 +109,6 @@ impl DbUser {
         }
         // Note: DateTime<Utc> in Rust cannot inherently be "zero" like time.IsZero() in Go.
         Ok(())
-    }
-
-    pub fn get_new_jwt_claims(&self) -> Hxi2JwtClaims {
-        Hxi2JwtClaims { /* Map fields here */ }
-    }
-
-    pub fn get_small_data(&self) -> SmallData {
-        SmallData { /* Map fields here */ }
     }
 }
 
@@ -195,7 +186,7 @@ impl DatabaseManager {
         Ok(user)
     }
 
-    pub async fn get_db_user_by_id(&self, user_id: i64) -> Result<DbUser, DbError> {
+    pub async fn get_db_user_by_id(&self, user_id: &i64) -> Result<DbUser, DbError> {
         let user = sqlx::query_as::<_, DbUser>("SELECT * FROM users WHERE id = ?")
             .bind(user_id)
             .fetch_one(&self.pool)
@@ -261,6 +252,7 @@ impl DatabaseManager {
         Ok(())
     }
 
+    // this NEEDS to be moved to LoginManager
     pub async fn renew_refresh_token(
         &self,
         refresh_token: &str,
@@ -458,13 +450,7 @@ pub struct DbTemporaryCode {
     pub expires_at: DateTime<Utc>,
 }
 
-impl DbTemporaryCode {
-    pub fn get_new_claims(&self) -> Result<Hxi2JwtClaims, DbError> {
-        let _jti = jwt_generate_jti_token()?;
-        // Implement claims mapping similar to your Go code
-        Ok(Hxi2JwtClaims { /* ... */ })
-    }
-}
+impl DbTemporaryCode {}
 
 impl DatabaseManager {
     pub async fn check_temp_code(

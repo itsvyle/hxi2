@@ -1,6 +1,7 @@
 use std::{fmt, fs};
 
 use anyhow::{Context, Result};
+use derivative::Derivative;
 use ed25519_dalek::pkcs8::EncodePublicKey;
 use once_cell::sync::Lazy;
 use sqlx::{AssertSqlSafe, Execute};
@@ -15,7 +16,21 @@ pub enum Environnement {
     Production,
 }
 
-#[allow(unused)]
+fn redact_string_fmt(s: &str, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+    fn redact_string(s: &str) -> String {
+        // if the length is above 10, show the first 5 characters, and the last 2, and replace the rest with "..."; otherwise return ...
+        if s.len() > 10 {
+            format!("{}...{}", &s[..5], &s[s.len() - 2..])
+        } else {
+            s.to_string()
+        }
+    }
+    write!(f, "{}", redact_string(s))
+}
+
+#[allow(unused, non_snake_case)]
+#[derive(Derivative)]
+#[derivative(Debug, Default)]
 pub struct AppConfiguration {
     #[doc = "Domain name and protocol of the **internet facing** auth domain (used for redirecting in case the user isn't logged in, to log in)"]
     pub auth_url: String,
@@ -36,35 +51,25 @@ pub struct AppConfiguration {
     #[doc = "Discord application id"]
     pub discord_application_id: String,
     #[doc = "Discord client id"]
+    #[derivative(Debug(format_with = "redact_string_fmt"))]
     pub discord_client_id: String,
     #[doc = "Discord client secret"]
+    #[derivative(Debug(format_with = "redact_string_fmt"))]
     pub discord_client_secret: String,
     #[doc = "Environment (development or production)"]
+    #[derivative(Default(value = "Environnement::Production"))]
     pub environment: Environnement,
 
-    db_manager: OnceCell<DatabaseManager>,
-}
+    // INTERNAL NON CHANGEABLE CONFIGURATION
+    #[derivative(Default(value = r#""HXI2_TOKEN""#))]
+    pub COOKIE_TOKEN_NAME: &'static str,
+    #[derivative(Default(value = r#""HXI2_REFRESH_TOKEN""#))]
+    pub COOKIE_REFRESH_TOKEN_NAME: &'static str,
+    #[derivative(Default(value = r#""HXI2_SMALL_DATA""#))]
+    pub COOKIE_SMALL_DATA_NAME: &'static str,
 
-impl fmt::Debug for AppConfiguration {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("AppConfiguration")
-            .field("auth_url", &self.auth_url)
-            .field("auth_endpoint", &self.auth_endpoint)
-            .field("cookies_domain", &self.cookies_domain)
-            .field("tld", &self.tld)
-            .field("default_redirect_url", &self.default_redirect_url)
-            .field("running_port", &self.running_port)
-            // Censor secrets
-            .field("jwt_private_key", &"[REDACTED]")
-            .field("discord_client_secret", &"[REDACTED]")
-            // Non-sensitive fields
-            .field("db_path", &self.db_path)
-            .field("discord_application_id", &self.discord_application_id)
-            .field("discord_client_id", &self.discord_client_id)
-            .field("environment", &self.environment)
-            // .field("db_manager", &self.db_manager)
-            .finish()
-    }
+    #[derivative(Debug = "ignore")]
+    db_manager: OnceCell<DatabaseManager>,
 }
 
 impl AppConfiguration {
@@ -99,8 +104,8 @@ impl AppConfiguration {
                     ));
                 }
             },
-
             db_manager: OnceCell::new(),
+            ..Default::default()
         })
     }
 

@@ -14,8 +14,12 @@ use oauth2::{
 };
 use serde::Deserialize;
 use std::sync::Arc;
+use tracing::error;
 
-use crate::app_config::AppConfiguration;
+use crate::{
+    app_config::AppConfiguration,
+    login_manager::{self, LoginManager},
+};
 
 #[derive(Deserialize)]
 pub struct CallbackQuery {
@@ -35,10 +39,11 @@ pub struct DiscordUser {
 #[derive(Clone)]
 pub struct DiscordLoginManager {
     oauth_client: BasicClient,
+    login_manager: Arc<LoginManager>,
 }
 
 impl DiscordLoginManager {
-    pub fn new(config: &AppConfiguration) -> anyhow::Result<Self> {
+    pub fn new(login_manager: Arc<LoginManager>) -> anyhow::Result<Self> {
         let cfg = AppConfiguration::INSTANCE();
 
         // Passed parameters directly into BasicClient::new
@@ -55,7 +60,10 @@ impl DiscordLoginManager {
             cfg.auth_url
         ))?);
 
-        Ok(Self { oauth_client })
+        Ok(Self {
+            oauth_client,
+            login_manager,
+        })
     }
 
     pub fn router(self) -> Router {
@@ -109,7 +117,8 @@ impl DiscordLoginManager {
             .exchange_code(AuthorizationCode::new(query.code))
             .request_async(async_http_client)
             .await
-            .map_err(|_| {
+            .map_err(|e| {
+                error!(error = %e, "Failed to exchange code with Discord");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "Failed to exchange code with Discord.",
@@ -122,7 +131,8 @@ impl DiscordLoginManager {
             .bearer_auth(token_result.access_token().secret())
             .send()
             .await
-            .map_err(|_| {
+            .map_err(|e| {
+                error!(error = %e, "Failed request to Discord API.");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "Failed request to Discord API.",
@@ -130,7 +140,8 @@ impl DiscordLoginManager {
             })?
             .json()
             .await
-            .map_err(|_| {
+            .map_err(|e| {
+                error!(error = %e, "Failed to parse Discord response JSON.");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "Failed to parse Discord response JSON.",

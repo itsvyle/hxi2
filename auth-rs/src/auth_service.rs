@@ -15,11 +15,10 @@ use hxi2_proto::{
     connect::auth::v2::AuthService,
     proto::auth::v2::{GetDevTokenRequest, GetDevTokenResponse},
 };
-use tracing::{info, instrument};
 
 use crate::app_config::AppConfiguration;
 use crate::connect_result::ToConnectError;
-use crate::{app_config, permissions_checking};
+use crate::permissions_checking;
 
 pub struct AuthServiceImpl {
     pub subdomain: String,
@@ -74,7 +73,7 @@ impl AuthService for AuthServiceImpl {
         _ctx: RequestContext,
         req: ServiceRequest<'_, GetDevTokenRequest>,
     ) -> ServiceResult<GetDevTokenResponse> {
-        if !app_config::AppConfiguration::INSTANCE().is_development() {
+        if !AppConfiguration::INSTANCE().is_development() {
             return Err(ConnectError::permission_denied(
                 "get_dev_token is only available in development mode",
             ));
@@ -90,7 +89,7 @@ impl AuthService for AuthServiceImpl {
             user_id: 42,
             username: "TESTING".to_owned(),
             first_name: "Test".to_owned(),
-            last_name: "T".to_owned(),
+            last_name: Some("T".to_owned()),
             permissions: final_permissions,
             promotion: 2000,
             ..Default::default()
@@ -148,7 +147,7 @@ impl AuthService for AuthServiceImpl {
             perms.csrf_token_cookie.unwrap(),
             new_token,
         );
-        if !app_config::AppConfiguration::INSTANCE().is_development() {
+        if !AppConfiguration::INSTANCE().is_development() {
             set_cookie.push_str(" Secure");
             set_cookie.push_str(" ;Domain=");
             set_cookie.push_str(&self.subdomain);
@@ -168,7 +167,7 @@ impl AuthService for AuthServiceImpl {
         _ctx: connectrpc::RequestContext,
         _request: connectrpc::ServiceRequest<'_, ListUsersRequest>,
     ) -> connectrpc::ServiceResult<ListUsersResponse> {
-        let db = app_config::AppConfiguration::INSTANCE().db().await;
+        let db = AppConfiguration::INSTANCE().db().await;
         let users = db
             .list_users()
             .await

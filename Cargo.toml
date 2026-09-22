@@ -17,6 +17,7 @@ buffa-descriptor = { version = "0.7.1", features = ["json"] }
 buffa-types = { version = "0.7.1", features = ["json"] }
 chrono = { version = "0.4.45", features = ["serde"] }
 connectrpc = { version = "0.7.0", features = ["axum", "client", "server", "tls"] }
+derivative = "2.2.0"
 generate-permissions-checking = { path = "global-rs/generate-permissions-checking" }
 hmac = "0.13.0"
 http = "1.4.2"

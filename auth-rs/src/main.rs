@@ -7,6 +7,7 @@ mod database;
 mod discord_login;
 mod jwt_signer;
 mod jwt_verifier;
+mod login_manager;
 mod permissions_checking;
 
 use anyhow::{Context as _, Result};
@@ -53,7 +54,12 @@ async fn main() -> Result<()> {
     });
     let connect = service.register(ConnectRouter::new());
 
-    let discord_manager = DiscordLoginManager::new(cfg)?;
+    let login_manager = Arc::new(login_manager::LoginManager::new(
+        &GLOBAL_JWT_SIGNER,
+        &GLOBAL_JWT_VERIFIER,
+    ));
+
+    let discord_manager = DiscordLoginManager::new(login_manager.clone())?;
 
     let mut app = axum::Router::new().merge(discord_manager.router());
     for (_, method_perms) in permissions_checking::get_compiled_permissions().permissions {
