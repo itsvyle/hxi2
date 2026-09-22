@@ -6,6 +6,7 @@ use axum::{
     routing::get,
 };
 use axum_extra::extract::cookie::{self, Cookie, CookieJar, SameSite};
+use base64::prelude::*;
 use oauth2::basic::BasicClient;
 use oauth2::reqwest::async_http_client;
 use oauth2::{
@@ -99,6 +100,7 @@ impl DiscordLoginManager {
         jar: CookieJar,
         Query(query): Query<CallbackQuery>,
     ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+        let cfg = AppConfiguration::INSTANCE();
         let stored_csrf = jar.get("csrf_token").map(|c| c.value().to_string());
         let jar = jar.remove(Cookie::from("csrf_token"));
 
@@ -148,8 +150,20 @@ impl DiscordLoginManager {
                 )
             })?;
 
+        let login_response = manager
+            .login_manager
+            .login_as(&login_manager::LoginID::DiscordID(discord_user.id.clone()))
+            .await
+            .map_err(|e| {
+                error!(error = %e, "Failed to login user by Discord ID.");
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Failed to login user by Discord ID.",
+                )
+            })?;
+
         Ok((
-            jar,
+            login_response.make_cookies(jar)?,
             format!(
                 "Successfully logged in as: {} (ID: {})",
                 discord_user.username, discord_user.id

@@ -1,7 +1,14 @@
+use axum_extra::extract::{
+    CookieJar,
+    cookie::{Cookie, SameSite},
+};
+use base64::prelude::*;
+use http::StatusCode;
 use hxi2_proto::proto::auth::v2::{DBUser, SmallData};
 use rand::RngExt;
+use tracing::error;
 
-use crate::{database::DbUser, jwt_signer::JWTSignerOptions};
+use crate::{app_config::AppConfiguration, database::DbUser, jwt_signer::JWTSignerOptions};
 
 pub struct LoginManager {
     pub signer: &'static crate::jwt_signer::JWTSigner,
@@ -11,8 +18,58 @@ pub struct LoginManager {
 
 pub struct LoginResponse {
     pub token: String,
+    pub token_max_age: i64,
     pub refresh_token: String,
+    pub refresh_token_max_age: i64,
     pub small_data: SmallData,
+}
+
+impl LoginResponse {
+    /// Returns: jwt_cookie, refresh_token_cookie, small_data_cookie
+    pub fn make_cookies(&self, jar: CookieJar) -> Result<CookieJar, (StatusCode, &'static str)> {
+        let cfg = AppConfiguration::INSTANCE();
+        let apply_base_cookie_options = |cookie: &mut Cookie| {
+            cookie.set_domain(&cfg.cookies_domain);
+            cookie.set_path("/");
+            cookie.set_http_only(true);
+            cookie.set_same_site(SameSite::Lax);
+        };
+
+        // JWT Cookie
+        let mut jwt_cookie = Cookie::build((cfg.COOKIE_JWT_TOKEN_NAME, self.token.to_owned()))
+            .max_age(time::Duration::seconds(self.token_max_age))
+            .build();
+        apply_base_cookie_options(&mut jwt_cookie);
+
+        // Refresh Token Cookie
+        let mut refresh_token_cookie =
+            Cookie::build((cfg.COOKIE_REFRESH_TOKEN_NAME, self.refresh_token.to_owned()))
+                .max_age(time::Duration::seconds(self.refresh_token_max_age))
+                .build();
+        apply_base_cookie_options(&mut refresh_token_cookie);
+
+        // Small Data Cookie
+        let small_data_json = serde_json::to_string(&self.small_data).map_err(|e| {
+            error!(error = %e, "Failed to serialize small_data to JSON.");
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to serialize small_data to JSON.",
+            )
+        })?;
+        let small_data_b64 =
+            base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(small_data_json);
+
+        let mut small_data_cookie = Cookie::build((cfg.COOKIE_SMALL_DATA_NAME, small_data_b64))
+            .max_age(time::Duration::seconds(self.refresh_token_max_age))
+            .build();
+        apply_base_cookie_options(&mut small_data_cookie);
+        small_data_cookie.set_http_only(false);
+
+        Ok(jar
+            .add(jwt_cookie)
+            .add(refresh_token_cookie)
+            .add(small_data_cookie))
+    }
 }
 
 pub enum LoginID {
@@ -58,18 +115,21 @@ impl LoginManager {
         };
 
         let small_data = self.small_data_from_user(&user);
-        let (token, claims) = self.signer.new_token(
-            &format!("{}", user.id),
-            &small_data,
-            &JWTSignerOptions::default(),
-        )?;
+        let opts = JWTSignerOptions::default();
+        let (token, claims) = self
+            .signer
+            .new_token(&format!("{}", user.id), &small_data, &opts)?;
 
         let refresh_token = Self::new_refresh_token();
 
         Ok(LoginResponse {
             token,
+            token_max_age: opts.validity.num_seconds(),
             refresh_token,
-            small_data: claims.data.expect("claims.data should be present"),
+            refresh_token_max_age: cfg.JWT_REFRESH_TOKEN_VALIDITY.num_seconds(),
+            small_data: claims
+                .data
+                .ok_or_else(|| anyhow::anyhow!("claims.data should be present"))?,
         })
     }
 }

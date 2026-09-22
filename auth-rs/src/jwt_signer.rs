@@ -5,7 +5,7 @@ use hxi2_proto::proto::auth::v2::{JwtClaims, SmallData};
 use jsonwebtoken::{Algorithm, EncodingKey, Header, encode};
 use rand::RngExt;
 
-use crate::app_config::AppConfiguration;
+use crate::app_config::{self, AppConfiguration};
 
 pub static GLOBAL_JWT_SIGNER: LazyLock<JWTSigner> =
     LazyLock::new(|| JWTSigner::new().expect("failed to initialize JWTSigner"));
@@ -16,18 +16,18 @@ pub struct JWTSigner {
 }
 
 pub struct JWTSignerOptions {
-    pub validity: time::Duration,
+    pub validity: chrono::Duration,
 }
 impl Default for JWTSignerOptions {
     fn default() -> Self {
         JWTSignerOptions {
-            validity: time::Duration::from_secs(15 * 60),
+            validity: app_config::AppConfiguration::INSTANCE().JWT_TOKEN_VALIDITY,
         }
     }
 }
 
 impl JWTSignerOptions {
-    pub fn with_validity(mut self, validity: time::Duration) -> Self {
+    pub fn with_validity(mut self, validity: chrono::Duration) -> Self {
         self.validity = validity;
         self
     }
@@ -54,7 +54,7 @@ impl JWTSigner {
         // calculate iat, exp, and nbf based on current time and validity
         let now = chrono::Utc::now();
         let iat = now.timestamp();
-        let exp = (now + chrono::Duration::from_std(options.validity)?).timestamp();
+        let exp = (now + options.validity).timestamp();
         let nbf = iat;
 
         let claims = JwtClaims {

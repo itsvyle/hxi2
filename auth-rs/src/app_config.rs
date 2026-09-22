@@ -1,6 +1,7 @@
 use std::{fmt, fs};
 
 use anyhow::{Context, Result};
+use chrono::Duration;
 use derivative::Derivative;
 use ed25519_dalek::pkcs8::EncodePublicKey;
 use once_cell::sync::Lazy;
@@ -62,11 +63,15 @@ pub struct AppConfiguration {
 
     // INTERNAL NON CHANGEABLE CONFIGURATION
     #[derivative(Default(value = r#""HXI2_TOKEN""#))]
-    pub COOKIE_TOKEN_NAME: &'static str,
+    pub COOKIE_JWT_TOKEN_NAME: &'static str,
     #[derivative(Default(value = r#""HXI2_REFRESH_TOKEN""#))]
     pub COOKIE_REFRESH_TOKEN_NAME: &'static str,
     #[derivative(Default(value = r#""HXI2_SMALL_DATA""#))]
     pub COOKIE_SMALL_DATA_NAME: &'static str,
+    #[derivative(Default(value = "Duration::days(30)"))]
+    pub JWT_REFRESH_TOKEN_VALIDITY: Duration,
+    #[derivative(Default(value = "Duration::seconds(15 * 60)"))]
+    pub JWT_TOKEN_VALIDITY: Duration,
 
     #[derivative(Debug = "ignore")]
     db_manager: OnceCell<DatabaseManager>,

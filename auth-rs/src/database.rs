@@ -182,7 +182,14 @@ impl DatabaseManager {
         let user = sqlx::query_as::<_, DbUser>("SELECT * FROM users WHERE discord_id = ?")
             .bind(discord_id)
             .fetch_one(&self.pool)
-            .await?;
+            .await
+            .map_err(|e| {
+                if matches!(e, sqlx::Error::RowNotFound) {
+                    DbError::NotFound
+                } else {
+                    DbError::Sqlx(e)
+                }
+            })?;
         Ok(user)
     }
 
@@ -190,7 +197,14 @@ impl DatabaseManager {
         let user = sqlx::query_as::<_, DbUser>("SELECT * FROM users WHERE id = ?")
             .bind(user_id)
             .fetch_one(&self.pool)
-            .await?;
+            .await
+            .map_err(|e| {
+                if matches!(e, sqlx::Error::RowNotFound) {
+                    DbError::NotFound
+                } else {
+                    DbError::Sqlx(e)
+                }
+            })?;
         Ok(user)
     }
 }

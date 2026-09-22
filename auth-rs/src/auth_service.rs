@@ -1,5 +1,3 @@
-use core::time;
-
 use anyhow::Context as _;
 use buffa_types::Empty;
 use connectrpc::{
@@ -101,7 +99,7 @@ impl AuthService for AuthServiceImpl {
                 &format!("{}", data.user_id),
                 &data,
                 &crate::jwt_signer::JWTSignerOptions::default()
-                    .with_validity(time::Duration::from_hours(24)),
+                    .with_validity(chrono::Duration::hours(24)),
             )
             .obfuscate()
             .to_connect_internal()?;
