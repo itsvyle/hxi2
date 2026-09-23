@@ -60,9 +60,6 @@ grpcui:
 generate-csrf-token:
     openssl rand -base64 32
 
-generate-jwt-token:
-    openssl genpkey -algorithm Ed25519 -out jwt_private_key.pem
-
 # get_jwt_public_key:
 #     curl -s -X POST \
 #         -H "Content-Type: application/json" \

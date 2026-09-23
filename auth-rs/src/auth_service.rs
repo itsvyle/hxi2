@@ -1,6 +1,6 @@
 use anyhow::Context as _;
 use buffa::MessageField;
-use buffa_types::Empty;
+use buffa_types::{Empty, Timestamp};
 use connectrpc::{
     ConnectError, ErrorCode, RequestContext, Response, ServiceRequest, ServiceResult,
 };
@@ -238,8 +238,14 @@ impl AuthService for AuthServiceImpl {
             permissions: new_user.permissions,
             promotion: new_user.promotion,
             discord_id: new_user.discord_id,
-            account_created_date: MessageField::none(),
-            account_modified_date: MessageField::none(),
+            account_created_date: Timestamp::from_unix_secs(
+                new_user.account_created_date.timestamp(),
+            )
+            .into(),
+            account_modified_date: Timestamp::from_unix_secs(
+                new_user.account_modified_date.timestamp(),
+            )
+            .into(),
             __buffa_unknown_fields: Default::default(),
         };
 
