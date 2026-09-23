@@ -30,6 +30,14 @@ pub type OwnedGetDevTokenRequestView = ::buffa::view::OwnedView<
 pub type OwnedGetDevTokenResponseView = ::buffa::view::OwnedView<
     crate::proto::auth::v2::__buffa::view::GetDevTokenResponseView<'static>,
 >;
+///Shorthand for `OwnedView<CreateUserRequestView<'static>>`.
+pub type OwnedCreateUserRequestView = ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::CreateUserRequestView<'static>,
+>;
+///Shorthand for `OwnedView<CreateUserResponseView<'static>>`.
+pub type OwnedCreateUserResponseView = ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::CreateUserResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<LoginRequestView<'static>>`.
 pub type OwnedLoginRequestView = ::buffa::view::OwnedView<
     crate::proto::auth::v2::__buffa::view::LoginRequestView<'static>,
@@ -186,6 +194,40 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::auth::v2::CreateUserResponse>
+for crate::proto::auth::v2::__buffa::view::CreateUserResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::auth::v2::CreateUserResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::CreateUserResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<crate::proto::auth::v2::LoginResponse>
 for crate::proto::auth::v2::__buffa::view::LoginResponseView<'_> {
     fn encode(
@@ -277,6 +319,12 @@ pub const AUTH_SERVICE_LIST_USERS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec:
 /// Static [`Spec`](::connectrpc::Spec) for the `GetDevToken` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_GET_DEV_TOKEN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/GetDevToken",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `CreateUser` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_CREATE_USER_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/auth.v2.AuthService/CreateUser",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
@@ -450,6 +498,29 @@ pub trait AuthService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::auth::v2::GetDevTokenResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// Handle the CreateUser RPC.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn create_user<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::auth::v2::CreateUserRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::auth::v2::CreateUserResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -702,6 +773,35 @@ impl<S: AuthService> AuthServiceExt for S {
             .with_spec(AUTH_SERVICE_GET_DEV_TOKEN_SPEC)
             .route_view(
                 AUTH_SERVICE_SERVICE_NAME,
+                "CreateUser",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::auth::v2::__buffa::view::CreateUserRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::auth::v2::CreateUserRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.create_user(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::auth::v2::CreateUserResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_CREATE_USER_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
                 "Login",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -915,6 +1015,12 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         .with_spec(AUTH_SERVICE_GET_DEV_TOKEN_SPEC),
                 )
             }
+            "CreateUser" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_CREATE_USER_SPEC),
+                )
+            }
             "Login" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
@@ -1040,6 +1146,26 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                     svc.get_dev_token(ctx, req)
                         .await?
                         .encode::<crate::proto::auth::v2::GetDevTokenResponse>(format)
+                })
+            }
+            "CreateUser" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::auth::v2::CreateUserRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::auth::v2::__buffa::view::CreateUserRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::auth::v2::CreateUserRequest,
+                    >::from_parts(&req, &body);
+                    svc.create_user(ctx, req)
+                        .await?
+                        .encode::<crate::proto::auth::v2::CreateUserResponse>(format)
                 })
             }
             "Login" => {
@@ -1432,6 +1558,47 @@ where
                 &self.transport,
                 &self.config,
                 AUTH_SERVICE_GET_DEV_TOKEN_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the CreateUser RPC. Sends a request to /auth.v2.AuthService/CreateUser.
+    pub async fn create_user(
+        &self,
+        request: crate::proto::auth::v2::CreateUserRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::auth::v2::__buffa::view::CreateUserResponseView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.create_user_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the CreateUser RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn create_user_with_options(
+        &self,
+        request: crate::proto::auth::v2::CreateUserRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::auth::v2::__buffa::view::CreateUserResponseView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_CREATE_USER_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

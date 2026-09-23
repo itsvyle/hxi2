@@ -1,18 +1,20 @@
 use anyhow::Context as _;
+use buffa::MessageField;
 use buffa_types::Empty;
 use connectrpc::{
     ConnectError, ErrorCode, RequestContext, Response, ServiceRequest, ServiceResult,
 };
 pub use hxi2_proto::connect::auth::v2::AuthServiceExt;
 use hxi2_proto::proto::auth::v2::{
-    GetCSRFTokenRequest, GetCSRFTokenResponse, GetJWTPublicKeyRequest, GetJWTPublicKeyResponse,
-    ListUsersRequest, ListUsersResponse, LoginRequest, LoginResponse, RenewJWTRequest,
-    RenewJWTResponse, SmallData,
+    CreateUserRequest, CreateUserResponse, GetCSRFTokenRequest, GetCSRFTokenResponse,
+    GetJWTPublicKeyRequest, GetJWTPublicKeyResponse, ListUsersRequest, ListUsersResponse,
+    LoginRequest, LoginResponse, RenewJWTRequest, RenewJWTResponse, SmallData,
 };
 use hxi2_proto::{
     connect::auth::v2::AuthService,
     proto::auth::v2::{GetDevTokenRequest, GetDevTokenResponse},
 };
+use tracing::error;
 
 use crate::app_config::AppConfiguration;
 use crate::connect_result::ToConnectError;
@@ -132,6 +134,10 @@ impl AuthService for AuthServiceImpl {
             )
         })?;
         if perms.csrf_token_cookie.is_none() || perms.csrf_token_header.is_none() {
+            error!(
+                "CSRF token cookie or header not configured for route {}",
+                ctx.path().unwrap_or("<unknown>")
+            );
             return Err(ConnectError::permission_denied(
                 "You need to configure the cookie name and the header name for the CSRF token in the permissions list for this route",
             ));
@@ -183,9 +189,62 @@ impl AuthService for AuthServiceImpl {
                     permissions: u.permissions,
                     promotion: u.promotion,
                     discord_id: u.discord_id,
-                    ..Default::default()
+                    account_created_date: MessageField::none(),
+                    account_modified_date: MessageField::none(),
+                    __buffa_unknown_fields: Default::default(),
                 })
                 .collect(),
+            ..Default::default()
+        })
+    }
+
+    async fn create_user(
+        &self,
+        _ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<'_, CreateUserRequest>,
+    ) -> ::connectrpc::ServiceResult<CreateUserResponse> {
+        let req = request.to_owned_message();
+
+        let mut new_user = crate::database::DbUser {
+            id: req.user.id,
+            username: req.user.username.to_owned(),
+            first_name: req.user.first_name.to_owned(),
+            last_name: req.user.last_name.to_owned(),
+            discord_id: req.user.discord_id.to_owned(),
+            account_created_date: Default::default(),
+            account_modified_date: Default::default(),
+            promotion: req.user.promotion,
+            permissions: req.user.permissions,
+        };
+
+        new_user.check_schema().map_err(|e| {
+            connectrpc::ConnectError::invalid_argument(format!("Invalid user data: {}", e))
+        })?;
+
+        let cfg = AppConfiguration::INSTANCE();
+        cfg.db()
+            .await
+            .add_new_db_user(&mut new_user)
+            .await
+            .context("creating user in database")
+            .obfuscate()
+            .to_connect_internal()?;
+
+        let return_user = hxi2_proto::proto::auth::v2::DBUser {
+            id: new_user.id,
+            username: new_user.username,
+            first_name: new_user.first_name,
+            last_name: new_user.last_name,
+            permissions: new_user.permissions,
+            promotion: new_user.promotion,
+            discord_id: new_user.discord_id,
+            account_created_date: MessageField::none(),
+            account_modified_date: MessageField::none(),
+            __buffa_unknown_fields: Default::default(),
+        };
+
+        Response::ok(CreateUserResponse {
+            user: return_user.into(),
             ..Default::default()
         })
     }

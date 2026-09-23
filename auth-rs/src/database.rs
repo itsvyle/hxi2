@@ -1,5 +1,5 @@
 use chrono::{DateTime, Duration, Utc};
-use rand::Rng;
+use rand::{Rng, RngExt};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use sqlx::{FromRow, sqlite::SqlitePool};
@@ -19,7 +19,11 @@ pub enum DbError {
 // This standard library trait makes the "?" operator work on your SQLx queries!
 impl From<sqlx::Error> for DbError {
     fn from(err: sqlx::Error) -> Self {
-        DbError::Sqlx(err)
+        if matches!(err, sqlx::Error::RowNotFound) {
+            DbError::NotFound
+        } else {
+            DbError::Sqlx(err)
+        }
     }
 }
 
@@ -39,9 +43,10 @@ impl std::fmt::Display for DbError {
 impl std::error::Error for DbError {}
 
 fn generate_32bits_number() -> Result<i64, DbError> {
-    unimplemented!("Implement a secure random 32-bit number generator here");
-    Ok(1)
-    // Ok(rand::thread_rng().gen_range(1..i32::MAX as i64))
+    use rand::rngs::ThreadRng;
+
+    let mut rng = ThreadRng::default();
+    Ok(rng.random_range(1..i32::MAX as i64))
 }
 fn generate_6_digit_number() -> Result<String, DbError> {
     unimplemented!("Implement a secure random 6-digit number generator here");
@@ -83,6 +88,7 @@ impl DatabaseManager {
 // -----------------------------------------------------------------------------
 #[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
 pub struct DbUser {
+    #[sqlx(rename = "ID")]
     pub id: i64,
     pub username: String,
     pub first_name: String,
@@ -113,7 +119,7 @@ impl DbUser {
 }
 
 impl DatabaseManager {
-    pub async fn add_new_db_user(&self, mut user: DbUser) -> Result<(), DbError> {
+    pub async fn add_new_db_user(&self, user: &mut DbUser) -> Result<(), DbError> {
         if user.id == 0 {
             user.id = generate_32bits_number()?;
         }
@@ -125,11 +131,12 @@ impl DatabaseManager {
 
         sqlx::query(
             r#"
-            INSERT INTO users (id, first_name, last_name, discord_id, account_created_date, account_modified_date, promotion, permissions)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO users (ID, username, first_name, last_name, discord_id, account_created_date, account_modified_date, promotion, permissions)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             "#,
         )
         .bind(user.id)
+        .bind(&user.username)
         .bind(&user.first_name)
         .bind(&user.last_name)
         .bind(&user.discord_id)
@@ -144,7 +151,7 @@ impl DatabaseManager {
     }
 
     pub async fn list_users(&self) -> Result<Vec<DbUser>, DbError> {
-        let users = sqlx::query_as::<_, DbUser>("SELECT * FROM users")
+        let users = sqlx::query_as::<_, DbUser>("SELECT * FROM USERS")
             .fetch_all(&self.pool)
             .await?;
         Ok(users)
@@ -161,7 +168,7 @@ impl DatabaseManager {
             r#"
             UPDATE users
             SET first_name = ?, last_name = ?, discord_id = ?, account_modified_date = ?, promotion = ?, permissions = ?, username = ?
-            WHERE id = ?
+            WHERE ID = ?
             "#,
         )
         .bind(&user.first_name)
@@ -194,7 +201,7 @@ impl DatabaseManager {
     }
 
     pub async fn get_db_user_by_id(&self, user_id: &i64) -> Result<DbUser, DbError> {
-        let user = sqlx::query_as::<_, DbUser>("SELECT * FROM users WHERE id = ?")
+        let user = sqlx::query_as::<_, DbUser>("SELECT * FROM users WHERE ID = ?")
             .bind(user_id)
             .fetch_one(&self.pool)
             .await

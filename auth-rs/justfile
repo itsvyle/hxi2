@@ -21,7 +21,7 @@ PORT := "8080"
 export CONFIG_RUNNING_PORT := PORT
 
 jwt_token_payload := '{"user_id": "42", "roles": [
-    "PERMISSION_API_JWT"
+    "PERMISSION_ADMIN"
 ]}'
 
 init: 

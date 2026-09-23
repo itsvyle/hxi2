@@ -33,6 +33,10 @@ impl LoginResponse {
             cookie.set_path("/");
             cookie.set_http_only(true);
             cookie.set_same_site(SameSite::Lax);
+            cookie.set_secure(match cfg.environment {
+                crate::app_config::Environnement::Development => false,
+                crate::app_config::Environnement::Production => true,
+            });
         };
 
         // JWT Cookie
@@ -110,9 +114,9 @@ impl LoginManager {
     pub async fn login_as(&self, user_id: &LoginID) -> anyhow::Result<LoginResponse> {
         let cfg = crate::app_config::AppConfiguration::INSTANCE();
         let user = match user_id {
-            LoginID::UserID(uid) => cfg.db().await.get_db_user_by_id(uid).await?,
-            LoginID::DiscordID(did) => cfg.db().await.get_db_user_by_discord_id(did).await?,
-        };
+            LoginID::UserID(uid) => cfg.db().await.get_db_user_by_id(uid).await,
+            LoginID::DiscordID(did) => cfg.db().await.get_db_user_by_discord_id(did).await,
+        }?;
 
         let small_data = self.small_data_from_user(&user);
         let opts = JWTSignerOptions::default();

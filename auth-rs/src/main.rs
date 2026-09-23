@@ -38,21 +38,14 @@ async fn main() -> Result<()> {
         .with_default_directive(tracing_subscriber::filter::LevelFilter::INFO.into())
         .from_env_lossy()
         .add_directive("sqlx=warn".parse().unwrap());
-
     tracing_subscriber::fmt().with_env_filter(filter).init();
+
     let cfg = AppConfiguration::INSTANCE();
     debug!(cfg = ?cfg,"Loaded configuration");
     // Force initialization of the JWT public key at startup, so we fail fast if the private key is invalid.
     let _jwt_public = cfg.jwt_public_key();
     let _csrf_prot = GLOBAL_CSRF_PROTECTION.generate_token();
     let _db = cfg.db().await;
-
-    let service = Arc::new(AuthServiceImpl {
-        subdomain: format!("auth.{}", cfg.tld),
-        signer: &GLOBAL_JWT_SIGNER,
-        verifier: &GLOBAL_JWT_VERIFIER,
-    });
-    let connect = service.register(ConnectRouter::new());
 
     let login_manager = Arc::new(login_manager::LoginManager::new(
         &GLOBAL_JWT_SIGNER,
@@ -62,6 +55,14 @@ async fn main() -> Result<()> {
     let discord_manager = DiscordLoginManager::new(login_manager.clone())?;
 
     let mut app = axum::Router::new().merge(discord_manager.router());
+
+    let service = Arc::new(AuthServiceImpl {
+        subdomain: format!("auth.{}", cfg.tld),
+        signer: &GLOBAL_JWT_SIGNER,
+        verifier: &GLOBAL_JWT_VERIFIER,
+    });
+    let connect = service.register(ConnectRouter::new());
+
     for (_, method_perms) in permissions_checking::get_compiled_permissions().permissions {
         if method_perms.is_frontend
             && method_perms.is_public

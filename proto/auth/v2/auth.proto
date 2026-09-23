@@ -33,6 +33,10 @@ service AuthService {
         option (permission_level).is_public = true;
     }
 
+    rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
+        option (permission_level).allow_role = PERMISSION_ADMIN;
+    }
+
     rpc Login(LoginRequest) returns (LoginResponse) {
         option (permission_level).is_public = true;
         option (permission_level).enforce_csrf = true;
@@ -99,6 +103,14 @@ message GetDevTokenResponse {
 message LoginRequest {
     string username = 1;
     string password = 2;
+}
+
+message CreateUserRequest {
+    DBUser user = 1;
+}
+
+message CreateUserResponse {
+    DBUser user = 1;
 }
 
 message LoginResponse {

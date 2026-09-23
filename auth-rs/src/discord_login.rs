@@ -15,10 +15,10 @@ use oauth2::{
 };
 use serde::Deserialize;
 use std::sync::Arc;
-use tracing::error;
+use tracing::{error, trace, warn};
 
 use crate::{
-    app_config::AppConfiguration,
+    app_config::{self, AppConfiguration},
     login_manager::{self, LoginManager},
 };
 
@@ -28,6 +28,12 @@ pub struct CallbackQuery {
     pub state: String,
 }
 
+#[derive(Deserialize)]
+struct LoginPreParams {
+    redirect_to: Option<String>,
+}
+
+#[allow(unused)]
 #[derive(Deserialize, Debug)]
 pub struct DiscordUser {
     pub id: String,
@@ -76,8 +82,32 @@ impl DiscordLoginManager {
             .with_state(state)
     }
 
+    /// Helper method to validate if a target URL/path is safe to redirect to after login
+    fn is_safe_redirect(&self, redirect_to: &str) -> bool {
+        let cfg_tld = &app_config::AppConfiguration::INSTANCE().tld;
+
+        // 1. Allow relative path redirects (e.g., "/dashboard")
+        if redirect_to.starts_with('/') && !redirect_to.starts_with("//") {
+            return true;
+        }
+
+        // 2. For absolute URLs, parse and match against cfg.tld or its subdomains
+        if let Ok(parsed) = reqwest::Url::parse(redirect_to)
+            && let Some(host) = parsed.host_str()
+        {
+            // Exact match (e.g. "example.com") or subdomain match (e.g. "app.example.com")
+            return host == cfg_tld || host.ends_with(&format!(".{}", cfg_tld));
+        }
+
+        false
+    }
+
     /// Handler for GET /api/login
-    async fn login_handler(State(manager): State<Arc<Self>>, jar: CookieJar) -> impl IntoResponse {
+    async fn login_handler(
+        State(manager): State<Arc<Self>>,
+        Query(params): Query<LoginPreParams>,
+        jar: CookieJar,
+    ) -> impl IntoResponse {
         let (auth_url, csrf_token) = manager
             .oauth_client
             .authorize_url(CsrfToken::new_random)
@@ -91,7 +121,22 @@ impl DiscordLoginManager {
             .max_age(time::Duration::minutes(10))
             .build();
 
-        (jar.add(csrf_cookie), Redirect::to(auth_url.as_str()))
+        let mut jar = jar.add(csrf_cookie);
+
+        if let Some(redirect_target) = params.redirect_to
+            && manager.is_safe_redirect(&redirect_target)
+        {
+            let redirect_cookie = Cookie::build(("redirect_to", redirect_target))
+                .path("/")
+                .http_only(true)
+                .same_site(SameSite::Lax)
+                .max_age(time::Duration::minutes(10))
+                .build();
+
+            jar = jar.add(redirect_cookie);
+        }
+
+        (jar, Redirect::to(auth_url.as_str()))
     }
 
     /// Handler for GET /api/discord_callback
@@ -100,7 +145,6 @@ impl DiscordLoginManager {
         jar: CookieJar,
         Query(query): Query<CallbackQuery>,
     ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-        let cfg = AppConfiguration::INSTANCE();
         let stored_csrf = jar.get("csrf_token").map(|c| c.value().to_string());
         let jar = jar.remove(Cookie::from("csrf_token"));
 
@@ -154,20 +198,38 @@ impl DiscordLoginManager {
             .login_manager
             .login_as(&login_manager::LoginID::DiscordID(discord_user.id.clone()))
             .await
-            .map_err(|e| {
-                error!(error = %e, "Failed to login user by Discord ID.");
+            .map_err(|err| {
+                if matches!(
+                    err.downcast_ref::<crate::database::DbError>(),
+                    Some(crate::database::DbError::NotFound)
+                ) {
+                    warn!("User {} (id={}) not found in database, yet tried to login with Discord.", discord_user.username, discord_user.id);
+                    return (
+                        StatusCode::UNAUTHORIZED,
+                        "No user found with the given Discord ID. Ask in the Discord to have an account created.",
+                    );
+                }
+                error!(error = %err, "Failed to login user by Discord ID.");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "Failed to login user by Discord ID.",
                 )
             })?;
+        let mut jar = login_response.make_cookies(jar)?;
 
-        Ok((
-            login_response.make_cookies(jar)?,
-            format!(
-                "Successfully logged in as: {} (ID: {})",
-                discord_user.username, discord_user.id
-            ),
-        ))
+        let redirect_to = jar
+            .get("redirect_to")
+            .map(|c| c.value().to_string())
+            .unwrap_or_else(|| "/".to_string());
+        if jar.get("redirect_to").is_some() {
+            jar = jar.remove(Cookie::from("redirect_to"));
+        }
+
+        trace!(
+            "User {} (id={}) logged in via Discord, redirecting to {}",
+            discord_user.username, discord_user.id, redirect_to
+        );
+
+        Ok((jar, Redirect::to(&redirect_to)))
     }
 }
