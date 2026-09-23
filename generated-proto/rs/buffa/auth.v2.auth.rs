@@ -670,16 +670,22 @@ pub struct RenewJWTResponse {
         skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_str"
     )]
     pub refresh_token: ::buffa::alloc::string::String,
-    /// Field 3: `refresh_token_expiry`
+    /// Field 3: `refresh_token_max_age`
     #[serde(
-        rename = "refreshTokenExpiry",
-        alias = "refresh_token_expiry",
-        skip_serializing_if = "::buffa::json_helpers::skip_if::is_unset_message_field"
+        rename = "refreshTokenMaxAge",
+        alias = "refresh_token_max_age",
+        with = "::buffa::json_helpers::int64",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_zero_i64"
     )]
-    pub refresh_token_expiry: ::buffa::MessageField<
-        ::buffa_types::google::protobuf::Timestamp,
-        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
-    >,
+    pub refresh_token_max_age: i64,
+    /// Field 5: `jwt_max_age`
+    #[serde(
+        rename = "jwtMaxAge",
+        alias = "jwt_max_age",
+        with = "::buffa::json_helpers::int64",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_zero_i64"
+    )]
+    pub jwt_max_age: i64,
     /// Field 4: `small_data`
     #[serde(
         rename = "smallData",
@@ -696,7 +702,8 @@ impl ::core::fmt::Debug for RenewJWTResponse {
         f.debug_struct("RenewJWTResponse")
             .field("jwt", &self.jwt)
             .field("refresh_token", &self.refresh_token)
-            .field("refresh_token_expiry", &self.refresh_token_expiry)
+            .field("refresh_token_max_age", &self.refresh_token_max_age)
+            .field("jwt_max_age", &self.jwt_max_age)
             .field("small_data", &self.small_data)
             .finish()
     }
@@ -730,12 +737,9 @@ impl ::buffa_descriptor::reflect::ReflectMessage for RenewJWTResponse {
             1u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.jwt),
             2u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.refresh_token),
             3u32 => {
-                ::buffa_descriptor::reflect::ValueRef::Message(
-                    ::buffa_descriptor::reflect::Reflectable::reflect(
-                        &*self.refresh_token_expiry,
-                    ),
-                )
+                ::buffa_descriptor::reflect::ValueRef::I64(self.refresh_token_max_age)
             }
+            5u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.jwt_max_age),
             4u32 => {
                 ::buffa_descriptor::reflect::ValueRef::Message(
                     ::buffa_descriptor::reflect::Reflectable::reflect(&*self.small_data),
@@ -755,7 +759,8 @@ impl ::buffa_descriptor::reflect::ReflectMessage for RenewJWTResponse {
         match field.number() {
             1u32 => !self.jwt.is_empty(),
             2u32 => !self.refresh_token.is_empty(),
-            3u32 => self.refresh_token_expiry.is_set(),
+            3u32 => self.refresh_token_max_age != 0,
+            5u32 => self.jwt_max_age != 0,
             4u32 => self.small_data.is_set(),
             _ => false,
         }
@@ -841,13 +846,11 @@ impl ::buffa::Message for RenewJWTResponse {
             size
                 += 1u64 + ::buffa::types::string_encoded_len(&self.refresh_token) as u64;
         }
-        if self.refresh_token_expiry.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.refresh_token_expiry.compute_size(__cache);
-            __cache.set(__slot, inner_size);
+        if self.refresh_token_max_age != 0i64 {
             size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
+                += 1u64
+                    + ::buffa::types::int64_encoded_len(self.refresh_token_max_age)
+                        as u64;
         }
         if self.small_data.is_set() {
             let __slot = __cache.reserve();
@@ -856,6 +859,9 @@ impl ::buffa::Message for RenewJWTResponse {
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
+        }
+        if self.jwt_max_age != 0i64 {
+            size += 1u64 + ::buffa::types::int64_encoded_len(self.jwt_max_age) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -873,13 +879,8 @@ impl ::buffa::Message for RenewJWTResponse {
         if !self.refresh_token.is_empty() {
             ::buffa::types::put_string_field(2u32, &self.refresh_token, buf);
         }
-        if self.refresh_token_expiry.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                3u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.refresh_token_expiry.write_to(__cache, buf);
+        if self.refresh_token_max_age != 0i64 {
+            ::buffa::types::put_int64_field(3u32, self.refresh_token_max_age, buf);
         }
         if self.small_data.is_set() {
             ::buffa::types::put_len_delimited_header(
@@ -888,6 +889,9 @@ impl ::buffa::Message for RenewJWTResponse {
                 buf,
             );
             self.small_data.write_to(__cache, buf);
+        }
+        if self.jwt_max_age != 0i64 {
+            ::buffa::types::put_int64_field(5u32, self.jwt_max_age, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -919,13 +923,9 @@ impl ::buffa::Message for RenewJWTResponse {
             3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
+                    ::buffa::encoding::WireType::Varint,
                 )?;
-                ::buffa::Message::merge_length_delimited(
-                    self.refresh_token_expiry.get_or_insert_default(),
-                    buf,
-                    ctx,
-                )?;
+                self.refresh_token_max_age = ::buffa::types::decode_int64(buf)?;
             }
             4u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -938,6 +938,13 @@ impl ::buffa::Message for RenewJWTResponse {
                     ctx,
                 )?;
             }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.jwt_max_age = ::buffa::types::decode_int64(buf)?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -948,8 +955,9 @@ impl ::buffa::Message for RenewJWTResponse {
     fn clear(&mut self) {
         self.jwt.clear();
         self.refresh_token.clear();
-        self.refresh_token_expiry = ::buffa::MessageField::none();
+        self.refresh_token_max_age = 0i64;
         self.small_data = ::buffa::MessageField::none();
+        self.jwt_max_age = 0i64;
         self.__buffa_unknown_fields.clear();
     }
 }

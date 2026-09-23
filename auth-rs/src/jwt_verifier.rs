@@ -23,4 +23,13 @@ impl JWTVerifier {
             .context("verifying token")?;
         Ok(token_data.claims)
     }
+
+    pub fn verify_token_ignore_expiry(&self, token: &str) -> Result<JwtClaims> {
+        let mut validation = self.validation_settings.clone();
+        validation.validate_exp = false;
+        validation.validate_nbf = false;
+        let token_data = decode::<JwtClaims>(token, &self.public_key, &validation)
+            .context("verifying token (ignoring expiry)")?;
+        Ok(token_data.claims)
+    }
 }

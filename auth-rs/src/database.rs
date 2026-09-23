@@ -3,7 +3,9 @@ use rand::{Rng, RngExt};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use sqlx::{FromRow, sqlite::SqlitePool};
-use tracing::error;
+use tracing::{error, instrument};
+
+use crate::app_config;
 
 const ONE_TIME_CODE_VALIDITY_DURATION_MINS: i64 = 10;
 
@@ -49,9 +51,10 @@ fn generate_32bits_number() -> Result<i64, DbError> {
     Ok(rng.random_range(1..i32::MAX as i64))
 }
 fn generate_6_digit_number() -> Result<String, DbError> {
-    unimplemented!("Implement a secure random 6-digit number generator here");
-    Ok("123456".into())
-    // Ok(format!("{:06}", rand::thread_rng().gen_range(0..999999)))
+    use rand::rngs::ThreadRng;
+
+    let mut rng = ThreadRng::default();
+    Ok(rng.random_range(100_000..1_000_000).to_string())
 }
 fn jwt_generate_refresh_token() -> Result<String, DbError> {
     unimplemented!("Implement a secure random refresh token generator here");
@@ -61,7 +64,6 @@ fn jwt_generate_jti_token() -> Result<String, DbError> {
     unimplemented!("Implement a secure random JTI token generator here");
     Ok("mock_jti".into())
 }
-const REFRESH_TOKEN_VALIDITY_DAYS: i64 = 7;
 
 // -----------------------------------------------------------------------------
 // Database Manager
@@ -76,7 +78,7 @@ impl DatabaseManager {
         Self { pool }
     }
 
-    fn hash_token(&self, token: &str) -> String {
+    pub fn hash_token(&self, token: &str) -> String {
         let mut hasher = Sha256::new();
         hasher.update(token.as_bytes());
         hex::encode(hasher.finalize())
@@ -118,7 +120,54 @@ impl DbUser {
     }
 }
 
+impl From<DbUser> for hxi2_proto::proto::auth::v2::DBUser {
+    fn from(user: DbUser) -> Self {
+        use buffa_types::Timestamp;
+        hxi2_proto::proto::auth::v2::DBUser {
+            id: user.id,
+            username: user.username,
+            first_name: user.first_name,
+            last_name: user.last_name.clone(),
+            discord_id: user.discord_id,
+            account_created_date: Timestamp::from_unix_secs(user.account_created_date.timestamp())
+                .into(),
+            account_modified_date: Timestamp::from_unix_secs(
+                user.account_modified_date.timestamp(),
+            )
+            .into(),
+            promotion: user.promotion,
+            permissions: user.permissions,
+            __buffa_unknown_fields: Default::default(),
+        }
+    }
+}
+
+impl From<hxi2_proto::proto::auth::v2::DBUser> for DbUser {
+    fn from(proto_user: hxi2_proto::proto::auth::v2::DBUser) -> Self {
+        DbUser {
+            id: proto_user.id,
+            username: proto_user.username,
+            first_name: proto_user.first_name,
+            last_name: proto_user.last_name.clone(),
+            discord_id: proto_user.discord_id,
+            account_created_date: proto_user
+                .account_created_date
+                .map(|ts| chrono::DateTime::<chrono::Utc>::from_timestamp_secs(ts.seconds))
+                .flatten()
+                .unwrap_or_default(),
+            account_modified_date: proto_user
+                .account_modified_date
+                .map(|ts| chrono::DateTime::<chrono::Utc>::from_timestamp_secs(ts.seconds))
+                .flatten()
+                .unwrap_or_default(),
+            promotion: proto_user.promotion,
+            permissions: proto_user.permissions,
+        }
+    }
+}
+
 impl DatabaseManager {
+    #[instrument(skip(self), err)]
     pub async fn add_new_db_user(&self, user: &mut DbUser) -> Result<(), DbError> {
         if user.id == 0 {
             user.id = generate_32bits_number()?;
@@ -150,6 +199,7 @@ impl DatabaseManager {
         Ok(())
     }
 
+    #[instrument(skip(self), err)]
     pub async fn list_users(&self) -> Result<Vec<DbUser>, DbError> {
         let users = sqlx::query_as::<_, DbUser>("SELECT * FROM USERS")
             .fetch_all(&self.pool)
@@ -157,7 +207,8 @@ impl DatabaseManager {
         Ok(users)
     }
 
-    pub async fn update_user(&self, mut user: DbUser) -> Result<(), DbError> {
+    #[instrument(skip(self), err)]
+    pub async fn update_user(&self, user: &mut DbUser) -> Result<(), DbError> {
         if user.id == 0 {
             return Err(DbError::Validation("no ID field on the user object".into()));
         }
@@ -243,6 +294,7 @@ impl DbRefreshToken {
 }
 
 impl DatabaseManager {
+    #[instrument(skip(self), err)]
     pub async fn add_refresh_token_pair(
         &self,
         user_id: i64,
@@ -265,20 +317,12 @@ impl DatabaseManager {
         Ok(())
     }
 
-    pub async fn delete_refresh_token_hash(&self, hash: &str) -> Result<(), DbError> {
-        sqlx::query("DELETE FROM refresh_tokens WHERE refresh_token_hash = ?")
-            .bind(hash)
-            .execute(&self.pool)
-            .await?;
-        Ok(())
-    }
-
-    // this NEEDS to be moved to LoginManager
-    pub async fn renew_refresh_token(
+    #[instrument(skip(self), err)]
+    pub async fn check_refresh_token(
         &self,
         refresh_token: &str,
         jti: &str,
-    ) -> Result<(i64, String, String), DbError> {
+    ) -> Result<DbRefreshToken, DbError> {
         let refresh_token_hash = self.hash_token(refresh_token);
         let jti_hash = self.hash_token(jti);
 
@@ -294,10 +338,50 @@ impl DatabaseManager {
             _ => DbError::Sqlx(e),
         })?;
 
+        if Utc::now() - rt.created_at
+            > app_config::AppConfiguration::INSTANCE().JWT_REFRESH_TOKEN_VALIDITY
+        {
+            return Err(DbError::Expired);
+        }
+
+        Ok(rt)
+    }
+
+    #[instrument(skip(self), err)]
+    pub async fn delete_refresh_token(&self, refresh_token: &str) -> Result<(), DbError> {
+        let refresh_token_hash = self.hash_token(refresh_token);
+
+        sqlx::query("DELETE FROM refresh_tokens WHERE refresh_token_hash = ?")
+            .bind(&refresh_token_hash)
+            .execute(&self.pool)
+            .await?;
+
+        Ok(())
+    }
+
+    // this NEEDS to be moved to LoginManager
+    /* pub async fn renew_refresh_token(
+        &self,
+        refresh_token: &str,
+        jti: &str,
+    ) -> Result<(i64, String, String), DbError> {
+        let refresh_token_hash = self.hash_token(refresh_token);
+        let jti_hash = self.hash_token(jti);
+
+        let rt = sqlx::query_as::<_, DbRefreshToken>(
+            "SELECT * FROM refresh_tokens WHERE refresh_token_hash = ? AND jti_hash = ?",
+        )
+        .bind(&refresh_token_hash)
+        .bind(&jti_hash)
+        .fetch_one(&self.pool)
+        .await?;
+
         rt.check_schema()?;
 
         // Token expiry check
-        if Utc::now() - rt.created_at > Duration::days(REFRESH_TOKEN_VALIDITY_DAYS) {
+        if Utc::now() - rt.created_at
+            > app_config::AppConfiguration::INSTANCE().JWT_REFRESH_TOKEN_VALIDITY
+        {
             return Err(DbError::Expired);
         }
 
@@ -322,12 +406,7 @@ impl DatabaseManager {
         }
 
         Ok((rt.associated_user_id, new_refresh_token, new_jti))
-    }
-
-    pub async fn delete_refresh_token(&self, refresh_token: &str) -> Result<(), DbError> {
-        let hash = self.hash_token(refresh_token);
-        self.delete_refresh_token_hash(&hash).await
-    }
+    } */
 }
 
 // -----------------------------------------------------------------------------

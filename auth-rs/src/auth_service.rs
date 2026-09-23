@@ -1,12 +1,13 @@
+use std::sync::Arc;
+
 use anyhow::Context as _;
-use buffa::MessageField;
-use buffa_types::{Empty, Timestamp};
+use buffa_types::Empty;
 use connectrpc::{
     ConnectError, ErrorCode, RequestContext, Response, ServiceRequest, ServiceResult,
 };
 pub use hxi2_proto::connect::auth::v2::AuthServiceExt;
 use hxi2_proto::proto::auth::v2::{
-    CreateUserRequest, CreateUserResponse, GetCSRFTokenRequest, GetCSRFTokenResponse,
+    CreateUserRequest, CreateUserResponse, DBUser, GetCSRFTokenRequest, GetCSRFTokenResponse,
     GetJWTPublicKeyRequest, GetJWTPublicKeyResponse, ListUsersRequest, ListUsersResponse,
     LoginRequest, LoginResponse, RenewJWTRequest, RenewJWTResponse, SmallData,
 };
@@ -14,10 +15,11 @@ use hxi2_proto::{
     connect::auth::v2::AuthService,
     proto::auth::v2::{GetDevTokenRequest, GetDevTokenResponse},
 };
-use tracing::error;
+use tracing::{error, instrument};
 
 use crate::app_config::AppConfiguration;
 use crate::connect_result::ToConnectError;
+use crate::login_manager::LoginManager;
 use crate::permissions_checking;
 
 pub struct AuthServiceImpl {
@@ -25,6 +27,7 @@ pub struct AuthServiceImpl {
     pub signer: &'static crate::jwt_signer::JWTSigner,
     #[allow(unused)]
     pub verifier: &'static crate::jwt_verifier::JWTVerifier,
+    pub login_manager: Arc<LoginManager>,
 }
 
 macro_rules! impl_unimplemented_rpc {
@@ -166,6 +169,30 @@ impl AuthService for AuthServiceImpl {
         Ok(res)
     }
 
+    // ignore the _ctx.headers
+    #[instrument(skip(self), err)]
+    async fn renew_jwt(
+        &self,
+        _ctx: connectrpc::RequestContext,
+        request: connectrpc::ServiceRequest<'_, RenewJWTRequest>,
+    ) -> connectrpc::ServiceResult<RenewJWTResponse> {
+        let r = self
+            .login_manager
+            .renew_authentication(request.jwt, request.refresh_token)
+            .await
+            .obfuscate()
+            .to_connect_permission_denied()?;
+
+        Response::ok(RenewJWTResponse {
+            jwt: r.token,
+            refresh_token: r.refresh_token,
+            refresh_token_max_age: r.refresh_token_max_age,
+            jwt_max_age: r.token_max_age,
+            small_data: r.small_data.into(),
+            ..Default::default()
+        })
+    }
+
     async fn list_users(
         &self,
         _ctx: connectrpc::RequestContext,
@@ -181,18 +208,7 @@ impl AuthService for AuthServiceImpl {
         Response::ok(ListUsersResponse {
             users: users
                 .into_iter()
-                .map(|u| hxi2_proto::proto::auth::v2::DBUser {
-                    id: u.id,
-                    username: u.username,
-                    first_name: u.first_name,
-                    last_name: u.last_name,
-                    permissions: u.permissions,
-                    promotion: u.promotion,
-                    discord_id: u.discord_id,
-                    account_created_date: MessageField::none(),
-                    account_modified_date: MessageField::none(),
-                    __buffa_unknown_fields: Default::default(),
-                })
+                .map(hxi2_proto::proto::auth::v2::DBUser::from)
                 .collect(),
             ..Default::default()
         })
@@ -205,17 +221,10 @@ impl AuthService for AuthServiceImpl {
     ) -> ::connectrpc::ServiceResult<CreateUserResponse> {
         let req = request.to_owned_message();
 
-        let mut new_user = crate::database::DbUser {
-            id: req.user.id,
-            username: req.user.username.to_owned(),
-            first_name: req.user.first_name.to_owned(),
-            last_name: req.user.last_name.to_owned(),
-            discord_id: req.user.discord_id.to_owned(),
-            account_created_date: Default::default(),
-            account_modified_date: Default::default(),
-            promotion: req.user.promotion,
-            permissions: req.user.permissions,
-        };
+        let mut new_user =
+            crate::database::DbUser::from(req.user.ok_or_else(|| {
+                connectrpc::ConnectError::invalid_argument("User data is missing")
+            })?);
 
         new_user.check_schema().map_err(|e| {
             connectrpc::ConnectError::invalid_argument(format!("Invalid user data: {}", e))
@@ -229,25 +238,7 @@ impl AuthService for AuthServiceImpl {
             .context("creating user in database")
             .obfuscate()
             .to_connect_internal()?;
-
-        let return_user = hxi2_proto::proto::auth::v2::DBUser {
-            id: new_user.id,
-            username: new_user.username,
-            first_name: new_user.first_name,
-            last_name: new_user.last_name,
-            permissions: new_user.permissions,
-            promotion: new_user.promotion,
-            discord_id: new_user.discord_id,
-            account_created_date: Timestamp::from_unix_secs(
-                new_user.account_created_date.timestamp(),
-            )
-            .into(),
-            account_modified_date: Timestamp::from_unix_secs(
-                new_user.account_modified_date.timestamp(),
-            )
-            .into(),
-            __buffa_unknown_fields: Default::default(),
-        };
+        let return_user = hxi2_proto::proto::auth::v2::DBUser::from(new_user);
 
         Response::ok(CreateUserResponse {
             user: return_user.into(),
@@ -255,7 +246,32 @@ impl AuthService for AuthServiceImpl {
         })
     }
 
-    impl_unimplemented_rpc!(renew_jwt, RenewJWTRequest, RenewJWTResponse);
+    async fn update_user(
+        &self,
+        _ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<'_, DBUser>,
+    ) -> ::connectrpc::ServiceResult<DBUser> {
+        let req = request.to_owned_message();
+
+        let mut updated_user = crate::database::DbUser::from(req);
+
+        updated_user.check_schema().map_err(|e| {
+            connectrpc::ConnectError::invalid_argument(format!("Invalid user data: {}", e))
+        })?;
+
+        let cfg = AppConfiguration::INSTANCE();
+        cfg.db()
+            .await
+            .update_user(&mut updated_user)
+            .await
+            .context("updating user in database")
+            .obfuscate()
+            .to_connect_internal()?;
+        let return_user = hxi2_proto::proto::auth::v2::DBUser::from(updated_user);
+
+        Response::ok(return_user)
+    }
+
     impl_unimplemented_rpc!(login, LoginRequest, LoginResponse);
     impl_otherplace_rpc!(frontend_index, Empty, Empty);
     impl_otherplace_rpc!(discord_callback, Empty, Empty);

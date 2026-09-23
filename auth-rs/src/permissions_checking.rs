@@ -13,6 +13,7 @@ pub fn get_route_from_public_url(url: &str) -> Option<&'static str> {
 "/auth.v2.AuthService/ListUsers" => return Some("/auth.v2.AuthService/ListUsers"),
 "/auth.v2.AuthService/Login" => return Some("/auth.v2.AuthService/Login"),
 "/auth.v2.AuthService/RenewJWT" => return Some("/auth.v2.AuthService/RenewJWT"),
+"/auth.v2.AuthService/UpdateUser" => return Some("/auth.v2.AuthService/UpdateUser"),
 _ => None,
     }
 }
@@ -76,6 +77,7 @@ impl CompiledPermissions {
 				"/auth.v2.AuthService/ListUsers" => return Some(&self.permissions[7].1),
 				"/auth.v2.AuthService/Login" => return Some(&self.permissions[8].1),
 				"/auth.v2.AuthService/RenewJWT" => return Some(&self.permissions[9].1),
+				"/auth.v2.AuthService/UpdateUser" => return Some(&self.permissions[10].1),
             _ => None,
         }
     }
@@ -221,6 +223,21 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 is_public: false,
                 public_url: None,
                 compiled_permissions_bitfield: 10,
+                csrf_token_header: Some("X-CSRF-Token"),
+                csrf_token_cookie: Some("csrf_token"),
+                response_cors_headers: None,
+                enforce_csrf: false,
+                is_frontend: false,
+                frontend_static_file: None,
+            }),
+            ("/auth.v2.AuthService/UpdateUser", MethodPermissions {
+                allow_roles: &[
+					Permission::PERMISSION_ADMIN,
+					Permission::PERMISSION_ADMIN,
+                ],
+                is_public: false,
+                public_url: None,
+                compiled_permissions_bitfield: 2,
                 csrf_token_header: Some("X-CSRF-Token"),
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,

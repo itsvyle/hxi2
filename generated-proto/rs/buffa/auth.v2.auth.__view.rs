@@ -1049,10 +1049,10 @@ pub struct RenewJWTResponseView<'a> {
     pub jwt: &'a str,
     /// Field 2: `refresh_token`
     pub refresh_token: &'a str,
-    /// Field 3: `refresh_token_expiry`
-    pub refresh_token_expiry: ::buffa::MessageFieldView<
-        ::buffa_types::google::protobuf::__buffa::view::TimestampView<'a>,
-    >,
+    /// Field 3: `refresh_token_max_age`
+    pub refresh_token_max_age: i64,
+    /// Field 5: `jwt_max_age`
+    pub jwt_max_age: i64,
     /// Field 4: `small_data`
     pub small_data: ::buffa::MessageFieldView<
         super::super::__buffa::view::SmallDataView<'a>,
@@ -1106,23 +1106,16 @@ impl<'a> ::buffa::MessageView<'a> for RenewJWTResponseView<'a> {
             3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
+                    ::buffa::encoding::WireType::Varint,
                 )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.refresh_token_expiry.as_mut() {
-                    Some(existing) => {
-                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
-                    }
-                    None => {
-                        view.refresh_token_expiry = ::buffa::MessageFieldView::set(
-                            <::buffa_types::google::protobuf::__buffa::view::TimestampView as ::buffa::MessageView>::decode_view_ctx(
-                                sub,
-                                __sub_ctx,
-                            )?,
-                        );
-                    }
-                }
+                view.refresh_token_max_age = ::buffa::types::decode_int64(&mut cur)?;
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.jwt_max_age = ::buffa::types::decode_int64(&mut cur)?;
             }
             4u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -1169,15 +1162,8 @@ impl<'a> ::buffa::MessageView<'a> for RenewJWTResponseView<'a> {
         ::core::result::Result::Ok(super::super::RenewJWTResponse {
             jwt: self.jwt.to_string(),
             refresh_token: self.refresh_token.to_string(),
-            refresh_token_expiry: match self.refresh_token_expiry.as_option() {
-                Some(v) => {
-                    ::buffa::MessageField::<
-                        ::buffa_types::google::protobuf::Timestamp,
-                        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
-                    >::some(v.to_owned_from_source(__buffa_src)?)
-                }
-                None => ::buffa::MessageField::none(),
-            },
+            refresh_token_max_age: self.refresh_token_max_age,
+            jwt_max_age: self.jwt_max_age,
             small_data: match self.small_data.as_option() {
                 Some(v) => {
                     ::buffa::MessageField::<
@@ -1205,13 +1191,11 @@ impl<'a> ::buffa::ViewEncode<'a> for RenewJWTResponseView<'a> {
             size
                 += 1u64 + ::buffa::types::string_encoded_len(&self.refresh_token) as u64;
         }
-        if self.refresh_token_expiry.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.refresh_token_expiry.compute_size(__cache);
-            __cache.set(__slot, inner_size);
+        if self.refresh_token_max_age != 0i64 {
             size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
+                += 1u64
+                    + ::buffa::types::int64_encoded_len(self.refresh_token_max_age)
+                        as u64;
         }
         if self.small_data.is_set() {
             let __slot = __cache.reserve();
@@ -1220,6 +1204,9 @@ impl<'a> ::buffa::ViewEncode<'a> for RenewJWTResponseView<'a> {
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
+        }
+        if self.jwt_max_age != 0i64 {
+            size += 1u64 + ::buffa::types::int64_encoded_len(self.jwt_max_age) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -1238,13 +1225,8 @@ impl<'a> ::buffa::ViewEncode<'a> for RenewJWTResponseView<'a> {
         if !self.refresh_token.is_empty() {
             ::buffa::types::put_string_field(2u32, &self.refresh_token, buf);
         }
-        if self.refresh_token_expiry.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                3u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.refresh_token_expiry.write_to(__cache, buf);
+        if self.refresh_token_max_age != 0i64 {
+            ::buffa::types::put_int64_field(3u32, self.refresh_token_max_age, buf);
         }
         if self.small_data.is_set() {
             ::buffa::types::put_len_delimited_header(
@@ -1253,6 +1235,9 @@ impl<'a> ::buffa::ViewEncode<'a> for RenewJWTResponseView<'a> {
                 buf,
             );
             self.small_data.write_to(__cache, buf);
+        }
+        if self.jwt_max_age != 0i64 {
+            ::buffa::types::put_int64_field(5u32, self.jwt_max_age, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1281,13 +1266,19 @@ impl<'__a> ::serde::Serialize for RenewJWTResponseView<'__a> {
         if !::buffa::json_helpers::skip_if::is_empty_str(self.refresh_token) {
             __map.serialize_entry("refreshToken", self.refresh_token)?;
         }
-        {
-            if let ::core::option::Option::Some(__v) = self
-                .refresh_token_expiry
-                .as_option()
-            {
-                __map.serialize_entry("refreshTokenExpiry", __v)?;
-            }
+        if !::buffa::json_helpers::skip_if::is_zero_i64(&self.refresh_token_max_age) {
+            __map
+                .serialize_entry(
+                    "refreshTokenMaxAge",
+                    &::buffa::json_helpers::ProtoJson(&self.refresh_token_max_age),
+                )?;
+        }
+        if !::buffa::json_helpers::skip_if::is_zero_i64(&self.jwt_max_age) {
+            __map
+                .serialize_entry(
+                    "jwtMaxAge",
+                    &::buffa::json_helpers::ProtoJson(&self.jwt_max_age),
+                )?;
         }
         {
             if let ::core::option::Option::Some(__v) = self.small_data.as_option() {
@@ -1397,14 +1388,15 @@ impl RenewJWTResponseOwnedView {
     pub fn refresh_token(&self) -> &'_ str {
         self.0.reborrow().refresh_token
     }
-    /// Field 3: `refresh_token_expiry`
+    /// Field 3: `refresh_token_max_age`
     #[must_use]
-    pub fn refresh_token_expiry(
-        &self,
-    ) -> &::buffa::MessageFieldView<
-        ::buffa_types::google::protobuf::__buffa::view::TimestampView<'_>,
-    > {
-        &self.0.reborrow().refresh_token_expiry
+    pub fn refresh_token_max_age(&self) -> i64 {
+        self.0.reborrow().refresh_token_max_age
+    }
+    /// Field 5: `jwt_max_age`
+    #[must_use]
+    pub fn jwt_max_age(&self) -> i64 {
+        self.0.reborrow().jwt_max_age
     }
     /// Field 4: `small_data`
     #[must_use]
@@ -1462,12 +1454,9 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for RenewJWTResponseView<'a
             1u32 => ::buffa_descriptor::reflect::ValueRef::String(self.jwt),
             2u32 => ::buffa_descriptor::reflect::ValueRef::String(self.refresh_token),
             3u32 => {
-                ::buffa_descriptor::reflect::ValueRef::Message(
-                    ::buffa_descriptor::reflect::ReflectCow::Borrowed(
-                        &*self.refresh_token_expiry,
-                    ),
-                )
+                ::buffa_descriptor::reflect::ValueRef::I64(self.refresh_token_max_age)
             }
+            5u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.jwt_max_age),
             4u32 => {
                 ::buffa_descriptor::reflect::ValueRef::Message(
                     ::buffa_descriptor::reflect::ReflectCow::Borrowed(&*self.small_data),
@@ -1487,7 +1476,8 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for RenewJWTResponseView<'a
         match field.number() {
             1u32 => !self.jwt.is_empty(),
             2u32 => !self.refresh_token.is_empty(),
-            3u32 => self.refresh_token_expiry.is_set(),
+            3u32 => self.refresh_token_max_age != 0,
+            5u32 => self.jwt_max_age != 0,
             4u32 => self.small_data.is_set(),
             _ => false,
         }

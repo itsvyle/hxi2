@@ -1,3 +1,4 @@
+use anyhow::Context as _;
 use axum_extra::extract::{
     CookieJar,
     cookie::{Cookie, SameSite},
@@ -101,7 +102,7 @@ impl LoginManager {
         }
     }
 
-    fn new_refresh_token() -> String {
+    fn generate_refresh_token() -> String {
         use rand::rngs::ThreadRng;
 
         let mut rng = ThreadRng::default();
@@ -124,7 +125,13 @@ impl LoginManager {
             .signer
             .new_token(&format!("{}", user.id), &small_data, &opts)?;
 
-        let refresh_token = Self::new_refresh_token();
+        let refresh_token = Self::generate_refresh_token();
+
+        cfg.db()
+            .await
+            .add_refresh_token_pair(user.id, &refresh_token, &claims.jti)
+            .await
+            .context("inserting refresh token into database")?;
 
         Ok(LoginResponse {
             token,
@@ -135,5 +142,27 @@ impl LoginManager {
                 .data
                 .ok_or_else(|| anyhow::anyhow!("claims.data should be present"))?,
         })
+    }
+
+    pub async fn renew_authentication(
+        &self,
+        refresh_token: &str,
+        old_token: &str,
+    ) -> anyhow::Result<LoginResponse> {
+        let db = crate::app_config::AppConfiguration::INSTANCE().db().await;
+        let claims = self
+            .verifier
+            .verify_token_ignore_expiry(old_token)
+            .context("verifying old token")?;
+
+        let old_jti = &claims.jti;
+
+        db.check_refresh_token(refresh_token, old_jti).await?;
+
+        if let Err(e) = db.delete_refresh_token(refresh_token).await {
+            error!(error = ?e, "Failed to delete old refresh token");
+        }
+
+        anyhow::bail!("not implemented")
     }
 }
