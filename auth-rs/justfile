@@ -15,10 +15,11 @@ MC4CAQAwBQYDK2VwBCIEIGSBlJqHrMz/gSJ0QgiEZVVgOmFzSNDT38RS6FPcXgXg
 export HXI2_TLD := "hxi2.fr"
 export LOCAL_DEBUG_INSTANCE := "1"
 export HXI2_COOKIES_DOMAIN := "localhost"
-export CONFIG_ENVIRONMENT := "development"
 export CONFIG_CSRF_SIGNING_KEY := "PAFXpBAmnyWvpeYK0FoaCSe3QrOp4OZygusAquc4Zho="
 PORT := "8080"
 export CONFIG_RUNNING_PORT := PORT
+
+export CONFIG_ENVIRONMENT := "development"
 
 jwt_token_payload := '{"user_id": "42", "roles": [
     "PERMISSION_ADMIN"
