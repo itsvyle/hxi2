@@ -170,7 +170,7 @@ impl AuthService for AuthServiceImpl {
     }
 
     // ignore the _ctx.headers
-    #[instrument(skip(self), err)]
+    // #[instrument(skip(self), err)]
     async fn renew_jwt(
         &self,
         _ctx: connectrpc::RequestContext,
@@ -189,7 +189,7 @@ impl AuthService for AuthServiceImpl {
             refresh_token_max_age: r.refresh_token_max_age,
             jwt_max_age: r.token_max_age,
             small_data: r.small_data.into(),
-            ..Default::default()
+            __buffa_unknown_fields: Default::default(),
         })
     }
 

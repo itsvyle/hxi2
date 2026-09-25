@@ -271,6 +271,7 @@ impl DatabaseManager {
 // Refresh Tokens
 // -----------------------------------------------------------------------------
 #[derive(Debug, FromRow)]
+#[allow(unused)]
 pub struct DbRefreshToken {
     pub associated_user_id: i64,
     pub refresh_token_hash: String,
@@ -317,7 +318,7 @@ impl DatabaseManager {
         Ok(())
     }
 
-    #[instrument(skip(self), err)]
+    #[cfg_attr(debug_assertions, instrument(skip(self), err))]
     pub async fn check_refresh_token(
         &self,
         refresh_token: &str,
@@ -347,7 +348,7 @@ impl DatabaseManager {
         Ok(rt)
     }
 
-    #[instrument(skip(self), err)]
+    #[cfg_attr(debug_assertions, instrument(skip(self), err))]
     pub async fn delete_refresh_token(&self, refresh_token: &str) -> Result<(), DbError> {
         let refresh_token_hash = self.hash_token(refresh_token);
 
@@ -358,55 +359,6 @@ impl DatabaseManager {
 
         Ok(())
     }
-
-    // this NEEDS to be moved to LoginManager
-    /* pub async fn renew_refresh_token(
-        &self,
-        refresh_token: &str,
-        jti: &str,
-    ) -> Result<(i64, String, String), DbError> {
-        let refresh_token_hash = self.hash_token(refresh_token);
-        let jti_hash = self.hash_token(jti);
-
-        let rt = sqlx::query_as::<_, DbRefreshToken>(
-            "SELECT * FROM refresh_tokens WHERE refresh_token_hash = ? AND jti_hash = ?",
-        )
-        .bind(&refresh_token_hash)
-        .bind(&jti_hash)
-        .fetch_one(&self.pool)
-        .await?;
-
-        rt.check_schema()?;
-
-        // Token expiry check
-        if Utc::now() - rt.created_at
-            > app_config::AppConfiguration::INSTANCE().JWT_REFRESH_TOKEN_VALIDITY
-        {
-            return Err(DbError::Expired);
-        }
-
-        let new_refresh_token = jwt_generate_refresh_token()?;
-        let new_jti = jwt_generate_jti_token()?;
-
-        if let Err(e) = self
-            .add_refresh_token_pair(rt.associated_user_id, &new_refresh_token, &new_jti)
-            .await
-        {
-            error!(error = ?e, "Failed to add new refresh token pair");
-            return Err(DbError::Internal(
-                "failed to add new refresh token pair".into(),
-            ));
-        }
-
-        if let Err(e) = self.delete_refresh_token_hash(&refresh_token_hash).await {
-            error!(error = ?e, "Failed to delete old refresh token");
-            return Err(DbError::Internal(
-                "failed to delete old refresh token".into(),
-            ));
-        }
-
-        Ok((rt.associated_user_id, new_refresh_token, new_jti))
-    } */
 }
 
 // -----------------------------------------------------------------------------

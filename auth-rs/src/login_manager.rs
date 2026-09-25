@@ -40,9 +40,9 @@ impl LoginResponse {
             });
         };
 
-        // JWT Cookie
+        // JWT Cookie: must be alive at least as long as refresh token, to provide adequate refreshing
         let mut jwt_cookie = Cookie::build((cfg.COOKIE_JWT_TOKEN_NAME, self.token.to_owned()))
-            .max_age(time::Duration::seconds(self.token_max_age))
+            .max_age(time::Duration::seconds(self.refresh_token_max_age))
             .build();
         apply_base_cookie_options(&mut jwt_cookie);
 
@@ -146,14 +146,19 @@ impl LoginManager {
 
     pub async fn renew_authentication(
         &self,
-        refresh_token: &str,
         old_token: &str,
+        refresh_token: &str,
     ) -> anyhow::Result<LoginResponse> {
         let db = crate::app_config::AppConfiguration::INSTANCE().db().await;
         let claims = self
             .verifier
             .verify_token_ignore_expiry(old_token)
             .context("verifying old token")?;
+
+        let uid = claims
+            .sub
+            .parse::<i64>()
+            .context("parsing user ID from claims.sub")?;
 
         let old_jti = &claims.jti;
 
@@ -163,6 +168,7 @@ impl LoginManager {
             error!(error = ?e, "Failed to delete old refresh token");
         }
 
-        anyhow::bail!("not implemented")
+        let l = self.login_as(&LoginID::UserID(uid)).await?;
+        Ok(l)
     }
 }

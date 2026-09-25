@@ -3,6 +3,7 @@ use std::sync::LazyLock;
 use anyhow::{Context as _, Result};
 use hxi2_proto::proto::auth::v2::JwtClaims;
 use jsonwebtoken::{DecodingKey, Validation, decode};
+use tracing::instrument;
 
 use crate::app_config::AppConfiguration;
 
@@ -24,6 +25,7 @@ impl JWTVerifier {
         Ok(token_data.claims)
     }
 
+    #[instrument(skip(self), err)]
     pub fn verify_token_ignore_expiry(&self, token: &str) -> Result<JwtClaims> {
         let mut validation = self.validation_settings.clone();
         validation.validate_exp = false;
