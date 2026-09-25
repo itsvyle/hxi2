@@ -18,6 +18,9 @@ clean:
     fd --type=directory -H -I target -x bash -c '[[ -f "{//}/Cargo.toml" ]] && echo "Removing {}" && rm -rf {}'
 
 compile-proto:
+    @just _utils-check-program "buf" 2
+    @just _utils-check-program "cargo" 2
+    # Note that you must: cargo install --locked connectrpc-codegen protoc-gen-buffa protoc-gen-buffa-packaging
     buf build -o ./generated-proto/hxi2.binpb
     buf generate --debug
     cd generated-proto/parse-perms && cargo run

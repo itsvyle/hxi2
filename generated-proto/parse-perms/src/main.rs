@@ -170,7 +170,7 @@ fn main() -> Result<()> {
             )
         })
         .collect();
-    println!("Permissions: {:#?}", perms);
+    // println!("Permissions: {:#?}", perms);
 
     let output = PermissionsOutput { permissions: perms };
     let json =
