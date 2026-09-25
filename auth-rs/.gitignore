@@ -24,3 +24,5 @@ rustc-ice-*.txt
 #.idea/
 
 *.pem
+
+*.sqlite3

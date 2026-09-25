@@ -7,7 +7,7 @@ use base64::prelude::*;
 use http::StatusCode;
 use hxi2_proto::proto::auth::v2::{DBUser, SmallData};
 use rand::RngExt;
-use tracing::error;
+use tracing::{error, instrument};
 
 use crate::{app_config::AppConfiguration, database::DbUser, jwt_signer::JWTSignerOptions};
 
@@ -17,6 +17,7 @@ pub struct LoginManager {
     pub verifier: &'static crate::jwt_verifier::JWTVerifier,
 }
 
+#[derive(Debug, Clone)]
 pub struct LoginResponse {
     pub token: String,
     pub token_max_age: i64,
@@ -77,6 +78,7 @@ impl LoginResponse {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum LoginID {
     UserID(i64),
     DiscordID(String),
@@ -112,6 +114,7 @@ impl LoginManager {
 
     // This creates a token for the user
     // Authorization to login as such a user must have been checked PRIOR
+    #[cfg_attr(debug_assertions, instrument(skip(self), level = "trace", ret))]
     pub async fn login_as(&self, user_id: &LoginID) -> anyhow::Result<LoginResponse> {
         let cfg = crate::app_config::AppConfiguration::INSTANCE();
         let user = match user_id {
