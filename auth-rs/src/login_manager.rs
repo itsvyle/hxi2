@@ -7,9 +7,13 @@ use base64::prelude::*;
 use http::StatusCode;
 use hxi2_proto::proto::auth::v2::{DBUser, SmallData};
 use rand::RngExt;
-use tracing::{error, instrument};
+use tracing::{error, instrument, trace};
 
-use crate::{app_config::AppConfiguration, database::DbUser, jwt_signer::JWTSignerOptions};
+use crate::{
+    app_config::AppConfiguration,
+    database::{DbError, DbUser},
+    jwt_signer::JWTSignerOptions,
+};
 
 pub struct LoginManager {
     pub signer: &'static crate::jwt_signer::JWTSigner,
@@ -147,6 +151,7 @@ impl LoginManager {
         })
     }
 
+    #[cfg_attr(debug_assertions, instrument(skip(self), level = "trace", ret))]
     pub async fn renew_authentication(
         &self,
         old_token: &str,
@@ -173,5 +178,21 @@ impl LoginManager {
 
         let l = self.login_as(&LoginID::UserID(uid)).await?;
         Ok(l)
+    }
+
+    #[cfg_attr(debug_assertions, instrument(skip(self), level = "trace", ret))]
+    pub async fn logout(&self, refresh_token: &str) -> anyhow::Result<()> {
+        let db = crate::app_config::AppConfiguration::INSTANCE().db().await;
+        if let Err(e) = db.delete_refresh_token(refresh_token).await {
+            if matches!(e, DbError::NotFound) {
+                trace!("Refresh token not found during logout, ignoring.");
+            } else {
+                error!(error = ?e, "Failed to delete refresh token during logout");
+                return Err(anyhow::anyhow!(
+                    "Failed to delete refresh token during logout"
+                ));
+            }
+        }
+        Ok(())
     }
 }

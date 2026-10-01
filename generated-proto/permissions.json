@@ -137,6 +137,20 @@
       "is_frontend": false,
       "frontend_static_file": null
     },
+    "/auth.v2.AuthService/Logout": {
+      "allow_roles": [
+        1
+      ],
+      "is_public": true,
+      "public_url": null,
+      "compiled_permissions_bitfield": 2,
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": false,
+      "is_frontend": false,
+      "frontend_static_file": null
+    },
     "/auth.v2.AuthService/RenewJWT": {
       "allow_roles": [
         1,

@@ -9,13 +9,13 @@ pub use hxi2_proto::connect::auth::v2::AuthServiceExt;
 use hxi2_proto::proto::auth::v2::{
     CreateUserRequest, CreateUserResponse, DBUser, GetCSRFTokenRequest, GetCSRFTokenResponse,
     GetJWTPublicKeyRequest, GetJWTPublicKeyResponse, ListUsersRequest, ListUsersResponse,
-    LoginRequest, LoginResponse, RenewJWTRequest, RenewJWTResponse, SmallData,
+    LoginRequest, LoginResponse, LogoutRequest, RenewJWTRequest, RenewJWTResponse, SmallData,
 };
 use hxi2_proto::{
     connect::auth::v2::AuthService,
     proto::auth::v2::{GetDevTokenRequest, GetDevTokenResponse},
 };
-use tracing::{error, instrument};
+use tracing::error;
 
 use crate::app_config::AppConfiguration;
 use crate::connect_result::ToConnectError;
@@ -34,10 +34,10 @@ macro_rules! impl_unimplemented_rpc {
     ($name:ident, $req_type:ty, $res_type:ty) => {
         async fn $name(
             &self,
-            _ctx: connectrpc::RequestContext,
-            _request: connectrpc::ServiceRequest<'_, $req_type>,
-        ) -> connectrpc::ServiceResult<$res_type> {
-            Err(connectrpc::ConnectError::unimplemented(
+            _ctx: RequestContext,
+            _request: ServiceRequest<'_, $req_type>,
+        ) -> ServiceResult<$res_type> {
+            Err(ConnectError::unimplemented(
                 concat!(stringify!($name), " is not implemented yet").to_string(),
             ))
         }
@@ -48,10 +48,10 @@ macro_rules! impl_otherplace_rpc {
     ($name:ident, $req_type:ty, $res_type:ty) => {
         async fn $name(
             &self,
-            _ctx: connectrpc::RequestContext,
-            _request: connectrpc::ServiceRequest<'_, $req_type>,
-        ) -> connectrpc::ServiceResult<$res_type> {
-            Err(connectrpc::ConnectError::unimplemented(
+            _ctx: RequestContext,
+            _request: ServiceRequest<'_, $req_type>,
+        ) -> ServiceResult<$res_type> {
+            Err(ConnectError::unimplemented(
                 concat!(stringify!($name), " is implemented some place else").to_string(),
             ))
         }
@@ -94,7 +94,7 @@ impl AuthService for AuthServiceImpl {
             first_name: "Test".to_owned(),
             last_name: Some("T".to_owned()),
             permissions: final_permissions,
-            promotion: 2000,
+            promotion: 2024,
             ..Default::default()
         };
 
@@ -124,9 +124,9 @@ impl AuthService for AuthServiceImpl {
 
     async fn get_csrf_token(
         &self,
-        ctx: connectrpc::RequestContext,
-        _request: connectrpc::ServiceRequest<'_, GetCSRFTokenRequest>,
-    ) -> connectrpc::ServiceResult<GetCSRFTokenResponse> {
+        ctx: RequestContext,
+        _request: ServiceRequest<'_, GetCSRFTokenRequest>,
+    ) -> ServiceResult<GetCSRFTokenResponse> {
         let perms = permissions_checking::get_by_route(ctx.path().ok_or_else(|| {
             ConnectError::new(ErrorCode::Internal, "couldn't get path for my request")
         })?)
@@ -173,9 +173,9 @@ impl AuthService for AuthServiceImpl {
     // #[instrument(skip(self), err)]
     async fn renew_jwt(
         &self,
-        _ctx: connectrpc::RequestContext,
-        request: connectrpc::ServiceRequest<'_, RenewJWTRequest>,
-    ) -> connectrpc::ServiceResult<RenewJWTResponse> {
+        _ctx: RequestContext,
+        request: ServiceRequest<'_, RenewJWTRequest>,
+    ) -> ServiceResult<RenewJWTResponse> {
         let r = self
             .login_manager
             .renew_authentication(request.jwt, request.refresh_token)
@@ -195,9 +195,9 @@ impl AuthService for AuthServiceImpl {
 
     async fn list_users(
         &self,
-        _ctx: connectrpc::RequestContext,
-        _request: connectrpc::ServiceRequest<'_, ListUsersRequest>,
-    ) -> connectrpc::ServiceResult<ListUsersResponse> {
+        _ctx: RequestContext,
+        _request: ServiceRequest<'_, ListUsersRequest>,
+    ) -> ServiceResult<ListUsersResponse> {
         let db = AppConfiguration::INSTANCE().db().await;
         let users = db
             .list_users()
@@ -216,19 +216,19 @@ impl AuthService for AuthServiceImpl {
 
     async fn create_user(
         &self,
-        _ctx: ::connectrpc::RequestContext,
-        request: ::connectrpc::ServiceRequest<'_, CreateUserRequest>,
-    ) -> ::connectrpc::ServiceResult<CreateUserResponse> {
+        _ctx: RequestContext,
+        request: ServiceRequest<'_, CreateUserRequest>,
+    ) -> ServiceResult<CreateUserResponse> {
         let req = request.to_owned_message();
 
-        let mut new_user =
-            crate::database::DbUser::from(req.user.ok_or_else(|| {
-                connectrpc::ConnectError::invalid_argument("User data is missing")
-            })?);
+        let mut new_user = crate::database::DbUser::from(
+            req.user
+                .ok_or_else(|| ConnectError::invalid_argument("User data is missing"))?,
+        );
 
-        new_user.check_schema().map_err(|e| {
-            connectrpc::ConnectError::invalid_argument(format!("Invalid user data: {}", e))
-        })?;
+        new_user
+            .check_schema()
+            .map_err(|e| ConnectError::invalid_argument(format!("Invalid user data: {}", e)))?;
 
         let cfg = AppConfiguration::INSTANCE();
         cfg.db()
@@ -248,16 +248,16 @@ impl AuthService for AuthServiceImpl {
 
     async fn update_user(
         &self,
-        _ctx: ::connectrpc::RequestContext,
-        request: ::connectrpc::ServiceRequest<'_, DBUser>,
-    ) -> ::connectrpc::ServiceResult<DBUser> {
+        _ctx: RequestContext,
+        request: ServiceRequest<'_, DBUser>,
+    ) -> ServiceResult<DBUser> {
         let req = request.to_owned_message();
 
         let mut updated_user = crate::database::DbUser::from(req);
 
-        updated_user.check_schema().map_err(|e| {
-            connectrpc::ConnectError::invalid_argument(format!("Invalid user data: {}", e))
-        })?;
+        updated_user
+            .check_schema()
+            .map_err(|e| ConnectError::invalid_argument(format!("Invalid user data: {}", e)))?;
 
         let cfg = AppConfiguration::INSTANCE();
         cfg.db()
@@ -270,6 +270,22 @@ impl AuthService for AuthServiceImpl {
         let return_user = hxi2_proto::proto::auth::v2::DBUser::from(updated_user);
 
         Response::ok(return_user)
+    }
+
+    async fn logout(
+        &self,
+        _ctx: RequestContext,
+        request: ServiceRequest<'_, LogoutRequest>,
+    ) -> ServiceResult<Empty> {
+        let token = request.to_owned_message().refresh_token;
+        self.login_manager
+            .logout(&token)
+            .await
+            .obfuscate()
+            .to_connect_permission_denied()?;
+        Response::ok(Empty {
+            ..Default::default()
+        })
     }
 
     impl_unimplemented_rpc!(login, LoginRequest, LoginResponse);
