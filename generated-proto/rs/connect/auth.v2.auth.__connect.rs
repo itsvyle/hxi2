@@ -50,10 +50,6 @@ pub type OwnedLoginRequestView = ::buffa::view::OwnedView<
 pub type OwnedLoginResponseView = ::buffa::view::OwnedView<
     crate::proto::auth::v2::__buffa::view::LoginResponseView<'static>,
 >;
-///Shorthand for `OwnedView<LogoutRequestView<'static>>`.
-pub type OwnedLogoutRequestView = ::buffa::view::OwnedView<
-    crate::proto::auth::v2::__buffa::view::LogoutRequestView<'static>,
->;
 ///Shorthand for `OwnedView<EmptyView<'static>>`.
 pub type OwnedEmptyView = ::buffa::view::OwnedView<
     ::buffa_types::google::protobuf::__buffa::view::EmptyView<'static>,
@@ -632,7 +628,7 @@ pub trait AuthService: Send + Sync + 'static {
     fn logout<'a>(
         &'a self,
         ctx: ::connectrpc::RequestContext,
-        request: ::connectrpc::ServiceRequest<'_, crate::proto::auth::v2::LogoutRequest>,
+        request: ::connectrpc::ServiceRequest<'_, ::buffa_types::google::protobuf::Empty>,
     ) -> impl ::std::future::Future<
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
@@ -956,7 +952,7 @@ impl<S: AuthService> AuthServiceExt for S {
                     ::connectrpc::view_handler_fn(move |
                         ctx,
                         req: ::buffa::view::OwnedView<
-                            crate::proto::auth::v2::__buffa::view::LogoutRequestView<
+                            ::buffa_types::google::protobuf::__buffa::view::EmptyView<
                                 'static,
                             >,
                         >,
@@ -965,7 +961,7 @@ impl<S: AuthService> AuthServiceExt for S {
                         let svc = ::std::sync::Arc::clone(&svc);
                         async move {
                             let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::auth::v2::LogoutRequest,
+                                ::buffa_types::google::protobuf::Empty,
                             >::from_parts(req.reborrow(), req.bytes());
                             svc.logout(ctx, sreq)
                                 .await?
@@ -1370,16 +1366,16 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
                     let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::auth::v2::LogoutRequest,
+                        ::buffa_types::google::protobuf::Empty,
                     >(request.encoded()?, format)?;
-                    let req: crate::proto::auth::v2::__buffa::view::LogoutRequestView<
+                    let req: ::buffa_types::google::protobuf::__buffa::view::EmptyView<
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
                         ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::auth::v2::LogoutRequest,
+                        ::buffa_types::google::protobuf::Empty,
                     >::from_parts(&req, &body);
                     svc.logout(ctx, req)
                         .await?
@@ -1884,7 +1880,7 @@ where
     /// Call the Logout RPC. Sends a request to /auth.v2.AuthService/Logout.
     pub async fn logout(
         &self,
-        request: crate::proto::auth::v2::LogoutRequest,
+        request: ::buffa_types::google::protobuf::Empty,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
@@ -1899,7 +1895,7 @@ where
     /// Call the Logout RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
     pub async fn logout_with_options(
         &self,
-        request: crate::proto::auth::v2::LogoutRequest,
+        request: ::buffa_types::google::protobuf::Empty,
         options: ::connectrpc::client::CallOptions,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<

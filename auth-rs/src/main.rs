@@ -54,7 +54,9 @@ async fn main() -> Result<()> {
 
     let discord_manager = DiscordLoginManager::new(login_manager.clone())?;
 
-    let mut app = axum::Router::new().merge(discord_manager.router());
+    let mut app = axum::Router::new()
+        .merge(discord_manager.router())
+        .merge(login_manager.router());
 
     let service = Arc::new(AuthServiceImpl {
         subdomain: format!("auth.{}", cfg.tld),

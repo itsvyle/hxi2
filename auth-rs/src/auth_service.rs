@@ -9,7 +9,7 @@ pub use hxi2_proto::connect::auth::v2::AuthServiceExt;
 use hxi2_proto::proto::auth::v2::{
     CreateUserRequest, CreateUserResponse, DBUser, GetCSRFTokenRequest, GetCSRFTokenResponse,
     GetJWTPublicKeyRequest, GetJWTPublicKeyResponse, ListUsersRequest, ListUsersResponse,
-    LoginRequest, LoginResponse, LogoutRequest, RenewJWTRequest, RenewJWTResponse, SmallData,
+    LoginRequest, LoginResponse, RenewJWTRequest, RenewJWTResponse, SmallData,
 };
 use hxi2_proto::{
     connect::auth::v2::AuthService,
@@ -273,23 +273,8 @@ impl AuthService for AuthServiceImpl {
         Response::ok(return_user)
     }
 
-    async fn logout(
-        &self,
-        _ctx: RequestContext,
-        request: ServiceRequest<'_, LogoutRequest>,
-    ) -> ServiceResult<Empty> {
-        let token = request.to_owned_message().refresh_token;
-        self.login_manager
-            .logout(&token)
-            .await
-            .obfuscate()
-            .to_connect_permission_denied()?;
-        Response::ok(Empty {
-            ..Default::default()
-        })
-    }
-
     impl_unimplemented_rpc!(login, LoginRequest, LoginResponse);
+    impl_otherplace_rpc!(logout, Empty, Empty);
     impl_otherplace_rpc!(frontend_index, Empty, Empty);
     impl_otherplace_rpc!(discord_callback, Empty, Empty);
     impl_otherplace_rpc!(discord_login, Empty, Empty);

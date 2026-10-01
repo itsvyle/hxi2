@@ -7,6 +7,7 @@ import "auth/v2/auth_data.proto";
 // import something for time type
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/any.proto";
 
 
 service AuthService {
@@ -49,8 +50,10 @@ service AuthService {
         option (permission_level).enforce_csrf = true;
     }
 
-    rpc Logout(LogoutRequest) returns (google.protobuf.Empty) {
+    rpc Logout(google.protobuf.Empty) returns (google.protobuf.Empty) {
         option (permission_level).is_public = true;
+        option (permission_level).is_frontend = true;
+        option (permission_level).public_url = "/logout";
     }
 
     rpc GetCSRFToken(GetCSRFTokenRequest) returns (GetCSRFTokenResponse) {
@@ -126,9 +129,6 @@ message CreateUserResponse {
     DBUser user = 1;
 }
 
-message LogoutRequest {
-    string refresh_token = 1;
-}
 
 message LoginResponse {
     string jwt = 1;

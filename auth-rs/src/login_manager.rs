@@ -1,4 +1,10 @@
+use std::sync::Arc;
+
 use anyhow::Context as _;
+use axum::{
+    extract::State,
+    response::{IntoResponse, Redirect},
+};
 use axum_extra::extract::{
     CookieJar,
     cookie::{Cookie, SameSite},
@@ -194,5 +200,64 @@ impl LoginManager {
             }
         }
         Ok(())
+    }
+
+    pub fn router(self: &Arc<Self>) -> axum::Router {
+        let state = Arc::clone(self);
+        axum::Router::new()
+            .route("/logout", axum::routing::get(Self::logout_route))
+            .with_state(state)
+    }
+
+    pub async fn logout_route(
+        State(manager): State<Arc<Self>>,
+        jar: CookieJar,
+    ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
+        let cfg = AppConfiguration::INSTANCE();
+        let refresh_token_cookie = jar
+            .get(cfg.COOKIE_REFRESH_TOKEN_NAME)
+            .ok_or((StatusCode::BAD_REQUEST, "No refresh token cookie found"))?;
+        let refresh_token = refresh_token_cookie.value();
+
+        if let Err(e) = manager.logout(refresh_token).await {
+            error!(error = ?e, "Failed to logout user");
+            return Err((StatusCode::INTERNAL_SERVER_ERROR, "Failed to logout user"));
+        }
+
+        let apply_base_cookie_options = |cookie: &mut Cookie| {
+            cookie.set_domain(&cfg.cookies_domain);
+            cookie.set_path("/");
+            cookie.set_http_only(true);
+            cookie.set_same_site(SameSite::Lax);
+            cookie.set_secure(match cfg.environment {
+                crate::app_config::Environnement::Development => false,
+                crate::app_config::Environnement::Production => true,
+            });
+        };
+
+        // Remove cookies
+        let mut jwt_cookie = Cookie::build((cfg.COOKIE_JWT_TOKEN_NAME, ""))
+            .max_age(time::Duration::seconds(0))
+            .build();
+        apply_base_cookie_options(&mut jwt_cookie);
+
+        let mut refresh_token_cookie = Cookie::build((cfg.COOKIE_REFRESH_TOKEN_NAME, ""))
+            .max_age(time::Duration::seconds(0))
+            .build();
+        apply_base_cookie_options(&mut refresh_token_cookie);
+
+        let mut small_data_cookie = Cookie::build((cfg.COOKIE_SMALL_DATA_NAME, ""))
+            .max_age(time::Duration::seconds(0))
+            .build();
+        apply_base_cookie_options(&mut small_data_cookie);
+
+        // redirect to the default redirect URL after logout
+        let redirect_url = cfg.default_redirect_url.clone();
+        Ok((
+            jar.remove(jwt_cookie)
+                .remove(refresh_token_cookie)
+                .remove(small_data_cookie),
+            Redirect::to(&redirect_url),
+        ))
     }
 }

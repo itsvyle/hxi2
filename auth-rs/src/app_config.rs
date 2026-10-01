@@ -41,7 +41,7 @@ pub struct AppConfiguration {
     pub cookies_domain: String,
     #[doc = "Domain name"]
     pub tld: String,
-    #[doc = "Default redirect url for the login page after the user has logged in"]
+    #[doc = "Default redirect url for the login page after the user has logged in, or logged out."]
     pub default_redirect_url: String,
     #[doc = "Port on which the server will run"]
     pub running_port: u16,
