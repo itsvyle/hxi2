@@ -2235,6 +2235,8 @@ pub struct GetDevTokenRequestView<'a> {
     pub user_id: &'a str,
     /// Field 2: `roles`
     pub roles: ::buffa::RepeatedView<'a, ::buffa::EnumValue<super::super::Permission>>,
+    /// Field 3: `validity_seconds`
+    pub validity_seconds: ::core::option::Option<i64>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for GetDevTokenRequestView<'a> {
@@ -2273,6 +2275,13 @@ impl<'a> ::buffa::MessageView<'a> for GetDevTokenRequestView<'a> {
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
                 view.user_id = ::buffa::types::borrow_str(&mut cur)?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.validity_seconds = Some(::buffa::types::decode_int64(&mut cur)?);
             }
             2u32 => {
                 if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
@@ -2327,6 +2336,7 @@ impl<'a> ::buffa::MessageView<'a> for GetDevTokenRequestView<'a> {
         ::core::result::Result::Ok(super::super::GetDevTokenRequest {
             user_id: self.user_id.to_string(),
             roles: self.roles.to_vec(),
+            validity_seconds: self.validity_seconds,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -2348,6 +2358,9 @@ impl<'a> ::buffa::ViewEncode<'a> for GetDevTokenRequestView<'a> {
                 .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
                 .sum::<u64>();
             size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
+        }
+        if let Some(v) = self.validity_seconds {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -2373,6 +2386,9 @@ impl<'a> ::buffa::ViewEncode<'a> for GetDevTokenRequestView<'a> {
             for v in &self.roles {
                 ::buffa::types::encode_int32(v.to_i32(), buf);
             }
+        }
+        if let Some(v) = self.validity_seconds {
+            ::buffa::types::put_int64_field(3u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2403,6 +2419,13 @@ impl<'__a> ::serde::Serialize for GetDevTokenRequestView<'__a> {
                 .serialize_entry(
                     "roles",
                     &::buffa::json_helpers::EnumSeqJson(&self.roles),
+                )?;
+        }
+        if let ::core::option::Option::Some(__v) = self.validity_seconds {
+            __map
+                .serialize_entry(
+                    "validitySeconds",
+                    &::buffa::json_helpers::ProtoJson(&__v),
                 )?;
         }
         __map.end()
@@ -2512,6 +2535,11 @@ impl GetDevTokenRequestOwnedView {
     ) -> &::buffa::RepeatedView<'_, ::buffa::EnumValue<super::super::Permission>> {
         &self.0.reborrow().roles
     }
+    /// Field 3: `validity_seconds`
+    #[must_use]
+    pub fn validity_seconds(&self) -> ::core::option::Option<i64> {
+        self.0.reborrow().validity_seconds
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<GetDevTokenRequestView<'static>>>
 for GetDevTokenRequestOwnedView {
@@ -2560,6 +2588,11 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for GetDevTokenRequestView<
         match field.number() {
             1u32 => ::buffa_descriptor::reflect::ValueRef::String(self.user_id),
             2u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.roles),
+            3u32 => {
+                ::buffa_descriptor::reflect::ValueRef::I64(
+                    self.validity_seconds.unwrap_or(0),
+                )
+            }
             _ => {
                 ::core::debug_assert!(
                     false,
@@ -2574,6 +2607,7 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for GetDevTokenRequestView<
         match field.number() {
             1u32 => !self.user_id.is_empty(),
             2u32 => !::buffa::RepeatedView::is_empty(&self.roles),
+            3u32 => self.validity_seconds.is_some(),
             _ => false,
         }
     }

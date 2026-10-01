@@ -1429,6 +1429,14 @@ pub struct GetDevTokenRequest {
         skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_vec"
     )]
     pub roles: ::buffa::alloc::vec::Vec<::buffa::EnumValue<Permission>>,
+    /// Field 3: `validity_seconds`
+    #[serde(
+        rename = "validitySeconds",
+        alias = "validity_seconds",
+        with = "::buffa::json_helpers::opt_int64",
+        skip_serializing_if = "::core::option::Option::is_none"
+    )]
+    pub validity_seconds: ::core::option::Option<i64>,
     #[serde(skip)]
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
@@ -1438,6 +1446,7 @@ impl ::core::fmt::Debug for GetDevTokenRequest {
         f.debug_struct("GetDevTokenRequest")
             .field("user_id", &self.user_id)
             .field("roles", &self.roles)
+            .field("validity_seconds", &self.validity_seconds)
             .finish()
     }
 }
@@ -1447,6 +1456,15 @@ impl GetDevTokenRequest {
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
     pub const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.GetDevTokenRequest";
+}
+impl GetDevTokenRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::validity_seconds`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_validity_seconds(mut self, value: i64) -> Self {
+        self.validity_seconds = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(GetDevTokenRequest);
 impl ::buffa_descriptor::reflect::ReflectMessage for GetDevTokenRequest {
@@ -1469,6 +1487,11 @@ impl ::buffa_descriptor::reflect::ReflectMessage for GetDevTokenRequest {
         match field.number() {
             1u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.user_id),
             2u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.roles),
+            3u32 => {
+                ::buffa_descriptor::reflect::ValueRef::I64(
+                    self.validity_seconds.unwrap_or(0),
+                )
+            }
             _ => {
                 ::core::debug_assert!(
                     false,
@@ -1483,6 +1506,7 @@ impl ::buffa_descriptor::reflect::ReflectMessage for GetDevTokenRequest {
         match field.number() {
             1u32 => !self.user_id.is_empty(),
             2u32 => !self.roles.is_empty(),
+            3u32 => self.validity_seconds.is_some(),
             _ => false,
         }
     }
@@ -1571,6 +1595,9 @@ impl ::buffa::Message for GetDevTokenRequest {
                 .sum::<u64>();
             size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
         }
+        if let Some(v) = self.validity_seconds {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1594,6 +1621,9 @@ impl ::buffa::Message for GetDevTokenRequest {
             for v in &self.roles {
                 ::buffa::types::encode_int32(v.to_i32(), buf);
             }
+        }
+        if let Some(v) = self.validity_seconds {
+            ::buffa::types::put_int64_field(3u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1653,6 +1683,15 @@ impl ::buffa::Message for GetDevTokenRequest {
                     );
                 }
             }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.validity_seconds = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1663,6 +1702,7 @@ impl ::buffa::Message for GetDevTokenRequest {
     fn clear(&mut self) {
         self.user_id.clear();
         self.roles.clear();
+        self.validity_seconds = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

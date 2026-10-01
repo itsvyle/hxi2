@@ -103,8 +103,9 @@ impl AuthService for AuthServiceImpl {
             .new_token(
                 &format!("{}", data.user_id),
                 &data,
-                &crate::jwt_signer::JWTSignerOptions::default()
-                    .with_validity(chrono::Duration::hours(24)),
+                &crate::jwt_signer::JWTSignerOptions::default().with_validity(
+                    chrono::Duration::seconds(req.validity_seconds.unwrap_or(86400)),
+                ),
             )
             .obfuscate()
             .to_connect_internal()?;

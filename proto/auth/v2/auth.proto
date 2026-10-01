@@ -104,6 +104,7 @@ message ListUsersResponse {
 message GetDevTokenRequest {
     string user_id = 1;
     repeated Permission roles = 2;
+    optional int64 validity_seconds = 3;
 }
 
 message GetDevTokenResponse {
