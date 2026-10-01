@@ -8,8 +8,12 @@ pub struct PermissionsView<'a> {
         'a,
         ::buffa::EnumValue<super::super::Permission>,
     >,
+    /// is_public indicates that the method is accessible without any authentication at all.
+    ///
     /// Field 2: `is_public`
     pub is_public: ::core::option::Option<bool>,
+    /// public_url url indicates the potentially different URL that this method is accessible at. It is used to then regulate permissions automatically.
+    ///
     /// Field 3: `public_url`
     pub public_url: ::buffa::RepeatedView<'a, &'a str>,
     /// Field 4: `csrf_token_header`
@@ -494,11 +498,15 @@ impl PermissionsOwnedView {
     ) -> &::buffa::RepeatedView<'_, ::buffa::EnumValue<super::super::Permission>> {
         &self.0.reborrow().allow_role
     }
+    /// is_public indicates that the method is accessible without any authentication at all.
+    ///
     /// Field 2: `is_public`
     #[must_use]
     pub fn is_public(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().is_public
     }
+    /// public_url url indicates the potentially different URL that this method is accessible at. It is used to then regulate permissions automatically.
+    ///
     /// Field 3: `public_url`
     #[must_use]
     pub fn public_url(&self) -> &::buffa::RepeatedView<'_, &'_ str> {

@@ -18,8 +18,10 @@ use hxi2_proto::{
 use tracing::error;
 
 use crate::app_config::AppConfiguration;
+use crate::auth_middleware::ReqAuthState;
 use crate::connect_result::ToConnectError;
 use crate::login_manager::LoginManager;
+use crate::password_login::PasswordLoginManager;
 use crate::permissions_checking;
 
 pub struct AuthServiceImpl {
@@ -28,6 +30,7 @@ pub struct AuthServiceImpl {
     #[allow(unused)]
     pub verifier: &'static crate::jwt_verifier::JWTVerifier,
     pub login_manager: Arc<LoginManager>,
+    pub password_login_manager: Arc<PasswordLoginManager>,
 }
 
 macro_rules! impl_unimplemented_rpc {
@@ -272,10 +275,66 @@ impl AuthService for AuthServiceImpl {
 
         Response::ok(return_user)
     }
+    async fn add_password(
+        &self,
+        ctx: RequestContext,
+        request: ServiceRequest<'_, AddPasswordRequest>,
+    ) -> ServiceResult<Empty> {
+        let auth_state = ctx.extensions().get::<ReqAuthState>().ok_or_else(|| {
+            ConnectError::permission_denied("ReqAuthState not found in request extensions")
+        })?;
+        let user_id = auth_state
+            .claims
+            .as_ref()
+            .ok_or_else(|| ConnectError::permission_denied("Claims not found in ReqAuthState"))?
+            .data
+            .user_id;
+
+        let req = request.to_owned_message();
+
+        if req.password.trim().is_empty() {
+            return Err(ConnectError::invalid_argument(
+                "Password cannot be empty or whitespace",
+            ));
+        }
+
+        self.password_login_manager
+            .add_password(user_id, &req.password)
+            .await
+            .obfuscate()
+            .to_connect_internal()?;
+
+        Response::ok(Empty {
+            ..Default::default()
+        })
+    }
+
+    async fn remove_password(
+        &self,
+        ctx: RequestContext,
+        _request: ServiceRequest<'_, Empty>,
+    ) -> ServiceResult<Empty> {
+        let auth_state = ctx.extensions().get::<ReqAuthState>().ok_or_else(|| {
+            ConnectError::permission_denied("ReqAuthState not found in request extensions")
+        })?;
+        let user_id = auth_state
+            .claims
+            .as_ref()
+            .ok_or_else(|| ConnectError::permission_denied("Claims not found in ReqAuthState"))?
+            .data
+            .user_id;
+
+        self.password_login_manager
+            .remove_password(user_id)
+            .await
+            .obfuscate()
+            .to_connect_internal()?;
+        Response::ok(Empty {
+            ..Default::default()
+        })
+    }
 
     impl_unimplemented_rpc!(login, LoginRequest, LoginResponse);
-    impl_unimplemented_rpc!(add_password, AddPasswordRequest, Empty);
-    impl_unimplemented_rpc!(remove_password, Empty, Empty);
     impl_otherplace_rpc!(logout, Empty, Empty);
     impl_otherplace_rpc!(frontend_index, Empty, Empty);
     impl_otherplace_rpc!(discord_callback, Empty, Empty);

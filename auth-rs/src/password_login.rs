@@ -23,6 +23,16 @@ impl PasswordLoginManager {
         Self { login_manager }
     }
 
+    pub fn router(self: &Arc<Self>) -> axum::Router {
+        let state = Arc::clone(self);
+        axum::Router::new()
+            .route(
+                "/api/password_login",
+                axum::routing::get(Self::login_handler),
+            )
+            .with_state(state)
+    }
+
     #[cfg_attr(debug_assertions, instrument(skip(self), level = "trace", ret))]
     pub async fn add_password(&self, user_id: i64, password: &str) -> anyhow::Result<()> {
         let password = Zeroizing::new(password.to_string());
@@ -43,12 +53,22 @@ impl PasswordLoginManager {
         Ok(())
     }
 
+    #[cfg_attr(debug_assertions, instrument(skip(self), level = "trace", ret))]
+    pub async fn remove_password(&self, user_id: i64) -> anyhow::Result<()> {
+        let db = crate::app_config::AppConfiguration::INSTANCE().db().await;
+
+        db.remove_user_password(user_id)
+            .await
+            .map_err(|e| anyhow!("Failed to remove password: {e}"))
+    }
+
     // POST /api/password_login with form data: username, password, remember_me
     // Returns: 200 OK with cookies set on success, 401 Unauthorized on failure
-    /* pub async fn login_handler(
+    pub async fn login_handler(
         State(manager): State<Arc<Self>>,
         jar: CookieJar,
     ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
-        return Err((StatusCode::INTERNAL_SERVER_ERROR, "Failed to logout user"));
-    } */
+        // return Err((StatusCode::INTERNAL_SERVER_ERROR, "Failed to logout user"));
+        Ok(())
+    }
 }

@@ -562,6 +562,7 @@ pub struct DbUserPassword {
 }
 
 impl DatabaseManager {
+    #[cfg_attr(debug_assertions, instrument(skip(self), level = "trace", ret))]
     pub async fn add_user_password(
         &self,
         user_id: i64,

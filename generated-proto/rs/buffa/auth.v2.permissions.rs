@@ -206,6 +206,8 @@ pub struct Permissions {
         skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_vec"
     )]
     pub allow_role: ::buffa::alloc::vec::Vec<::buffa::EnumValue<Permission>>,
+    /// is_public indicates that the method is accessible without any authentication at all.
+    ///
     /// Field 2: `is_public`
     #[serde(
         rename = "isPublic",
@@ -213,6 +215,8 @@ pub struct Permissions {
         skip_serializing_if = "::core::option::Option::is_none"
     )]
     pub is_public: ::core::option::Option<bool>,
+    /// public_url url indicates the potentially different URL that this method is accessible at. It is used to then regulate permissions automatically.
+    ///
     /// Field 3: `public_url`
     #[serde(
         rename = "publicUrl",

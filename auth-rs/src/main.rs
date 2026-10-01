@@ -53,6 +53,10 @@ async fn main() -> Result<()> {
         &GLOBAL_JWT_VERIFIER,
     ));
 
+    let password_login_manager = Arc::new(password_login::PasswordLoginManager::new(
+        login_manager.clone(),
+    ));
+
     let discord_manager = DiscordLoginManager::new(login_manager.clone())?;
 
     let mut app = axum::Router::new()
@@ -64,6 +68,7 @@ async fn main() -> Result<()> {
         signer: &GLOBAL_JWT_SIGNER,
         verifier: &GLOBAL_JWT_VERIFIER,
         login_manager,
+        password_login_manager,
     });
     let connect = service.register(ConnectRouter::new());
 
