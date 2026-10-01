@@ -12,6 +12,8 @@ pub enum Permission {
     /// API Permissions
     PERMISSION_API_JWT = 4i32,
     PERMISSION_API_LIST_USERS = 5i32,
+    /// MISC
+    PERMISSION_ANY_AUTHENTICATED = 6i32,
 }
 impl Permission {
     ///Idiomatic alias for [`Self::PERMISSION_PERMISSION_UNSPECIFIED`]; `Debug` prints the variant name.
@@ -32,6 +34,9 @@ impl Permission {
     ///Idiomatic alias for [`Self::PERMISSION_API_LIST_USERS`]; `Debug` prints the variant name.
     #[allow(non_upper_case_globals)]
     pub const ApiListUsers: Self = Self::PERMISSION_API_LIST_USERS;
+    ///Idiomatic alias for [`Self::PERMISSION_ANY_AUTHENTICATED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const AnyAuthenticated: Self = Self::PERMISSION_ANY_AUTHENTICATED;
 }
 impl ::core::default::Default for Permission {
     fn default() -> Self {
@@ -133,6 +138,7 @@ impl ::buffa::Enumeration for Permission {
             3i32 => ::core::option::Option::Some(Self::PERMISSION_TEACHER),
             4i32 => ::core::option::Option::Some(Self::PERMISSION_API_JWT),
             5i32 => ::core::option::Option::Some(Self::PERMISSION_API_LIST_USERS),
+            6i32 => ::core::option::Option::Some(Self::PERMISSION_ANY_AUTHENTICATED),
             _ => ::core::option::Option::None,
         }
     }
@@ -149,6 +155,7 @@ impl ::buffa::Enumeration for Permission {
             Self::PERMISSION_TEACHER => "PERMISSION_TEACHER",
             Self::PERMISSION_API_JWT => "PERMISSION_API_JWT",
             Self::PERMISSION_API_LIST_USERS => "PERMISSION_API_LIST_USERS",
+            Self::PERMISSION_ANY_AUTHENTICATED => "PERMISSION_ANY_AUTHENTICATED",
         }
     }
     fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
@@ -169,6 +176,9 @@ impl ::buffa::Enumeration for Permission {
             "PERMISSION_API_LIST_USERS" => {
                 ::core::option::Option::Some(Self::PERMISSION_API_LIST_USERS)
             }
+            "PERMISSION_ANY_AUTHENTICATED" => {
+                ::core::option::Option::Some(Self::PERMISSION_ANY_AUTHENTICATED)
+            }
             _ => ::core::option::Option::None,
         }
     }
@@ -180,6 +190,7 @@ impl ::buffa::Enumeration for Permission {
             Self::PERMISSION_TEACHER,
             Self::PERMISSION_API_JWT,
             Self::PERMISSION_API_LIST_USERS,
+            Self::PERMISSION_ANY_AUTHENTICATED,
         ]
     }
 }

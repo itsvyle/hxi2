@@ -7,9 +7,9 @@ use connectrpc::{
 };
 pub use hxi2_proto::connect::auth::v2::AuthServiceExt;
 use hxi2_proto::proto::auth::v2::{
-    CreateUserRequest, CreateUserResponse, DBUser, GetCSRFTokenRequest, GetCSRFTokenResponse,
-    GetJWTPublicKeyRequest, GetJWTPublicKeyResponse, ListUsersRequest, ListUsersResponse,
-    LoginRequest, LoginResponse, RenewJWTRequest, RenewJWTResponse, SmallData,
+    AddPasswordRequest, CreateUserRequest, CreateUserResponse, DBUser, GetCSRFTokenRequest,
+    GetCSRFTokenResponse, GetJWTPublicKeyRequest, GetJWTPublicKeyResponse, ListUsersRequest,
+    ListUsersResponse, LoginRequest, LoginResponse, RenewJWTRequest, RenewJWTResponse, SmallData,
 };
 use hxi2_proto::{
     connect::auth::v2::AuthService,
@@ -274,6 +274,8 @@ impl AuthService for AuthServiceImpl {
     }
 
     impl_unimplemented_rpc!(login, LoginRequest, LoginResponse);
+    impl_unimplemented_rpc!(add_password, AddPasswordRequest, Empty);
+    impl_unimplemented_rpc!(remove_password, Empty, Empty);
     impl_otherplace_rpc!(logout, Empty, Empty);
     impl_otherplace_rpc!(frontend_index, Empty, Empty);
     impl_otherplace_rpc!(discord_callback, Empty, Empty);

@@ -550,3 +550,53 @@ impl DatabaseManager {
         Ok(temp_code)
     }
 }
+
+// ==============================================================================
+// USERS_PASSWORDS
+// ==============================================================================
+#[derive(Debug, FromRow)]
+pub struct DbUserPassword {
+    pub user_id: i64,
+    pub password_hash: String,
+    pub updated_at: DateTime<Utc>,
+}
+
+impl DatabaseManager {
+    pub async fn add_user_password(
+        &self,
+        user_id: i64,
+        password_hash: &str,
+    ) -> Result<(), DbError> {
+        if user_id <= 0 {
+            return Err(DbError::Validation("invalid user ID".into()));
+        }
+        if password_hash.is_empty() {
+            return Err(DbError::Validation("password hash is empty".into()));
+        }
+
+        sqlx::query(
+            "INSERT INTO USERS_PASSWORDS (user_id, password_hash, updated_at) VALUES (?, ?, ?) \
+             ON CONFLICT(user_id) DO UPDATE SET password_hash = excluded.password_hash, updated_at = excluded.updated_at",
+        )
+        .bind(user_id)
+        .bind(password_hash)
+        .bind(Utc::now())
+        .execute(&self.pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn remove_user_password(&self, user_id: i64) -> Result<(), DbError> {
+        if user_id <= 0 {
+            return Err(DbError::Validation("invalid user ID".into()));
+        }
+
+        sqlx::query("DELETE FROM USERS_PASSWORDS WHERE user_id = ?")
+            .bind(user_id)
+            .execute(&self.pool)
+            .await?;
+
+        Ok(())
+    }
+}

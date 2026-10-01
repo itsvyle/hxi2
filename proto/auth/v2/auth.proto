@@ -69,6 +69,16 @@ service AuthService {
         option (permission_level).public_url = "/api/discord_callback";
     }
 
+    rpc AddPassword(AddPasswordRequest) returns (google.protobuf.Empty) {
+        option (permission_level).is_public = false;
+        option (permission_level).allow_role = PERMISSION_ANY_AUTHENTICATED;
+    }
+
+    rpc RemovePassword(google.protobuf.Empty) returns (google.protobuf.Empty) {
+        option (permission_level).is_public = false;
+        option (permission_level).allow_role = PERMISSION_ANY_AUTHENTICATED;
+    }
+
     // FRONTEND PAGES
     rpc FrontendIndex(google.protobuf.Empty) returns (google.protobuf.Empty) {
         option (permission_level).is_public = true;
@@ -126,6 +136,10 @@ message CreateUserRequest {
 
 message CreateUserResponse {
     DBUser user = 1;
+}
+
+message AddPasswordRequest {
+    string password = 1;
 }
 
 

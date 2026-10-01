@@ -62,6 +62,10 @@ pub type OwnedGetCsrfTokenRequestView = ::buffa::view::OwnedView<
 pub type OwnedGetCsrfTokenResponseView = ::buffa::view::OwnedView<
     crate::proto::auth::v2::__buffa::view::GetCSRFTokenResponseView<'static>,
 >;
+///Shorthand for `OwnedView<AddPasswordRequestView<'static>>`.
+pub type OwnedAddPasswordRequestView = ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::AddPasswordRequestView<'static>,
+>;
 impl ::connectrpc::Encodable<crate::proto::auth::v2::GetJWTPublicKeyResponse>
 for crate::proto::auth::v2::__buffa::view::GetJWTPublicKeyResponseView<'_> {
     fn encode(
@@ -402,6 +406,18 @@ pub const AUTH_SERVICE_DISCORD_CALLBACK_SPEC: ::connectrpc::Spec = ::connectrpc:
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `AddPassword` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_ADD_PASSWORD_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/auth.v2.AuthService/AddPassword",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `RemovePassword` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_REMOVE_PASSWORD_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/auth.v2.AuthService/RemovePassword",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// Static [`Spec`](::connectrpc::Spec) for the `FrontendIndex` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_FRONTEND_INDEX_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/FrontendIndex",
@@ -689,6 +705,49 @@ pub trait AuthService: Send + Sync + 'static {
     /// `.to_owned_message()` (or copy the specific fields) for anything
     /// returned, stored, or moved into `tokio::spawn`.
     fn discord_callback<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<'_, ::buffa_types::google::protobuf::Empty>,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                ::buffa_types::google::protobuf::Empty,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// Handle the AddPassword RPC.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn add_password<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::auth::v2::AddPasswordRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                ::buffa_types::google::protobuf::Empty,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// Handle the RemovePassword RPC.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn remove_password<'a>(
         &'a self,
         ctx: ::connectrpc::RequestContext,
         request: ::connectrpc::ServiceRequest<'_, ::buffa_types::google::protobuf::Empty>,
@@ -1056,6 +1115,60 @@ impl<S: AuthService> AuthServiceExt for S {
             .with_spec(AUTH_SERVICE_DISCORD_CALLBACK_SPEC)
             .route_view(
                 AUTH_SERVICE_SERVICE_NAME,
+                "AddPassword",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::auth::v2::__buffa::view::AddPasswordRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::auth::v2::AddPasswordRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.add_password(ctx, sreq)
+                                .await?
+                                .encode::<::buffa_types::google::protobuf::Empty>(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_ADD_PASSWORD_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
+                "RemovePassword",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            ::buffa_types::google::protobuf::__buffa::view::EmptyView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                ::buffa_types::google::protobuf::Empty,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.remove_password(ctx, sreq)
+                                .await?
+                                .encode::<::buffa_types::google::protobuf::Empty>(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_REMOVE_PASSWORD_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
                 "FrontendIndex",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -1199,6 +1312,18 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(AUTH_SERVICE_DISCORD_CALLBACK_SPEC),
+                )
+            }
+            "AddPassword" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_ADD_PASSWORD_SPEC),
+                )
+            }
+            "RemovePassword" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_REMOVE_PASSWORD_SPEC),
                 )
             }
             "FrontendIndex" => {
@@ -1438,6 +1563,46 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         ::buffa_types::google::protobuf::Empty,
                     >::from_parts(&req, &body);
                     svc.discord_callback(ctx, req)
+                        .await?
+                        .encode::<::buffa_types::google::protobuf::Empty>(format)
+                })
+            }
+            "AddPassword" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::auth::v2::AddPasswordRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::auth::v2::__buffa::view::AddPasswordRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::auth::v2::AddPasswordRequest,
+                    >::from_parts(&req, &body);
+                    svc.add_password(ctx, req)
+                        .await?
+                        .encode::<::buffa_types::google::protobuf::Empty>(format)
+                })
+            }
+            "RemovePassword" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        ::buffa_types::google::protobuf::Empty,
+                    >(request.encoded()?, format)?;
+                    let req: ::buffa_types::google::protobuf::__buffa::view::EmptyView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        ::buffa_types::google::protobuf::Empty,
+                    >::from_parts(&req, &body);
+                    svc.remove_password(ctx, req)
                         .await?
                         .encode::<::buffa_types::google::protobuf::Empty>(format)
                 })
@@ -2031,6 +2196,88 @@ where
                 &self.transport,
                 &self.config,
                 AUTH_SERVICE_DISCORD_CALLBACK_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the AddPassword RPC. Sends a request to /auth.v2.AuthService/AddPassword.
+    pub async fn add_password(
+        &self,
+        request: crate::proto::auth::v2::AddPasswordRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                ::buffa_types::google::protobuf::__buffa::view::EmptyView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.add_password_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the AddPassword RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn add_password_with_options(
+        &self,
+        request: crate::proto::auth::v2::AddPasswordRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                ::buffa_types::google::protobuf::__buffa::view::EmptyView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_ADD_PASSWORD_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the RemovePassword RPC. Sends a request to /auth.v2.AuthService/RemovePassword.
+    pub async fn remove_password(
+        &self,
+        request: ::buffa_types::google::protobuf::Empty,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                ::buffa_types::google::protobuf::__buffa::view::EmptyView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.remove_password_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the RemovePassword RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn remove_password_with_options(
+        &self,
+        request: ::buffa_types::google::protobuf::Empty,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                ::buffa_types::google::protobuf::__buffa::view::EmptyView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_REMOVE_PASSWORD_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

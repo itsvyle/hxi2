@@ -8,6 +8,7 @@ mod discord_login;
 mod jwt_signer;
 mod jwt_verifier;
 mod login_manager;
+mod password_login;
 mod permissions_checking;
 
 use anyhow::{Context as _, Result};

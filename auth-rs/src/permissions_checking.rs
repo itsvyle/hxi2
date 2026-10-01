@@ -3,7 +3,8 @@
 
 pub fn get_route_from_public_url(url: &str) -> Option<&'static str> {
     match url {
-        "/auth.v2.AuthService/CreateUser" => return Some("/auth.v2.AuthService/CreateUser"),
+        "/auth.v2.AuthService/AddPassword" => return Some("/auth.v2.AuthService/AddPassword"),
+"/auth.v2.AuthService/CreateUser" => return Some("/auth.v2.AuthService/CreateUser"),
 "/api/discord_callback" | "/auth.v2.AuthService/DiscordCallback" => return Some("/auth.v2.AuthService/DiscordCallback"),
 "/api/login" | "/auth.v2.AuthService/DiscordLogin" => return Some("/auth.v2.AuthService/DiscordLogin"),
 "/" | "/index.html" | "/auth.v2.AuthService/FrontendIndex" => return Some("/auth.v2.AuthService/FrontendIndex"),
@@ -13,6 +14,7 @@ pub fn get_route_from_public_url(url: &str) -> Option<&'static str> {
 "/auth.v2.AuthService/ListUsers" => return Some("/auth.v2.AuthService/ListUsers"),
 "/auth.v2.AuthService/Login" => return Some("/auth.v2.AuthService/Login"),
 "/logout" | "/auth.v2.AuthService/Logout" => return Some("/auth.v2.AuthService/Logout"),
+"/auth.v2.AuthService/RemovePassword" => return Some("/auth.v2.AuthService/RemovePassword"),
 "/auth.v2.AuthService/RenewJWT" => return Some("/auth.v2.AuthService/RenewJWT"),
 "/auth.v2.AuthService/UpdateUser" => return Some("/auth.v2.AuthService/UpdateUser"),
 _ => None,
@@ -46,6 +48,12 @@ impl MethodPermissionsOptionExt for MethodPermissions {
         if self.is_public {
             return true;
         }
+        // take into account the case where the user is logged in, and the "Permission::PERMISSION_ANY_AUTHENTICATED" is set, which is a special case that allows any logged-in user to access the route
+        else if self.compiled_permissions_bitfield & 12 > 0
+            && user_permissions > 0
+        {
+            return true;
+        }
         (user_permissions & self.compiled_permissions_bitfield) > 0
     }
 }
@@ -68,18 +76,20 @@ pub struct CompiledPermissions {
 impl CompiledPermissions {
     pub fn get_by_route(&self, route: &str) -> Option<&MethodPermissions> {
         match route {
-				"/auth.v2.AuthService/CreateUser" => return Some(&self.permissions[0].1),
-				"/auth.v2.AuthService/DiscordCallback" => return Some(&self.permissions[1].1),
-				"/auth.v2.AuthService/DiscordLogin" => return Some(&self.permissions[2].1),
-				"/auth.v2.AuthService/FrontendIndex" => return Some(&self.permissions[3].1),
-				"/auth.v2.AuthService/GetCSRFToken" => return Some(&self.permissions[4].1),
-				"/auth.v2.AuthService/GetDevToken" => return Some(&self.permissions[5].1),
-				"/auth.v2.AuthService/GetJWTPublicKey" => return Some(&self.permissions[6].1),
-				"/auth.v2.AuthService/ListUsers" => return Some(&self.permissions[7].1),
-				"/auth.v2.AuthService/Login" => return Some(&self.permissions[8].1),
-				"/auth.v2.AuthService/Logout" => return Some(&self.permissions[9].1),
-				"/auth.v2.AuthService/RenewJWT" => return Some(&self.permissions[10].1),
-				"/auth.v2.AuthService/UpdateUser" => return Some(&self.permissions[11].1),
+				"/auth.v2.AuthService/AddPassword" => return Some(&self.permissions[0].1),
+				"/auth.v2.AuthService/CreateUser" => return Some(&self.permissions[1].1),
+				"/auth.v2.AuthService/DiscordCallback" => return Some(&self.permissions[2].1),
+				"/auth.v2.AuthService/DiscordLogin" => return Some(&self.permissions[3].1),
+				"/auth.v2.AuthService/FrontendIndex" => return Some(&self.permissions[4].1),
+				"/auth.v2.AuthService/GetCSRFToken" => return Some(&self.permissions[5].1),
+				"/auth.v2.AuthService/GetDevToken" => return Some(&self.permissions[6].1),
+				"/auth.v2.AuthService/GetJWTPublicKey" => return Some(&self.permissions[7].1),
+				"/auth.v2.AuthService/ListUsers" => return Some(&self.permissions[8].1),
+				"/auth.v2.AuthService/Login" => return Some(&self.permissions[9].1),
+				"/auth.v2.AuthService/Logout" => return Some(&self.permissions[10].1),
+				"/auth.v2.AuthService/RemovePassword" => return Some(&self.permissions[11].1),
+				"/auth.v2.AuthService/RenewJWT" => return Some(&self.permissions[12].1),
+				"/auth.v2.AuthService/UpdateUser" => return Some(&self.permissions[13].1),
             _ => None,
         }
     }
@@ -88,6 +98,21 @@ impl CompiledPermissions {
 pub fn get_compiled_permissions() -> &'static CompiledPermissions {
     static INSTANCE: CompiledPermissions = CompiledPermissions {
         permissions: &[
+            ("/auth.v2.AuthService/AddPassword", MethodPermissions {
+                allow_roles: &[
+					Permission::PERMISSION_ADMIN,
+					Permission::PERMISSION_ANY_AUTHENTICATED,
+                ],
+                is_public: false,
+                public_url: None,
+                compiled_permissions_bitfield: 14,
+                csrf_token_header: Some("X-CSRF-Token"),
+                csrf_token_cookie: Some("csrf_token"),
+                response_cors_headers: None,
+                enforce_csrf: false,
+                is_frontend: false,
+                frontend_static_file: None,
+            }),
             ("/auth.v2.AuthService/CreateUser", MethodPermissions {
                 allow_roles: &[
 					Permission::PERMISSION_ADMIN,
@@ -229,6 +254,21 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 response_cors_headers: None,
                 enforce_csrf: false,
                 is_frontend: true,
+                frontend_static_file: None,
+            }),
+            ("/auth.v2.AuthService/RemovePassword", MethodPermissions {
+                allow_roles: &[
+					Permission::PERMISSION_ADMIN,
+					Permission::PERMISSION_ANY_AUTHENTICATED,
+                ],
+                is_public: false,
+                public_url: None,
+                compiled_permissions_bitfield: 14,
+                csrf_token_header: Some("X-CSRF-Token"),
+                csrf_token_cookie: Some("csrf_token"),
+                response_cors_headers: None,
+                enforce_csrf: false,
+                is_frontend: false,
                 frontend_static_file: None,
             }),
             ("/auth.v2.AuthService/RenewJWT", MethodPermissions {

@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 anyhow = { workspace = true }
+argon2 = { version = "0.6.0", features = ["getrandom"] }
 axum = { workspace = true }
 axum-extra = { version = "0.12.6", features = ["cookie"] }
 base64 = { workspace = true }
@@ -36,6 +37,7 @@ tower-http = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 utils = { workspace = true }
+zeroize = "1.9.0"
 
 [build-dependencies]
 generate-permissions-checking = { workspace = true }

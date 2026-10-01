@@ -32,4 +32,7 @@ enum Permission {
     // API Permissions
     PERMISSION_API_JWT = 4;
     PERMISSION_API_LIST_USERS = 5;
+
+    // MISC
+    PERMISSION_ANY_AUTHENTICATED = 6;
 }
