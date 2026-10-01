@@ -13,7 +13,9 @@ extend google.protobuf.ServiceOptions {
 
 message Permissions {
     repeated Permission allow_role = 1;
+    // is_public indicates that the method is accessible without any authentication at all.
     optional bool is_public = 2;
+    // public_url url indicates the potentially different URL that this method is accessible at. It is used to then regulate permissions automatically.
     repeated string public_url = 3;
     optional string csrf_token_header = 4;
     optional string csrf_token_cookie = 5;
