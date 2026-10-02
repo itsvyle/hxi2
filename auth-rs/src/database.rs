@@ -600,4 +600,24 @@ impl DatabaseManager {
 
         Ok(())
     }
+
+    pub async fn get_user_password_hash(&self, username: &str) -> Result<(i64, String), DbError> {
+        if username.is_empty() {
+            return Err(DbError::Validation("username is empty".into()));
+        }
+
+        let password_hash = sqlx::query_as::<_, DbUserPassword>(
+            "SELECT user_id, password_hash FROM USERS_PASSWORDS
+            JOIN USERS ON USERS_PASSWORDS.user_id = users.ID
+            WHERE USERS.username = ?",
+        )
+        .bind(username)
+        .fetch_one(&self.pool)
+        .await
+        .map_err(|e| match e {
+            sqlx::Error::RowNotFound => DbError::NotFound,
+            _ => DbError::Sqlx(e),
+        })?;
+        Ok((password_hash.user_id, password_hash.password_hash))
+    }
 }
