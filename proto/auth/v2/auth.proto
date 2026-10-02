@@ -59,11 +59,13 @@ service AuthService {
     }
 
     rpc AddPassword(AddPasswordRequest) returns (google.protobuf.Empty) {
+        // option (permission_level).enforce_csrf = true; // To be enabled when I actually have a frontend for this
         option (permission_level).is_public = false;
         option (permission_level).allow_role = PERMISSION_ANY_AUTHENTICATED;
     }
 
     rpc RemovePassword(RemovePasswordRequest) returns (google.protobuf.Empty) {
+        // option (permission_level).enforce_csrf = true; // To be enabled when I actually have a frontend for this
         option (permission_level).is_public = false;
         option (permission_level).allow_role = PERMISSION_ANY_AUTHENTICATED;
     }
