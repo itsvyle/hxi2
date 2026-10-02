@@ -11,7 +11,7 @@ use axum_extra::extract::{
 };
 use base64::prelude::*;
 use http::StatusCode;
-use hxi2_proto::proto::auth::v2::{PasswordLoginResponse, SmallData};
+use hxi2_proto::proto::auth::v2::SmallData;
 use rand::RngExt;
 use tracing::{error, instrument, trace};
 

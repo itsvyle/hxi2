@@ -1,12 +1,14 @@
 use std::sync::Arc;
 
 use anyhow::Context as _;
+use axum::response::IntoResponse;
+use axum_extra::extract::CookieJar;
+use axum_extra::extract::cookie::Cookie;
 use buffa_types::Empty;
 use connectrpc::{
     ConnectError, ErrorCode, RequestContext, Response, ServiceRequest, ServiceResult,
 };
-use cookie::{Cookie, CookieJar};
-use http::HeaderMap;
+use http::header::SET_COOKIE;
 pub use hxi2_proto::connect::auth::v2::AuthServiceExt;
 use hxi2_proto::proto::auth::v2::{
     AddPasswordRequest, CreateUserRequest, CreateUserResponse, DBUser, GetCSRFTokenRequest,
@@ -36,6 +38,7 @@ pub struct AuthServiceImpl {
     pub password_login_manager: Arc<PasswordLoginManager>,
 }
 
+#[allow(unused)]
 macro_rules! impl_unimplemented_rpc {
     ($name:ident, $req_type:ty, $res_type:ty) => {
         async fn $name(
@@ -62,25 +65,6 @@ macro_rules! impl_otherplace_rpc {
             ))
         }
     };
-}
-
-// Taken from axum-extras
-fn cookies_from_request(headers: &HeaderMap) -> impl Iterator<Item = Cookie<'static>> + '_ {
-    const COOKIE: &str = "cookie";
-    headers
-        .get_all(COOKIE)
-        .into_iter()
-        .filter_map(|value| value.to_str().ok())
-        .flat_map(|value| value.split(';'))
-        .filter_map(|cookie| Cookie::parse_encoded(cookie.to_owned()).ok())
-}
-
-fn cookie_jar_from_request(headers: &HeaderMap) -> CookieJar {
-    let mut jar = CookieJar::new();
-    for cookie in cookies_from_request(headers) {
-        jar.add_original(cookie);
-    }
-    jar
 }
 
 #[allow(refining_impl_trait)]
@@ -380,13 +364,13 @@ impl AuthService for AuthServiceImpl {
         })
     }
 
+    // #[cfg_attr(debug_assertions, instrument(skip(self), level = "trace", ret))]
     async fn password_login(
         &self,
         ctx: RequestContext,
         req: ServiceRequest<'_, PasswordLoginRequest>,
     ) -> ServiceResult<PasswordLoginResponse> {
-        let cfg = AppConfiguration::INSTANCE();
-        let mut jar = cookie_jar_from_request(ctx.headers());
+        let jar = CookieJar::from_headers(ctx.headers());
 
         let user_id = self
             .password_login_manager
@@ -413,7 +397,7 @@ impl AuthService for AuthServiceImpl {
                 ConnectError::new(ErrorCode::Internal, "Failed to login user by UserID.")
             })?;
 
-        let login_cookies = login_response.make_cookies().map_err(|err| {
+        let mut jar = login_response.make_cookies(jar).map_err(|err| {
             error!(
                 err_code = err.0.as_u16(),
                 err_message = err.1,
@@ -424,16 +408,15 @@ impl AuthService for AuthServiceImpl {
                 "Failed to make cookies for login response",
             )
         })?;
-        jar.add(login_cookies.jwt_cookie);
-        jar.add(login_cookies.refresh_token_cookie);
-        jar.add(login_cookies.small_data_cookie);
 
         let redirect_to = {
             if let Some(r) = req.redirect_to {
                 Some(r.to_owned())
             } else if let Some(cookie) = jar.get("redirect_to") {
                 let redirect_to = cookie.value().to_string();
-                jar.remove(Cookie::from("redirect_to"));
+                let mut c = Cookie::from("redirect_to");
+                LoginManager::apply_secure_cookie_options(&mut c);
+                jar = jar.remove(c);
                 Some(redirect_to)
             } else {
                 None
@@ -450,6 +433,23 @@ impl AuthService for AuthServiceImpl {
             redirect_to,
             ..Default::default()
         });
+
+        // this is so incredibly stupid... i hate it... I hate types... it sucks
+        // this only works well here because we know that manu of the cookies will change
+        // basically, the axum CookieJar doesn't expose the "delta" like the basic one does
+        // but I'm having problems with adapting make_cookies to use either the axum one or the basic one
+        // so im doing this as a workaround for now...
+        let jar = jar.into_response();
+        for (header_name, header_value) in
+            jar.headers().iter().filter(|(name, _)| name == &SET_COOKIE)
+        {
+            // trace!(
+            //     "Adding Set-Cookie header to response: {} = {}",
+            //     header_name,
+            //     header_value.to_str().unwrap_or("<invalid utf8>")
+            // );
+            res = res.try_with_header(header_name, header_value.as_bytes())?;
+        }
 
         Ok(res)
     }

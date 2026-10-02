@@ -601,13 +601,14 @@ impl DatabaseManager {
         Ok(())
     }
 
+    #[cfg_attr(debug_assertions, instrument(skip(self), level = "trace", ret))]
     pub async fn get_user_password_hash(&self, username: &str) -> Result<(i64, String), DbError> {
         if username.is_empty() {
             return Err(DbError::Validation("username is empty".into()));
         }
 
         let password_hash = sqlx::query_as::<_, DbUserPassword>(
-            "SELECT user_id, password_hash FROM USERS_PASSWORDS
+            "SELECT user_id, * FROM USERS_PASSWORDS
             JOIN USERS ON USERS_PASSWORDS.user_id = users.ID
             WHERE USERS.username = ?",
         )

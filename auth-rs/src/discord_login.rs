@@ -5,8 +5,7 @@ use axum::{
     response::{IntoResponse, Redirect},
     routing::get,
 };
-use axum_extra::extract::cookie::{self, Cookie, CookieJar, SameSite};
-use base64::prelude::*;
+use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
 use oauth2::basic::BasicClient;
 use oauth2::reqwest::async_http_client;
 use oauth2::{
