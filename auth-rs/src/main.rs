@@ -62,7 +62,6 @@ async fn main() -> Result<()> {
     let mut app = axum::Router::new()
         .merge(discord_manager.router())
         .merge(login_manager.router());
-
     let service = Arc::new(AuthServiceImpl {
         subdomain: format!("auth.{}", cfg.tld),
         signer: &GLOBAL_JWT_SIGNER,

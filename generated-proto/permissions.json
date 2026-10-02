@@ -138,20 +138,6 @@
       "is_frontend": false,
       "frontend_static_file": null
     },
-    "/auth.v2.AuthService/Login": {
-      "allow_roles": [
-        1
-      ],
-      "is_public": true,
-      "public_url": null,
-      "compiled_permissions_bitfield": 2,
-      "csrf_token_header": "X-CSRF-Token",
-      "csrf_token_cookie": "csrf_token",
-      "response_cors_headers": null,
-      "enforce_csrf": true,
-      "is_frontend": false,
-      "frontend_static_file": null
-    },
     "/auth.v2.AuthService/Logout": {
       "allow_roles": [
         1
@@ -166,6 +152,20 @@
       "response_cors_headers": null,
       "enforce_csrf": false,
       "is_frontend": true,
+      "frontend_static_file": null
+    },
+    "/auth.v2.AuthService/PasswordLogin": {
+      "allow_roles": [
+        1
+      ],
+      "is_public": true,
+      "public_url": null,
+      "compiled_permissions_bitfield": 2,
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": true,
+      "is_frontend": false,
       "frontend_static_file": null
     },
     "/auth.v2.AuthService/RemovePassword": {

@@ -2027,246 +2027,6 @@ pub const __GET_DEV_TOKEN_RESPONSE_JSON_ANY: ::buffa::type_registry::JsonAnyEntr
 #[derive(Clone, PartialEq, Default)]
 #[derive(::serde::Serialize, ::serde::Deserialize)]
 #[serde(default)]
-pub struct LoginRequest {
-    /// Field 1: `username`
-    #[serde(
-        rename = "username",
-        with = "::buffa::json_helpers::proto_string",
-        skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_str"
-    )]
-    pub username: ::buffa::alloc::string::String,
-    /// Field 2: `password`
-    #[serde(
-        rename = "password",
-        with = "::buffa::json_helpers::proto_string",
-        skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_str"
-    )]
-    pub password: ::buffa::alloc::string::String,
-    #[serde(skip)]
-    #[doc(hidden)]
-    pub __buffa_unknown_fields: ::buffa::UnknownFields,
-}
-impl ::core::fmt::Debug for LoginRequest {
-    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("LoginRequest")
-            .field("username", &self.username)
-            .field("password", &self.password)
-            .finish()
-    }
-}
-impl LoginRequest {
-    /// Protobuf type URL for this message, for use with `Any::pack` and
-    /// `Any::unpack_if`.
-    ///
-    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.LoginRequest";
-}
-::buffa::impl_default_instance!(LoginRequest);
-impl ::buffa_descriptor::reflect::ReflectMessage for LoginRequest {
-    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
-        __buffa::reflect::descriptor_pool()
-            .message(Self::__buffa_reflect_message_index())
-    }
-    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
-        __buffa::reflect::descriptor_pool()
-    }
-    fn unknown_fields(&self) -> &::buffa::UnknownFields {
-        &self.__buffa_unknown_fields
-    }
-    fn get(
-        &self,
-        field: &::buffa_descriptor::FieldDescriptor,
-    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        match field.number() {
-            1u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.username),
-            2u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.password),
-            _ => {
-                ::core::debug_assert!(
-                    false,
-                    "field number {} is not a member of this message's reflect get()",
-                    field.number(),
-                );
-                ::buffa_descriptor::reflect::ValueRef::Bool(false)
-            }
-        }
-    }
-    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
-        match field.number() {
-            1u32 => !self.username.is_empty(),
-            2u32 => !self.password.is_empty(),
-            _ => false,
-        }
-    }
-    fn for_each_set(
-        &self,
-        f: &mut dyn ::core::ops::FnMut(
-            &::buffa_descriptor::FieldDescriptor,
-            ::buffa_descriptor::reflect::ValueRef<'_>,
-        ),
-    ) {
-        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
-        for fd in md.fields() {
-            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
-                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
-            }
-        }
-    }
-    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
-        ::buffa_descriptor::reflect::DynamicMessage::from_message(
-            self,
-            ::buffa::alloc::sync::Arc::clone(__buffa::reflect::descriptor_pool()),
-            Self::__buffa_reflect_message_index(),
-        )
-    }
-}
-impl ::buffa_descriptor::reflect::ReflectElement for LoginRequest {
-    #[inline]
-    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
-        ::buffa_descriptor::reflect::ValueRef::Message(
-            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
-        )
-    }
-}
-impl LoginRequest {
-    /// Memoized `MessageIndex` for this message type, resolved once
-    /// against the package's embedded descriptor pool.
-    #[doc(hidden)]
-    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
-        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
-        *IDX
-            .get_or_init(|| {
-                __buffa::reflect::descriptor_pool()
-                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
-                    .expect(
-                        "generated message is registered in the embedded descriptor pool",
-                    )
-            })
-    }
-}
-impl ::buffa_descriptor::reflect::Reflectable for LoginRequest {
-    /// Vtable-mode reflective handle: borrows `self` directly. No
-    /// encode/decode round-trip and no allocation — the reflective
-    /// accessors read this message's fields in place.
-    #[inline]
-    fn reflect(&self) -> ::buffa_descriptor::reflect::ReflectCow<'_> {
-        ::buffa_descriptor::reflect::ReflectCow::Borrowed(self)
-    }
-}
-impl ::buffa::MessageName for LoginRequest {
-    const PACKAGE: &'static str = "auth.v2";
-    const NAME: &'static str = "LoginRequest";
-    const FULL_NAME: &'static str = "auth.v2.LoginRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.LoginRequest";
-}
-impl ::buffa::Message for LoginRequest {
-    /// Returns the total encoded size in bytes.
-    ///
-    /// Accumulates in `u64` (which cannot overflow for in-memory
-    /// data) and saturates to `u32` at return, so a message whose
-    /// encoded size exceeds the 2 GiB protobuf limit yields a value
-    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
-    /// points reject, never a silently wrapped size.
-    #[allow(clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if !self.username.is_empty() {
-            size += 1u64 + ::buffa::types::string_encoded_len(&self.username) as u64;
-        }
-        if !self.password.is_empty() {
-            size += 1u64 + ::buffa::types::string_encoded_len(&self.password) as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if !self.username.is_empty() {
-            ::buffa::types::put_string_field(1u32, &self.username, buf);
-        }
-        if !self.password.is_empty() {
-            ::buffa::types::put_string_field(2u32, &self.password, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-    fn merge_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        buf: &mut impl ::buffa::bytes::Buf,
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::bytes::Buf as _;
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(&mut self.username, buf)?;
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(&mut self.password, buf)?;
-            }
-            _ => {
-                self.__buffa_unknown_fields
-                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
-            }
-        }
-        ::core::result::Result::Ok(())
-    }
-    fn clear(&mut self) {
-        self.username.clear();
-        self.password.clear();
-        self.__buffa_unknown_fields.clear();
-    }
-}
-impl ::buffa::ExtensionSet for LoginRequest {
-    const PROTO_FQN: &'static str = "auth.v2.LoginRequest";
-    fn unknown_fields(&self) -> &::buffa::UnknownFields {
-        &self.__buffa_unknown_fields
-    }
-    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
-        &mut self.__buffa_unknown_fields
-    }
-}
-impl ::buffa::json_helpers::ProtoElemJson for LoginRequest {
-    fn serialize_proto_json<S: ::serde::Serializer>(
-        v: &Self,
-        s: S,
-    ) -> ::core::result::Result<S::Ok, S::Error> {
-        ::serde::Serialize::serialize(v, s)
-    }
-    fn deserialize_proto_json<'de, D: ::serde::Deserializer<'de>>(
-        d: D,
-    ) -> ::core::result::Result<Self, D::Error> {
-        <Self as ::serde::Deserialize>::deserialize(d)
-    }
-}
-#[doc(hidden)]
-pub const __LOGIN_REQUEST_JSON_ANY: ::buffa::type_registry::JsonAnyEntry = ::buffa::type_registry::JsonAnyEntry {
-    type_url: "type.googleapis.com/auth.v2.LoginRequest",
-    to_json: ::buffa::type_registry::any_to_json::<LoginRequest>,
-    from_json: ::buffa::type_registry::any_from_json::<LoginRequest>,
-    is_wkt: false,
-};
-#[derive(Clone, PartialEq, Default)]
-#[derive(::serde::Serialize, ::serde::Deserialize)]
-#[serde(default)]
 pub struct CreateUserRequest {
     /// Field 1: `user`
     #[serde(
@@ -3211,62 +2971,77 @@ pub const __REMOVE_PASSWORD_REQUEST_JSON_ANY: ::buffa::type_registry::JsonAnyEnt
 #[derive(Clone, PartialEq, Default)]
 #[derive(::serde::Serialize, ::serde::Deserialize)]
 #[serde(default)]
-pub struct LoginResponse {
-    /// Field 1: `jwt`
+pub struct PasswordLoginRequest {
+    /// Field 1: `username`
     #[serde(
-        rename = "jwt",
+        rename = "username",
         with = "::buffa::json_helpers::proto_string",
         skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_str"
     )]
-    pub jwt: ::buffa::alloc::string::String,
-    /// Field 2: `refresh_token`
+    pub username: ::buffa::alloc::string::String,
+    /// Field 2: `password`
     #[serde(
-        rename = "refreshToken",
-        alias = "refresh_token",
+        rename = "password",
         with = "::buffa::json_helpers::proto_string",
         skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_str"
     )]
-    pub refresh_token: ::buffa::alloc::string::String,
-    /// Field 3: `refresh_token_expiry`
+    pub password: ::buffa::alloc::string::String,
+    /// Field 3: `remember_me`
     #[serde(
-        rename = "refreshTokenExpiry",
-        alias = "refresh_token_expiry",
-        skip_serializing_if = "::buffa::json_helpers::skip_if::is_unset_message_field"
+        rename = "rememberMe",
+        alias = "remember_me",
+        skip_serializing_if = "::core::option::Option::is_none"
     )]
-    pub refresh_token_expiry: ::buffa::MessageField<
-        ::buffa_types::google::protobuf::Timestamp,
-        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
-    >,
-    /// Field 4: `small_data`
+    pub remember_me: ::core::option::Option<bool>,
+    /// Field 4: `redirect_to`
     #[serde(
-        rename = "smallData",
-        alias = "small_data",
-        skip_serializing_if = "::buffa::json_helpers::skip_if::is_unset_message_field"
+        rename = "redirectTo",
+        alias = "redirect_to",
+        skip_serializing_if = "::core::option::Option::is_none"
     )]
-    pub small_data: ::buffa::MessageField<SmallData, ::buffa::Inline<SmallData>>,
+    pub redirect_to: ::core::option::Option<::buffa::alloc::string::String>,
     #[serde(skip)]
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for LoginResponse {
+impl ::core::fmt::Debug for PasswordLoginRequest {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("LoginResponse")
-            .field("jwt", &self.jwt)
-            .field("refresh_token", &self.refresh_token)
-            .field("refresh_token_expiry", &self.refresh_token_expiry)
-            .field("small_data", &self.small_data)
+        f.debug_struct("PasswordLoginRequest")
+            .field("username", &self.username)
+            .field("password", &self.password)
+            .field("remember_me", &self.remember_me)
+            .field("redirect_to", &self.redirect_to)
             .finish()
     }
 }
-impl LoginResponse {
+impl PasswordLoginRequest {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.LoginResponse";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.PasswordLoginRequest";
 }
-::buffa::impl_default_instance!(LoginResponse);
-impl ::buffa_descriptor::reflect::ReflectMessage for LoginResponse {
+impl PasswordLoginRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::remember_me`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_remember_me(mut self, value: bool) -> Self {
+        self.remember_me = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::redirect_to`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_redirect_to(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.redirect_to = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(PasswordLoginRequest);
+impl ::buffa_descriptor::reflect::ReflectMessage for PasswordLoginRequest {
     fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
         __buffa::reflect::descriptor_pool()
             .message(Self::__buffa_reflect_message_index())
@@ -3284,18 +3059,16 @@ impl ::buffa_descriptor::reflect::ReflectMessage for LoginResponse {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         match field.number() {
-            1u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.jwt),
-            2u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.refresh_token),
+            1u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.username),
+            2u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.password),
             3u32 => {
-                ::buffa_descriptor::reflect::ValueRef::Message(
-                    ::buffa_descriptor::reflect::Reflectable::reflect(
-                        &*self.refresh_token_expiry,
-                    ),
+                ::buffa_descriptor::reflect::ValueRef::Bool(
+                    self.remember_me.unwrap_or(false),
                 )
             }
             4u32 => {
-                ::buffa_descriptor::reflect::ValueRef::Message(
-                    ::buffa_descriptor::reflect::Reflectable::reflect(&*self.small_data),
+                ::buffa_descriptor::reflect::ValueRef::String(
+                    self.redirect_to.as_deref().unwrap_or(""),
                 )
             }
             _ => {
@@ -3310,10 +3083,10 @@ impl ::buffa_descriptor::reflect::ReflectMessage for LoginResponse {
     }
     fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
         match field.number() {
-            1u32 => !self.jwt.is_empty(),
-            2u32 => !self.refresh_token.is_empty(),
-            3u32 => self.refresh_token_expiry.is_set(),
-            4u32 => self.small_data.is_set(),
+            1u32 => !self.username.is_empty(),
+            2u32 => !self.password.is_empty(),
+            3u32 => self.remember_me.is_some(),
+            4u32 => self.redirect_to.is_some(),
             _ => false,
         }
     }
@@ -3339,7 +3112,7 @@ impl ::buffa_descriptor::reflect::ReflectMessage for LoginResponse {
         )
     }
 }
-impl ::buffa_descriptor::reflect::ReflectElement for LoginResponse {
+impl ::buffa_descriptor::reflect::ReflectElement for PasswordLoginRequest {
     #[inline]
     fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
         ::buffa_descriptor::reflect::ValueRef::Message(
@@ -3347,7 +3120,7 @@ impl ::buffa_descriptor::reflect::ReflectElement for LoginResponse {
         )
     }
 }
-impl LoginResponse {
+impl PasswordLoginRequest {
     /// Memoized `MessageIndex` for this message type, resolved once
     /// against the package's embedded descriptor pool.
     #[doc(hidden)]
@@ -3363,7 +3136,7 @@ impl LoginResponse {
             })
     }
 }
-impl ::buffa_descriptor::reflect::Reflectable for LoginResponse {
+impl ::buffa_descriptor::reflect::Reflectable for PasswordLoginRequest {
     /// Vtable-mode reflective handle: borrows `self` directly. No
     /// encode/decode round-trip and no allocation — the reflective
     /// accessors read this message's fields in place.
@@ -3372,13 +3145,13 @@ impl ::buffa_descriptor::reflect::Reflectable for LoginResponse {
         ::buffa_descriptor::reflect::ReflectCow::Borrowed(self)
     }
 }
-impl ::buffa::MessageName for LoginResponse {
+impl ::buffa::MessageName for PasswordLoginRequest {
     const PACKAGE: &'static str = "auth.v2";
-    const NAME: &'static str = "LoginResponse";
-    const FULL_NAME: &'static str = "auth.v2.LoginResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.LoginResponse";
+    const NAME: &'static str = "PasswordLoginRequest";
+    const FULL_NAME: &'static str = "auth.v2.PasswordLoginRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.PasswordLoginRequest";
 }
-impl ::buffa::Message for LoginResponse {
+impl ::buffa::Message for PasswordLoginRequest {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -3387,64 +3160,43 @@ impl ::buffa::Message for LoginResponse {
     /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
     /// points reject, never a silently wrapped size.
     #[allow(clippy::let_and_return)]
-    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if !self.jwt.is_empty() {
-            size += 1u64 + ::buffa::types::string_encoded_len(&self.jwt) as u64;
+        if !self.username.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.username) as u64;
         }
-        if !self.refresh_token.is_empty() {
-            size
-                += 1u64 + ::buffa::types::string_encoded_len(&self.refresh_token) as u64;
+        if !self.password.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.password) as u64;
         }
-        if self.refresh_token_expiry.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.refresh_token_expiry.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
+        if self.remember_me.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
-        if self.small_data.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.small_data.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
+        if let Some(ref v) = self.redirect_to {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     fn write_to(
         &self,
-        __cache: &mut ::buffa::SizeCache,
+        _cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if !self.jwt.is_empty() {
-            ::buffa::types::put_string_field(1u32, &self.jwt, buf);
+        if !self.username.is_empty() {
+            ::buffa::types::put_string_field(1u32, &self.username, buf);
         }
-        if !self.refresh_token.is_empty() {
-            ::buffa::types::put_string_field(2u32, &self.refresh_token, buf);
+        if !self.password.is_empty() {
+            ::buffa::types::put_string_field(2u32, &self.password, buf);
         }
-        if self.refresh_token_expiry.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                3u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.refresh_token_expiry.write_to(__cache, buf);
+        if let Some(v) = self.remember_me {
+            ::buffa::types::put_bool_field(3u32, v, buf);
         }
-        if self.small_data.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                4u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.small_data.write_to(__cache, buf);
+        if let Some(ref v) = self.redirect_to {
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3464,35 +3216,34 @@ impl ::buffa::Message for LoginResponse {
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                ::buffa::types::merge_string(&mut self.jwt, buf)?;
+                ::buffa::types::merge_string(&mut self.username, buf)?;
             }
             2u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                ::buffa::types::merge_string(&mut self.refresh_token, buf)?;
+                ::buffa::types::merge_string(&mut self.password, buf)?;
             }
             3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
+                    ::buffa::encoding::WireType::Varint,
                 )?;
-                ::buffa::Message::merge_length_delimited(
-                    self.refresh_token_expiry.get_or_insert_default(),
-                    buf,
-                    ctx,
-                )?;
+                self.remember_me = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
             }
             4u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                ::buffa::Message::merge_length_delimited(
-                    self.small_data.get_or_insert_default(),
+                ::buffa::types::merge_string(
+                    self
+                        .redirect_to
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
                     buf,
-                    ctx,
                 )?;
             }
             _ => {
@@ -3503,15 +3254,15 @@ impl ::buffa::Message for LoginResponse {
         ::core::result::Result::Ok(())
     }
     fn clear(&mut self) {
-        self.jwt.clear();
-        self.refresh_token.clear();
-        self.refresh_token_expiry = ::buffa::MessageField::none();
-        self.small_data = ::buffa::MessageField::none();
+        self.username.clear();
+        self.password.clear();
+        self.remember_me = ::core::option::Option::None;
+        self.redirect_to = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for LoginResponse {
-    const PROTO_FQN: &'static str = "auth.v2.LoginResponse";
+impl ::buffa::ExtensionSet for PasswordLoginRequest {
+    const PROTO_FQN: &'static str = "auth.v2.PasswordLoginRequest";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -3519,7 +3270,7 @@ impl ::buffa::ExtensionSet for LoginResponse {
         &mut self.__buffa_unknown_fields
     }
 }
-impl ::buffa::json_helpers::ProtoElemJson for LoginResponse {
+impl ::buffa::json_helpers::ProtoElemJson for PasswordLoginRequest {
     fn serialize_proto_json<S: ::serde::Serializer>(
         v: &Self,
         s: S,
@@ -3533,9 +3284,226 @@ impl ::buffa::json_helpers::ProtoElemJson for LoginResponse {
     }
 }
 #[doc(hidden)]
-pub const __LOGIN_RESPONSE_JSON_ANY: ::buffa::type_registry::JsonAnyEntry = ::buffa::type_registry::JsonAnyEntry {
-    type_url: "type.googleapis.com/auth.v2.LoginResponse",
-    to_json: ::buffa::type_registry::any_to_json::<LoginResponse>,
-    from_json: ::buffa::type_registry::any_from_json::<LoginResponse>,
+pub const __PASSWORD_LOGIN_REQUEST_JSON_ANY: ::buffa::type_registry::JsonAnyEntry = ::buffa::type_registry::JsonAnyEntry {
+    type_url: "type.googleapis.com/auth.v2.PasswordLoginRequest",
+    to_json: ::buffa::type_registry::any_to_json::<PasswordLoginRequest>,
+    from_json: ::buffa::type_registry::any_from_json::<PasswordLoginRequest>,
+    is_wkt: false,
+};
+#[derive(Clone, PartialEq, Default)]
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+#[serde(default)]
+pub struct PasswordLoginResponse {
+    /// Field 1: `redirect_to`
+    #[serde(
+        rename = "redirectTo",
+        alias = "redirect_to",
+        with = "::buffa::json_helpers::proto_string",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_str"
+    )]
+    pub redirect_to: ::buffa::alloc::string::String,
+    #[serde(skip)]
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for PasswordLoginResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("PasswordLoginResponse")
+            .field("redirect_to", &self.redirect_to)
+            .finish()
+    }
+}
+impl PasswordLoginResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.PasswordLoginResponse";
+}
+::buffa::impl_default_instance!(PasswordLoginResponse);
+impl ::buffa_descriptor::reflect::ReflectMessage for PasswordLoginResponse {
+    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+        __buffa::reflect::descriptor_pool()
+            .message(Self::__buffa_reflect_message_index())
+    }
+    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+        __buffa::reflect::descriptor_pool()
+    }
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn get(
+        &self,
+        field: &::buffa_descriptor::FieldDescriptor,
+    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match field.number() {
+            1u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.redirect_to),
+            _ => {
+                ::core::debug_assert!(
+                    false,
+                    "field number {} is not a member of this message's reflect get()",
+                    field.number(),
+                );
+                ::buffa_descriptor::reflect::ValueRef::Bool(false)
+            }
+        }
+    }
+    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+        match field.number() {
+            1u32 => !self.redirect_to.is_empty(),
+            _ => false,
+        }
+    }
+    fn for_each_set(
+        &self,
+        f: &mut dyn ::core::ops::FnMut(
+            &::buffa_descriptor::FieldDescriptor,
+            ::buffa_descriptor::reflect::ValueRef<'_>,
+        ),
+    ) {
+        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
+        for fd in md.fields() {
+            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+            }
+        }
+    }
+    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+        ::buffa_descriptor::reflect::DynamicMessage::from_message(
+            self,
+            ::buffa::alloc::sync::Arc::clone(__buffa::reflect::descriptor_pool()),
+            Self::__buffa_reflect_message_index(),
+        )
+    }
+}
+impl ::buffa_descriptor::reflect::ReflectElement for PasswordLoginResponse {
+    #[inline]
+    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        ::buffa_descriptor::reflect::ValueRef::Message(
+            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+        )
+    }
+}
+impl PasswordLoginResponse {
+    /// Memoized `MessageIndex` for this message type, resolved once
+    /// against the package's embedded descriptor pool.
+    #[doc(hidden)]
+    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+        *IDX
+            .get_or_init(|| {
+                __buffa::reflect::descriptor_pool()
+                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                    .expect(
+                        "generated message is registered in the embedded descriptor pool",
+                    )
+            })
+    }
+}
+impl ::buffa_descriptor::reflect::Reflectable for PasswordLoginResponse {
+    /// Vtable-mode reflective handle: borrows `self` directly. No
+    /// encode/decode round-trip and no allocation — the reflective
+    /// accessors read this message's fields in place.
+    #[inline]
+    fn reflect(&self) -> ::buffa_descriptor::reflect::ReflectCow<'_> {
+        ::buffa_descriptor::reflect::ReflectCow::Borrowed(self)
+    }
+}
+impl ::buffa::MessageName for PasswordLoginResponse {
+    const PACKAGE: &'static str = "auth.v2";
+    const NAME: &'static str = "PasswordLoginResponse";
+    const FULL_NAME: &'static str = "auth.v2.PasswordLoginResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.PasswordLoginResponse";
+}
+impl ::buffa::Message for PasswordLoginResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if !self.redirect_to.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.redirect_to) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if !self.redirect_to.is_empty() {
+            ::buffa::types::put_string_field(1u32, &self.redirect_to, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(&mut self.redirect_to, buf)?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.redirect_to.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for PasswordLoginResponse {
+    const PROTO_FQN: &'static str = "auth.v2.PasswordLoginResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+impl ::buffa::json_helpers::ProtoElemJson for PasswordLoginResponse {
+    fn serialize_proto_json<S: ::serde::Serializer>(
+        v: &Self,
+        s: S,
+    ) -> ::core::result::Result<S::Ok, S::Error> {
+        ::serde::Serialize::serialize(v, s)
+    }
+    fn deserialize_proto_json<'de, D: ::serde::Deserializer<'de>>(
+        d: D,
+    ) -> ::core::result::Result<Self, D::Error> {
+        <Self as ::serde::Deserialize>::deserialize(d)
+    }
+}
+#[doc(hidden)]
+pub const __PASSWORD_LOGIN_RESPONSE_JSON_ANY: ::buffa::type_registry::JsonAnyEntry = ::buffa::type_registry::JsonAnyEntry {
+    type_url: "type.googleapis.com/auth.v2.PasswordLoginResponse",
+    to_json: ::buffa::type_registry::any_to_json::<PasswordLoginResponse>,
+    from_json: ::buffa::type_registry::any_from_json::<PasswordLoginResponse>,
     is_wkt: false,
 };

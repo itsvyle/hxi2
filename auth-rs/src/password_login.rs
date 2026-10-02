@@ -11,6 +11,8 @@ use axum::{
 };
 use axum_extra::extract::{CookieJar, cookie::Cookie};
 use http::StatusCode;
+use hxi2_proto::proto::auth::v2::PasswordLoginResponse;
+use serde::Serialize;
 use tracing::{error, instrument, trace, warn};
 use zeroize::Zeroizing;
 
@@ -32,16 +34,6 @@ pub struct LoginForm {
 impl PasswordLoginManager {
     pub fn new(login_manager: Arc<LoginManager>) -> Self {
         Self { login_manager }
-    }
-
-    pub fn router(self: &Arc<Self>) -> axum::Router {
-        let state = Arc::clone(self);
-        axum::Router::new()
-            .route(
-                "/api/password_login",
-                axum::routing::post(Self::login_handler),
-            )
-            .with_state(state)
     }
 
     #[cfg_attr(debug_assertions, instrument(skip(self), level = "trace", ret))]
@@ -79,8 +71,7 @@ impl PasswordLoginManager {
     )]
     pub async fn try_login(&self, username: &str, password: &str) -> anyhow::Result<i64> {
         // make sure to always check a hash, to avoid timing attacks which could reveal whether a user exists or not.
-        const DUMMY_HASH: &str =
-            "$argon2id$v=19$m=19456,t=2,p=1$c29tZXNhbHQ$vO8wK7A25iC28d3Vj2uJ/1/m3w2jM4y";
+        const DUMMY_HASH: &str = "$argon2id$v=19$m=19456,t=2,p=1$VVdiljEvbLBmvl8ztJXUWg$YPEyPpwKESeb72CDEfZd2fMkT1mwUReqKiVkhkgDe/U";
 
         let password_input = Zeroizing::new(password.to_string());
 
@@ -160,6 +151,17 @@ impl PasswordLoginManager {
             form.username, user_id, redirect_to
         );
 
-        Ok((jar, Redirect::to(&redirect_to)))
+        let res = PasswordLoginResponse {
+            redirect_to,
+            ..Default::default()
+        };
+        let res_json = serde_json::to_string(&res).map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to serialize response",
+            )
+        })?;
+
+        Ok((jar, res_json))
     }
 }

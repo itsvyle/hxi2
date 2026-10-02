@@ -42,18 +42,6 @@ pub type OwnedCreateUserResponseView = ::buffa::view::OwnedView<
 pub type OwnedDbUserView = ::buffa::view::OwnedView<
     crate::proto::auth::v2::__buffa::view::DBUserView<'static>,
 >;
-///Shorthand for `OwnedView<LoginRequestView<'static>>`.
-pub type OwnedLoginRequestView = ::buffa::view::OwnedView<
-    crate::proto::auth::v2::__buffa::view::LoginRequestView<'static>,
->;
-///Shorthand for `OwnedView<LoginResponseView<'static>>`.
-pub type OwnedLoginResponseView = ::buffa::view::OwnedView<
-    crate::proto::auth::v2::__buffa::view::LoginResponseView<'static>,
->;
-///Shorthand for `OwnedView<EmptyView<'static>>`.
-pub type OwnedEmptyView = ::buffa::view::OwnedView<
-    ::buffa_types::google::protobuf::__buffa::view::EmptyView<'static>,
->;
 ///Shorthand for `OwnedView<GetCsrfTokenRequestView<'static>>`.
 pub type OwnedGetCsrfTokenRequestView = ::buffa::view::OwnedView<
     crate::proto::auth::v2::__buffa::view::GetCSRFTokenRequestView<'static>,
@@ -62,6 +50,10 @@ pub type OwnedGetCsrfTokenRequestView = ::buffa::view::OwnedView<
 pub type OwnedGetCsrfTokenResponseView = ::buffa::view::OwnedView<
     crate::proto::auth::v2::__buffa::view::GetCSRFTokenResponseView<'static>,
 >;
+///Shorthand for `OwnedView<EmptyView<'static>>`.
+pub type OwnedEmptyView = ::buffa::view::OwnedView<
+    ::buffa_types::google::protobuf::__buffa::view::EmptyView<'static>,
+>;
 ///Shorthand for `OwnedView<AddPasswordRequestView<'static>>`.
 pub type OwnedAddPasswordRequestView = ::buffa::view::OwnedView<
     crate::proto::auth::v2::__buffa::view::AddPasswordRequestView<'static>,
@@ -69,6 +61,14 @@ pub type OwnedAddPasswordRequestView = ::buffa::view::OwnedView<
 ///Shorthand for `OwnedView<RemovePasswordRequestView<'static>>`.
 pub type OwnedRemovePasswordRequestView = ::buffa::view::OwnedView<
     crate::proto::auth::v2::__buffa::view::RemovePasswordRequestView<'static>,
+>;
+///Shorthand for `OwnedView<PasswordLoginRequestView<'static>>`.
+pub type OwnedPasswordLoginRequestView = ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::PasswordLoginRequestView<'static>,
+>;
+///Shorthand for `OwnedView<PasswordLoginResponseView<'static>>`.
+pub type OwnedPasswordLoginResponseView = ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::PasswordLoginResponseView<'static>,
 >;
 impl ::connectrpc::Encodable<crate::proto::auth::v2::GetJWTPublicKeyResponse>
 for crate::proto::auth::v2::__buffa::view::GetJWTPublicKeyResponseView<'_> {
@@ -274,8 +274,8 @@ for ::buffa::view::OwnedView<
         )
     }
 }
-impl ::connectrpc::Encodable<crate::proto::auth::v2::LoginResponse>
-for crate::proto::auth::v2::__buffa::view::LoginResponseView<'_> {
+impl ::connectrpc::Encodable<crate::proto::auth::v2::GetCSRFTokenResponse>
+for crate::proto::auth::v2::__buffa::view::GetCSRFTokenResponseView<'_> {
     fn encode(
         &self,
         codec: ::connectrpc::CodecFormat,
@@ -283,9 +283,9 @@ for crate::proto::auth::v2::__buffa::view::LoginResponseView<'_> {
         ::connectrpc::__codegen::encode_view_body(self, codec)
     }
 }
-impl ::connectrpc::Encodable<crate::proto::auth::v2::LoginResponse>
+impl ::connectrpc::Encodable<crate::proto::auth::v2::GetCSRFTokenResponse>
 for ::buffa::view::OwnedView<
-    crate::proto::auth::v2::__buffa::view::LoginResponseView<'static>,
+    crate::proto::auth::v2::__buffa::view::GetCSRFTokenResponseView<'static>,
 > {
     fn encode(
         &self,
@@ -308,8 +308,8 @@ for ::buffa::view::OwnedView<
         )
     }
 }
-impl ::connectrpc::Encodable<crate::proto::auth::v2::GetCSRFTokenResponse>
-for crate::proto::auth::v2::__buffa::view::GetCSRFTokenResponseView<'_> {
+impl ::connectrpc::Encodable<crate::proto::auth::v2::PasswordLoginResponse>
+for crate::proto::auth::v2::__buffa::view::PasswordLoginResponseView<'_> {
     fn encode(
         &self,
         codec: ::connectrpc::CodecFormat,
@@ -317,9 +317,9 @@ for crate::proto::auth::v2::__buffa::view::GetCSRFTokenResponseView<'_> {
         ::connectrpc::__codegen::encode_view_body(self, codec)
     }
 }
-impl ::connectrpc::Encodable<crate::proto::auth::v2::GetCSRFTokenResponse>
+impl ::connectrpc::Encodable<crate::proto::auth::v2::PasswordLoginResponse>
 for ::buffa::view::OwnedView<
-    crate::proto::auth::v2::__buffa::view::GetCSRFTokenResponseView<'static>,
+    crate::proto::auth::v2::__buffa::view::PasswordLoginResponseView<'static>,
 > {
     fn encode(
         &self,
@@ -380,18 +380,6 @@ pub const AUTH_SERVICE_UPDATE_USER_SPEC: ::connectrpc::Spec = ::connectrpc::Spec
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// Static [`Spec`](::connectrpc::Spec) for the `Login` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const AUTH_SERVICE_LOGIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/auth.v2.AuthService/Login",
-        ::connectrpc::StreamType::Unary,
-    )
-    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// Static [`Spec`](::connectrpc::Spec) for the `Logout` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const AUTH_SERVICE_LOGOUT_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/auth.v2.AuthService/Logout",
-        ::connectrpc::StreamType::Unary,
-    )
-    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// Static [`Spec`](::connectrpc::Spec) for the `GetCSRFToken` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_GET_CSRF_TOKEN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/GetCSRFToken",
@@ -422,9 +410,21 @@ pub const AUTH_SERVICE_REMOVE_PASSWORD_SPEC: ::connectrpc::Spec = ::connectrpc::
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `PasswordLogin` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_PASSWORD_LOGIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/auth.v2.AuthService/PasswordLogin",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// Static [`Spec`](::connectrpc::Spec) for the `FrontendIndex` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_FRONTEND_INDEX_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/FrontendIndex",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `Logout` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_LOGOUT_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/auth.v2.AuthService/Logout",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
@@ -616,46 +616,6 @@ pub trait AuthService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// Handle the Login RPC.
-    ///
-    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
-    ///
-    /// `request` is borrowed from the request body and is valid for the
-    /// duration of the call; message fields are read directly on it
-    /// (zero-copy). The response cannot borrow from `request` — use
-    /// `.to_owned_message()` (or copy the specific fields) for anything
-    /// returned, stored, or moved into `tokio::spawn`.
-    fn login<'a>(
-        &'a self,
-        ctx: ::connectrpc::RequestContext,
-        request: ::connectrpc::ServiceRequest<'_, crate::proto::auth::v2::LoginRequest>,
-    ) -> impl ::std::future::Future<
-        Output = ::connectrpc::ServiceResult<
-            impl ::connectrpc::Encodable<
-                crate::proto::auth::v2::LoginResponse,
-            > + Send + use<'a, Self>,
-        >,
-    > + Send;
-    /// Handle the Logout RPC.
-    ///
-    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
-    ///
-    /// `request` is borrowed from the request body and is valid for the
-    /// duration of the call; message fields are read directly on it
-    /// (zero-copy). The response cannot borrow from `request` — use
-    /// `.to_owned_message()` (or copy the specific fields) for anything
-    /// returned, stored, or moved into `tokio::spawn`.
-    fn logout<'a>(
-        &'a self,
-        ctx: ::connectrpc::RequestContext,
-        request: ::connectrpc::ServiceRequest<'_, ::buffa_types::google::protobuf::Empty>,
-    ) -> impl ::std::future::Future<
-        Output = ::connectrpc::ServiceResult<
-            impl ::connectrpc::Encodable<
-                ::buffa_types::google::protobuf::Empty,
-            > + Send + use<'a, Self>,
-        >,
-    > + Send;
     /// Handle the GetCSRFToken RPC.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
@@ -765,6 +725,29 @@ pub trait AuthService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
+    /// Handle the PasswordLogin RPC.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn password_login<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::auth::v2::PasswordLoginRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::auth::v2::PasswordLoginResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
     /// FRONTEND PAGES
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
@@ -775,6 +758,26 @@ pub trait AuthService: Send + Sync + 'static {
     /// `.to_owned_message()` (or copy the specific fields) for anything
     /// returned, stored, or moved into `tokio::spawn`.
     fn frontend_index<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<'_, ::buffa_types::google::protobuf::Empty>,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                ::buffa_types::google::protobuf::Empty,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// Handle the Logout RPC.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn logout<'a>(
         &'a self,
         ctx: ::connectrpc::RequestContext,
         request: ::connectrpc::ServiceRequest<'_, ::buffa_types::google::protobuf::Empty>,
@@ -985,60 +988,6 @@ impl<S: AuthService> AuthServiceExt for S {
             .with_spec(AUTH_SERVICE_UPDATE_USER_SPEC)
             .route_view(
                 AUTH_SERVICE_SERVICE_NAME,
-                "Login",
-                {
-                    let svc = ::std::sync::Arc::clone(&self);
-                    ::connectrpc::view_handler_fn(move |
-                        ctx,
-                        req: ::buffa::view::OwnedView<
-                            crate::proto::auth::v2::__buffa::view::LoginRequestView<
-                                'static,
-                            >,
-                        >,
-                        format|
-                    {
-                        let svc = ::std::sync::Arc::clone(&svc);
-                        async move {
-                            let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::auth::v2::LoginRequest,
-                            >::from_parts(req.reborrow(), req.bytes());
-                            svc.login(ctx, sreq)
-                                .await?
-                                .encode::<crate::proto::auth::v2::LoginResponse>(format)
-                        }
-                    })
-                },
-            )
-            .with_spec(AUTH_SERVICE_LOGIN_SPEC)
-            .route_view(
-                AUTH_SERVICE_SERVICE_NAME,
-                "Logout",
-                {
-                    let svc = ::std::sync::Arc::clone(&self);
-                    ::connectrpc::view_handler_fn(move |
-                        ctx,
-                        req: ::buffa::view::OwnedView<
-                            ::buffa_types::google::protobuf::__buffa::view::EmptyView<
-                                'static,
-                            >,
-                        >,
-                        format|
-                    {
-                        let svc = ::std::sync::Arc::clone(&svc);
-                        async move {
-                            let sreq = ::connectrpc::ServiceRequest::<
-                                ::buffa_types::google::protobuf::Empty,
-                            >::from_parts(req.reborrow(), req.bytes());
-                            svc.logout(ctx, sreq)
-                                .await?
-                                .encode::<::buffa_types::google::protobuf::Empty>(format)
-                        }
-                    })
-                },
-            )
-            .with_spec(AUTH_SERVICE_LOGOUT_SPEC)
-            .route_view(
-                AUTH_SERVICE_SERVICE_NAME,
                 "GetCSRFToken",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -1176,6 +1125,35 @@ impl<S: AuthService> AuthServiceExt for S {
             .with_spec(AUTH_SERVICE_REMOVE_PASSWORD_SPEC)
             .route_view(
                 AUTH_SERVICE_SERVICE_NAME,
+                "PasswordLogin",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::auth::v2::__buffa::view::PasswordLoginRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::auth::v2::PasswordLoginRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.password_login(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::auth::v2::PasswordLoginResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_PASSWORD_LOGIN_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
                 "FrontendIndex",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -1201,6 +1179,33 @@ impl<S: AuthService> AuthServiceExt for S {
                 },
             )
             .with_spec(AUTH_SERVICE_FRONTEND_INDEX_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
+                "Logout",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            ::buffa_types::google::protobuf::__buffa::view::EmptyView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                ::buffa_types::google::protobuf::Empty,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.logout(ctx, sreq)
+                                .await?
+                                .encode::<::buffa_types::google::protobuf::Empty>(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_LOGOUT_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -1291,18 +1296,6 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         .with_spec(AUTH_SERVICE_UPDATE_USER_SPEC),
                 )
             }
-            "Login" => {
-                Some(
-                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
-                        .with_spec(AUTH_SERVICE_LOGIN_SPEC),
-                )
-            }
-            "Logout" => {
-                Some(
-                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
-                        .with_spec(AUTH_SERVICE_LOGOUT_SPEC),
-                )
-            }
             "GetCSRFToken" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
@@ -1333,10 +1326,22 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         .with_spec(AUTH_SERVICE_REMOVE_PASSWORD_SPEC),
                 )
             }
+            "PasswordLogin" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_PASSWORD_LOGIN_SPEC),
+                )
+            }
             "FrontendIndex" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(AUTH_SERVICE_FRONTEND_INDEX_SPEC),
+                )
+            }
+            "Logout" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_LOGOUT_SPEC),
                 )
             }
             _ => None,
@@ -1474,46 +1479,6 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         .encode::<crate::proto::auth::v2::DBUser>(format)
                 })
             }
-            "Login" => {
-                let svc = ::std::sync::Arc::clone(&self.inner);
-                Box::pin(async move {
-                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::auth::v2::LoginRequest,
-                    >(request.encoded()?, format)?;
-                    let req: crate::proto::auth::v2::__buffa::view::LoginRequestView<
-                        '_,
-                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
-                        &body,
-                        ctx.decode_options(),
-                    )?;
-                    let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::auth::v2::LoginRequest,
-                    >::from_parts(&req, &body);
-                    svc.login(ctx, req)
-                        .await?
-                        .encode::<crate::proto::auth::v2::LoginResponse>(format)
-                })
-            }
-            "Logout" => {
-                let svc = ::std::sync::Arc::clone(&self.inner);
-                Box::pin(async move {
-                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        ::buffa_types::google::protobuf::Empty,
-                    >(request.encoded()?, format)?;
-                    let req: ::buffa_types::google::protobuf::__buffa::view::EmptyView<
-                        '_,
-                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
-                        &body,
-                        ctx.decode_options(),
-                    )?;
-                    let req = ::connectrpc::ServiceRequest::<
-                        ::buffa_types::google::protobuf::Empty,
-                    >::from_parts(&req, &body);
-                    svc.logout(ctx, req)
-                        .await?
-                        .encode::<::buffa_types::google::protobuf::Empty>(format)
-                })
-            }
             "GetCSRFToken" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
@@ -1614,6 +1579,26 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         .encode::<::buffa_types::google::protobuf::Empty>(format)
                 })
             }
+            "PasswordLogin" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::auth::v2::PasswordLoginRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::auth::v2::__buffa::view::PasswordLoginRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::auth::v2::PasswordLoginRequest,
+                    >::from_parts(&req, &body);
+                    svc.password_login(ctx, req)
+                        .await?
+                        .encode::<crate::proto::auth::v2::PasswordLoginResponse>(format)
+                })
+            }
             "FrontendIndex" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
@@ -1630,6 +1615,26 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         ::buffa_types::google::protobuf::Empty,
                     >::from_parts(&req, &body);
                     svc.frontend_index(ctx, req)
+                        .await?
+                        .encode::<::buffa_types::google::protobuf::Empty>(format)
+                })
+            }
+            "Logout" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        ::buffa_types::google::protobuf::Empty,
+                    >(request.encoded()?, format)?;
+                    let req: ::buffa_types::google::protobuf::__buffa::view::EmptyView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        ::buffa_types::google::protobuf::Empty,
+                    >::from_parts(&req, &body);
+                    svc.logout(ctx, req)
                         .await?
                         .encode::<::buffa_types::google::protobuf::Empty>(format)
                 })
@@ -2012,80 +2017,6 @@ where
             )
             .await
     }
-    /// Call the Login RPC. Sends a request to /auth.v2.AuthService/Login.
-    pub async fn login(
-        &self,
-        request: crate::proto::auth::v2::LoginRequest,
-    ) -> Result<
-        ::connectrpc::client::UnaryResponse<
-            ::buffa::view::OwnedView<
-                crate::proto::auth::v2::__buffa::view::LoginResponseView<'static>,
-            >,
-        >,
-        ::connectrpc::ConnectError,
-    > {
-        self.login_with_options(request, ::connectrpc::client::CallOptions::default())
-            .await
-    }
-    /// Call the Login RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn login_with_options(
-        &self,
-        request: crate::proto::auth::v2::LoginRequest,
-        options: ::connectrpc::client::CallOptions,
-    ) -> Result<
-        ::connectrpc::client::UnaryResponse<
-            ::buffa::view::OwnedView<
-                crate::proto::auth::v2::__buffa::view::LoginResponseView<'static>,
-            >,
-        >,
-        ::connectrpc::ConnectError,
-    > {
-        ::connectrpc::client::call_unary(
-                &self.transport,
-                &self.config,
-                AUTH_SERVICE_LOGIN_SPEC.with_origin(::connectrpc::SpecOrigin::Client),
-                request,
-                options,
-            )
-            .await
-    }
-    /// Call the Logout RPC. Sends a request to /auth.v2.AuthService/Logout.
-    pub async fn logout(
-        &self,
-        request: ::buffa_types::google::protobuf::Empty,
-    ) -> Result<
-        ::connectrpc::client::UnaryResponse<
-            ::buffa::view::OwnedView<
-                ::buffa_types::google::protobuf::__buffa::view::EmptyView<'static>,
-            >,
-        >,
-        ::connectrpc::ConnectError,
-    > {
-        self.logout_with_options(request, ::connectrpc::client::CallOptions::default())
-            .await
-    }
-    /// Call the Logout RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn logout_with_options(
-        &self,
-        request: ::buffa_types::google::protobuf::Empty,
-        options: ::connectrpc::client::CallOptions,
-    ) -> Result<
-        ::connectrpc::client::UnaryResponse<
-            ::buffa::view::OwnedView<
-                ::buffa_types::google::protobuf::__buffa::view::EmptyView<'static>,
-            >,
-        >,
-        ::connectrpc::ConnectError,
-    > {
-        ::connectrpc::client::call_unary(
-                &self.transport,
-                &self.config,
-                AUTH_SERVICE_LOGOUT_SPEC.with_origin(::connectrpc::SpecOrigin::Client),
-                request,
-                options,
-            )
-            .await
-    }
     /// Call the GetCSRFToken RPC. Sends a request to /auth.v2.AuthService/GetCSRFToken.
     pub async fn get_csrf_token(
         &self,
@@ -2291,6 +2222,47 @@ where
             )
             .await
     }
+    /// Call the PasswordLogin RPC. Sends a request to /auth.v2.AuthService/PasswordLogin.
+    pub async fn password_login(
+        &self,
+        request: crate::proto::auth::v2::PasswordLoginRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::auth::v2::__buffa::view::PasswordLoginResponseView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.password_login_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the PasswordLogin RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn password_login_with_options(
+        &self,
+        request: crate::proto::auth::v2::PasswordLoginRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::auth::v2::__buffa::view::PasswordLoginResponseView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_PASSWORD_LOGIN_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
     /// Call the FrontendIndex RPC. Sends a request to /auth.v2.AuthService/FrontendIndex.
     pub async fn frontend_index(
         &self,
@@ -2327,6 +2299,43 @@ where
                 &self.config,
                 AUTH_SERVICE_FRONTEND_INDEX_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the Logout RPC. Sends a request to /auth.v2.AuthService/Logout.
+    pub async fn logout(
+        &self,
+        request: ::buffa_types::google::protobuf::Empty,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                ::buffa_types::google::protobuf::__buffa::view::EmptyView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.logout_with_options(request, ::connectrpc::client::CallOptions::default())
+            .await
+    }
+    /// Call the Logout RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn logout_with_options(
+        &self,
+        request: ::buffa_types::google::protobuf::Empty,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                ::buffa_types::google::protobuf::__buffa::view::EmptyView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_LOGOUT_SPEC.with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )

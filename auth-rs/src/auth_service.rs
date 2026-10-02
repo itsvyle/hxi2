@@ -5,18 +5,20 @@ use buffa_types::Empty;
 use connectrpc::{
     ConnectError, ErrorCode, RequestContext, Response, ServiceRequest, ServiceResult,
 };
+use cookie::{Cookie, CookieJar};
+use http::HeaderMap;
 pub use hxi2_proto::connect::auth::v2::AuthServiceExt;
 use hxi2_proto::proto::auth::v2::{
     AddPasswordRequest, CreateUserRequest, CreateUserResponse, DBUser, GetCSRFTokenRequest,
     GetCSRFTokenResponse, GetJWTPublicKeyRequest, GetJWTPublicKeyResponse, ListUsersRequest,
-    ListUsersResponse, LoginRequest, LoginResponse, Permission, RemovePasswordRequest,
-    RenewJWTRequest, RenewJWTResponse, SmallData,
+    ListUsersResponse, PasswordLoginRequest, PasswordLoginResponse, Permission,
+    RemovePasswordRequest, RenewJWTRequest, RenewJWTResponse, SmallData,
 };
 use hxi2_proto::{
     connect::auth::v2::AuthService,
     proto::auth::v2::{GetDevTokenRequest, GetDevTokenResponse},
 };
-use tracing::error;
+use tracing::{error, trace, warn};
 
 use crate::app_config::AppConfiguration;
 use crate::auth_middleware::ReqAuthState;
@@ -60,6 +62,25 @@ macro_rules! impl_otherplace_rpc {
             ))
         }
     };
+}
+
+// Taken from axum-extras
+fn cookies_from_request(headers: &HeaderMap) -> impl Iterator<Item = Cookie<'static>> + '_ {
+    const COOKIE: &str = "cookie";
+    headers
+        .get_all(COOKIE)
+        .into_iter()
+        .filter_map(|value| value.to_str().ok())
+        .flat_map(|value| value.split(';'))
+        .filter_map(|cookie| Cookie::parse_encoded(cookie.to_owned()).ok())
+}
+
+fn cookie_jar_from_request(headers: &HeaderMap) -> CookieJar {
+    let mut jar = CookieJar::new();
+    for cookie in cookies_from_request(headers) {
+        jar.add_original(cookie);
+    }
+    jar
 }
 
 #[allow(refining_impl_trait)]
@@ -359,7 +380,80 @@ impl AuthService for AuthServiceImpl {
         })
     }
 
-    impl_unimplemented_rpc!(login, LoginRequest, LoginResponse);
+    async fn password_login(
+        &self,
+        ctx: RequestContext,
+        req: ServiceRequest<'_, PasswordLoginRequest>,
+    ) -> ServiceResult<PasswordLoginResponse> {
+        let cfg = AppConfiguration::INSTANCE();
+        let mut jar = cookie_jar_from_request(ctx.headers());
+
+        let user_id = self
+            .password_login_manager
+            .try_login(req.username, req.password)
+            .await
+            .map_err(|_| ConnectError::permission_denied("Invalid username or password"))?;
+
+        let login_response = self
+            .login_manager
+            .login_as(&crate::login_manager::LoginID::UserID(user_id))
+            .await
+            .map_err(|err| {
+                if matches!(
+                    err.downcast_ref::<crate::database::DbError>(),
+                    Some(crate::database::DbError::NotFound)
+                ) {
+                    warn!(
+                        "User {} (id={}) not found in database, yet tried to login with UserID.",
+                        req.username, user_id
+                    );
+                    return ConnectError::permission_denied("Invalid username or password");
+                }
+                error!(error = %err, "Failed to login user by UserID.");
+                ConnectError::new(ErrorCode::Internal, "Failed to login user by UserID.")
+            })?;
+
+        let login_cookies = login_response.make_cookies().map_err(|err| {
+            error!(
+                err_code = err.0.as_u16(),
+                err_message = err.1,
+                "Failed to make cookies for login response"
+            );
+            ConnectError::new(
+                ErrorCode::Internal,
+                "Failed to make cookies for login response",
+            )
+        })?;
+        jar.add(login_cookies.jwt_cookie);
+        jar.add(login_cookies.refresh_token_cookie);
+        jar.add(login_cookies.small_data_cookie);
+
+        let redirect_to = {
+            if let Some(r) = req.redirect_to {
+                Some(r.to_owned())
+            } else if let Some(cookie) = jar.get("redirect_to") {
+                let redirect_to = cookie.value().to_string();
+                jar.remove(Cookie::from("redirect_to"));
+                Some(redirect_to)
+            } else {
+                None
+            }
+        }
+        .unwrap_or_else(|| "/".to_string());
+
+        trace!(
+            "User {} (id={}) logged in via password, redirecting to {}",
+            req.username, user_id, redirect_to
+        );
+
+        let mut res = Response::from(PasswordLoginResponse {
+            redirect_to,
+            ..Default::default()
+        });
+
+        Ok(res)
+    }
+
     impl_otherplace_rpc!(logout, Empty, Empty);
     impl_otherplace_rpc!(frontend_index, Empty, Empty);
     impl_otherplace_rpc!(discord_callback, Empty, Empty);

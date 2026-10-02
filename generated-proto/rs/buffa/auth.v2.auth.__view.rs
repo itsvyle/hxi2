@@ -3125,371 +3125,6 @@ impl<'a> GetDevTokenResponseView<'a> {
     }
 }
 #[derive(Clone, Debug, Default)]
-pub struct LoginRequestView<'a> {
-    /// Field 1: `username`
-    pub username: &'a str,
-    /// Field 2: `password`
-    pub password: &'a str,
-    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
-}
-impl<'a> ::buffa::MessageView<'a> for LoginRequestView<'a> {
-    type Owned = super::super::LoginRequest;
-    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
-        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
-        <Self as ::buffa::MessageView>::decode_view_ctx(
-            buf,
-            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
-                .with_element_memory(&__elem),
-        )
-    }
-    fn decode_view_with_ctx(
-        buf: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
-    }
-    #[inline]
-    fn merge_view_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        cur: &'a [u8],
-        before_tag: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
-        let _ = ctx;
-        #[allow(unused_variables)]
-        let view = self;
-        let mut cur = cur;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.username = ::buffa::types::borrow_str(&mut cur)?;
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.password = ::buffa::types::borrow_str(&mut cur)?;
-            }
-            _ => {
-                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
-                let span_len = before_tag.len() - cur.len();
-                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
-            }
-        }
-        ::core::result::Result::Ok(cur)
-    }
-    fn to_owned_message(
-        &self,
-    ) -> ::core::result::Result<super::super::LoginRequest, ::buffa::DecodeError> {
-        self.to_owned_from_source(None)
-    }
-    #[allow(clippy::useless_conversion, clippy::needless_update)]
-    fn to_owned_from_source(
-        &self,
-        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<super::super::LoginRequest, ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::alloc::string::ToString as _;
-        let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::LoginRequest {
-            username: self.username.to_string(),
-            password: self.password.to_string(),
-            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
-            ..::core::default::Default::default()
-        })
-    }
-}
-impl<'a> ::buffa::ViewEncode<'a> for LoginRequestView<'a> {
-    #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if !self.username.is_empty() {
-            size += 1u64 + ::buffa::types::string_encoded_len(&self.username) as u64;
-        }
-        if !self.password.is_empty() {
-            size += 1u64 + ::buffa::types::string_encoded_len(&self.password) as u64;
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    #[allow(clippy::needless_borrow)]
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if !self.username.is_empty() {
-            ::buffa::types::put_string_field(1u32, &self.username, buf);
-        }
-        if !self.password.is_empty() {
-            ::buffa::types::put_string_field(2u32, &self.password, buf);
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-}
-/// Serializes this view as protobuf JSON.
-///
-/// Implicit-presence fields with default values are omitted, `required`
-/// fields are always emitted, explicit-presence (`optional`) fields are
-/// emitted only when set, bytes fields are base64-encoded, and enum
-/// values are their proto name strings.
-///
-/// This impl uses `serialize_map(None)` because the number of emitted
-/// fields depends on default-omission rules; serializers that require
-/// known map lengths (e.g. `bincode`) will return a runtime error.
-/// Use the owned message type for those formats.
-impl<'__a> ::serde::Serialize for LoginRequestView<'__a> {
-    fn serialize<__S: ::serde::Serializer>(
-        &self,
-        __s: __S,
-    ) -> ::core::result::Result<__S::Ok, __S::Error> {
-        use ::serde::ser::SerializeMap as _;
-        let mut __map = __s.serialize_map(::core::option::Option::None)?;
-        if !::buffa::json_helpers::skip_if::is_empty_str(self.username) {
-            __map.serialize_entry("username", self.username)?;
-        }
-        if !::buffa::json_helpers::skip_if::is_empty_str(self.password) {
-            __map.serialize_entry("password", self.password)?;
-        }
-        __map.end()
-    }
-}
-impl<'a> ::buffa::MessageName for LoginRequestView<'a> {
-    const PACKAGE: &'static str = "auth.v2";
-    const NAME: &'static str = "LoginRequest";
-    const FULL_NAME: &'static str = "auth.v2.LoginRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.LoginRequest";
-}
-::buffa::impl_default_view_instance!(LoginRequestView);
-::buffa::impl_view_reborrow!(LoginRequestView);
-/** Self-contained, `'static` owned view of a `LoginRequest` message.
-
- Wraps [`::buffa::OwnedView`]`<`[`LoginRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
-
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`LoginRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
-#[derive(Clone, Debug)]
-pub struct LoginRequestOwnedView(::buffa::OwnedView<LoginRequestView<'static>>);
-impl LoginRequestOwnedView {
-    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
-    ///
-    /// The view borrows directly from the buffer's data; the buffer is
-    /// retained inside the returned handle.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
-    /// protobuf data.
-    pub fn decode(
-        bytes: ::buffa::bytes::Bytes,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            LoginRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
-        )
-    }
-    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
-    /// max message size).
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
-    /// exceeds the configured limits.
-    pub fn decode_with_options(
-        bytes: ::buffa::bytes::Bytes,
-        opts: &::buffa::DecodeOptions,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            LoginRequestOwnedView(::buffa::OwnedView::decode_with_options(bytes, opts)?),
-        )
-    }
-    /// Build from an owned message via an encode → decode round-trip.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
-    /// message's encoded size exceeds the 2 GiB protobuf limit, or
-    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
-    /// somehow invalid (should not happen for well-formed messages).
-    pub fn from_owned(
-        msg: &super::super::LoginRequest,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            LoginRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
-        )
-    }
-    /// Borrow the full [`LoginRequestView`] with its lifetime tied to `&self`.
-    #[must_use]
-    pub fn view(&self) -> &LoginRequestView<'_> {
-        self.0.reborrow()
-    }
-    /// Convert to the owned message type.
-    ///
-    /// Infallible: this type's constructors wire-decode their
-    /// buffer, and a view produced by wire decoding always
-    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
-    /// whose contract also governs handles converted from a raw
-    /// [`::buffa::OwnedView`].
-    #[must_use]
-    pub fn to_owned_message(&self) -> super::super::LoginRequest {
-        self.0.to_owned_message()
-    }
-    /// The underlying bytes buffer.
-    #[must_use]
-    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
-        self.0.bytes()
-    }
-    /// Consume the handle, returning the underlying bytes buffer.
-    #[must_use]
-    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
-        self.0.into_bytes()
-    }
-    /// Field 1: `username`
-    #[must_use]
-    pub fn username(&self) -> &'_ str {
-        self.0.reborrow().username
-    }
-    /// Field 2: `password`
-    #[must_use]
-    pub fn password(&self) -> &'_ str {
-        self.0.reborrow().password
-    }
-}
-impl ::core::convert::From<::buffa::OwnedView<LoginRequestView<'static>>>
-for LoginRequestOwnedView {
-    fn from(inner: ::buffa::OwnedView<LoginRequestView<'static>>) -> Self {
-        LoginRequestOwnedView(inner)
-    }
-}
-impl ::core::convert::From<LoginRequestOwnedView>
-for ::buffa::OwnedView<LoginRequestView<'static>> {
-    fn from(wrapper: LoginRequestOwnedView) -> Self {
-        wrapper.0
-    }
-}
-impl ::core::convert::AsRef<::buffa::OwnedView<LoginRequestView<'static>>>
-for LoginRequestOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<LoginRequestView<'static>> {
-        &self.0
-    }
-}
-impl ::buffa::HasMessageView for super::super::LoginRequest {
-    type View<'a> = LoginRequestView<'a>;
-    type ViewHandle = LoginRequestOwnedView;
-}
-impl ::serde::Serialize for LoginRequestOwnedView {
-    fn serialize<__S: ::serde::Serializer>(
-        &self,
-        __s: __S,
-    ) -> ::core::result::Result<__S::Ok, __S::Error> {
-        ::serde::Serialize::serialize(&self.0, __s)
-    }
-}
-impl<'a> ::buffa_descriptor::reflect::ReflectMessage for LoginRequestView<'a> {
-    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
-        super::super::__buffa::reflect::descriptor_pool()
-            .message(Self::__buffa_reflect_message_index())
-    }
-    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
-        super::super::__buffa::reflect::descriptor_pool()
-    }
-    fn get(
-        &self,
-        field: &::buffa_descriptor::FieldDescriptor,
-    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        match field.number() {
-            1u32 => ::buffa_descriptor::reflect::ValueRef::String(self.username),
-            2u32 => ::buffa_descriptor::reflect::ValueRef::String(self.password),
-            _ => {
-                ::core::debug_assert!(
-                    false,
-                    "field number {} is not a member of this view's reflect get()", field
-                    .number(),
-                );
-                ::buffa_descriptor::reflect::ValueRef::Bool(false)
-            }
-        }
-    }
-    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
-        match field.number() {
-            1u32 => !self.username.is_empty(),
-            2u32 => !self.password.is_empty(),
-            _ => false,
-        }
-    }
-    fn for_each_set(
-        &self,
-        f: &mut dyn ::core::ops::FnMut(
-            &::buffa_descriptor::FieldDescriptor,
-            ::buffa_descriptor::reflect::ValueRef<'_>,
-        ),
-    ) {
-        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
-        for fd in md.fields() {
-            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
-                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
-            }
-        }
-    }
-    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
-        let bytes = ::buffa::ViewEncode::encode_to_vec(self);
-        let options = ::buffa::DecodeOptions::new()
-            .with_element_memory_limit(
-                bytes
-                    .len()
-                    .saturating_mul(128)
-                    .max(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT),
-            )
-            .with_unknown_field_limit(
-                bytes.len().max(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT),
-            );
-        ::buffa_descriptor::reflect::DynamicMessage::decode_with_options(
-                ::buffa::alloc::sync::Arc::clone(
-                    super::super::__buffa::reflect::descriptor_pool(),
-                ),
-                Self::__buffa_reflect_message_index(),
-                &bytes,
-                &options,
-            )
-            .expect("view re-encodes to bytes decodable against its own descriptor")
-    }
-}
-impl<'a> ::buffa_descriptor::reflect::ReflectElement for LoginRequestView<'a> {
-    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
-        ::buffa_descriptor::reflect::ValueRef::Message(
-            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
-        )
-    }
-}
-impl<'a> LoginRequestView<'a> {
-    /// Memoized `MessageIndex` for this view's message type, resolved
-    /// once against the package's embedded descriptor pool. An inherent
-    /// associated fn (not a free fn) so sibling views in the same module
-    /// do not collide.
-    #[doc(hidden)]
-    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
-        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
-        *IDX
-            .get_or_init(|| {
-                super::super::__buffa::reflect::descriptor_pool()
-                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
-                    .expect(
-                        "generated view type is registered in the embedded descriptor pool",
-                    )
-            })
-    }
-}
-#[derive(Clone, Debug, Default)]
 pub struct CreateUserRequestView<'a> {
     /// Field 1: `user`
     pub user: ::buffa::MessageFieldView<super::super::__buffa::view::DBUserView<'a>>,
@@ -4982,23 +4617,19 @@ impl<'a> RemovePasswordRequestView<'a> {
     }
 }
 #[derive(Clone, Debug, Default)]
-pub struct LoginResponseView<'a> {
-    /// Field 1: `jwt`
-    pub jwt: &'a str,
-    /// Field 2: `refresh_token`
-    pub refresh_token: &'a str,
-    /// Field 3: `refresh_token_expiry`
-    pub refresh_token_expiry: ::buffa::MessageFieldView<
-        ::buffa_types::google::protobuf::__buffa::view::TimestampView<'a>,
-    >,
-    /// Field 4: `small_data`
-    pub small_data: ::buffa::MessageFieldView<
-        super::super::__buffa::view::SmallDataView<'a>,
-    >,
+pub struct PasswordLoginRequestView<'a> {
+    /// Field 1: `username`
+    pub username: &'a str,
+    /// Field 2: `password`
+    pub password: &'a str,
+    /// Field 3: `remember_me`
+    pub remember_me: ::core::option::Option<bool>,
+    /// Field 4: `redirect_to`
+    pub redirect_to: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for LoginResponseView<'a> {
-    type Owned = super::super::LoginResponse;
+impl<'a> ::buffa::MessageView<'a> for PasswordLoginRequestView<'a> {
+    type Owned = super::super::PasswordLoginRequest;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -5032,56 +4663,28 @@ impl<'a> ::buffa::MessageView<'a> for LoginResponseView<'a> {
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.jwt = ::buffa::types::borrow_str(&mut cur)?;
+                view.username = ::buffa::types::borrow_str(&mut cur)?;
             }
             2u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.refresh_token = ::buffa::types::borrow_str(&mut cur)?;
+                view.password = ::buffa::types::borrow_str(&mut cur)?;
             }
             3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
+                    ::buffa::encoding::WireType::Varint,
                 )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.refresh_token_expiry.as_mut() {
-                    Some(existing) => {
-                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
-                    }
-                    None => {
-                        view.refresh_token_expiry = ::buffa::MessageFieldView::set(
-                            <::buffa_types::google::protobuf::__buffa::view::TimestampView as ::buffa::MessageView>::decode_view_ctx(
-                                sub,
-                                __sub_ctx,
-                            )?,
-                        );
-                    }
-                }
+                view.remember_me = Some(::buffa::types::decode_bool(&mut cur)?);
             }
             4u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.small_data.as_mut() {
-                    Some(existing) => {
-                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
-                    }
-                    None => {
-                        view.small_data = ::buffa::MessageFieldView::set(
-                            <super::super::__buffa::view::SmallDataView as ::buffa::MessageView>::decode_view_ctx(
-                                sub,
-                                __sub_ctx,
-                            )?,
-                        );
-                    }
-                }
+                view.redirect_to = Some(::buffa::types::borrow_str(&mut cur)?);
             }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
@@ -5093,71 +4696,50 @@ impl<'a> ::buffa::MessageView<'a> for LoginResponseView<'a> {
     }
     fn to_owned_message(
         &self,
-    ) -> ::core::result::Result<super::super::LoginResponse, ::buffa::DecodeError> {
+    ) -> ::core::result::Result<
+        super::super::PasswordLoginRequest,
+        ::buffa::DecodeError,
+    > {
         self.to_owned_from_source(None)
     }
     #[allow(clippy::useless_conversion, clippy::needless_update)]
     fn to_owned_from_source(
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<super::super::LoginResponse, ::buffa::DecodeError> {
+    ) -> ::core::result::Result<
+        super::super::PasswordLoginRequest,
+        ::buffa::DecodeError,
+    > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::LoginResponse {
-            jwt: self.jwt.to_string(),
-            refresh_token: self.refresh_token.to_string(),
-            refresh_token_expiry: match self.refresh_token_expiry.as_option() {
-                Some(v) => {
-                    ::buffa::MessageField::<
-                        ::buffa_types::google::protobuf::Timestamp,
-                        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
-                    >::some(v.to_owned_from_source(__buffa_src)?)
-                }
-                None => ::buffa::MessageField::none(),
-            },
-            small_data: match self.small_data.as_option() {
-                Some(v) => {
-                    ::buffa::MessageField::<
-                        super::super::SmallData,
-                        ::buffa::Inline<super::super::SmallData>,
-                    >::some(v.to_owned_from_source(__buffa_src)?)
-                }
-                None => ::buffa::MessageField::none(),
-            },
+        ::core::result::Result::Ok(super::super::PasswordLoginRequest {
+            username: self.username.to_string(),
+            password: self.password.to_string(),
+            remember_me: self.remember_me,
+            redirect_to: self.redirect_to.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for LoginResponseView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for PasswordLoginRequestView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if !self.jwt.is_empty() {
-            size += 1u64 + ::buffa::types::string_encoded_len(&self.jwt) as u64;
+        if !self.username.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.username) as u64;
         }
-        if !self.refresh_token.is_empty() {
-            size
-                += 1u64 + ::buffa::types::string_encoded_len(&self.refresh_token) as u64;
+        if !self.password.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.password) as u64;
         }
-        if self.refresh_token_expiry.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.refresh_token_expiry.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
+        if self.remember_me.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
-        if self.small_data.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.small_data.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
+        if let Some(ref v) = self.redirect_to {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -5165,32 +4747,22 @@ impl<'a> ::buffa::ViewEncode<'a> for LoginResponseView<'a> {
     #[allow(clippy::needless_borrow)]
     fn write_to(
         &self,
-        __cache: &mut ::buffa::SizeCache,
+        _cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if !self.jwt.is_empty() {
-            ::buffa::types::put_string_field(1u32, &self.jwt, buf);
+        if !self.username.is_empty() {
+            ::buffa::types::put_string_field(1u32, &self.username, buf);
         }
-        if !self.refresh_token.is_empty() {
-            ::buffa::types::put_string_field(2u32, &self.refresh_token, buf);
+        if !self.password.is_empty() {
+            ::buffa::types::put_string_field(2u32, &self.password, buf);
         }
-        if self.refresh_token_expiry.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                3u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.refresh_token_expiry.write_to(__cache, buf);
+        if let Some(v) = self.remember_me {
+            ::buffa::types::put_bool_field(3u32, v, buf);
         }
-        if self.small_data.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                4u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.small_data.write_to(__cache, buf);
+        if let Some(ref v) = self.redirect_to {
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5206,51 +4778,46 @@ impl<'a> ::buffa::ViewEncode<'a> for LoginResponseView<'a> {
 /// fields depends on default-omission rules; serializers that require
 /// known map lengths (e.g. `bincode`) will return a runtime error.
 /// Use the owned message type for those formats.
-impl<'__a> ::serde::Serialize for LoginResponseView<'__a> {
+impl<'__a> ::serde::Serialize for PasswordLoginRequestView<'__a> {
     fn serialize<__S: ::serde::Serializer>(
         &self,
         __s: __S,
     ) -> ::core::result::Result<__S::Ok, __S::Error> {
         use ::serde::ser::SerializeMap as _;
         let mut __map = __s.serialize_map(::core::option::Option::None)?;
-        if !::buffa::json_helpers::skip_if::is_empty_str(self.jwt) {
-            __map.serialize_entry("jwt", self.jwt)?;
+        if !::buffa::json_helpers::skip_if::is_empty_str(self.username) {
+            __map.serialize_entry("username", self.username)?;
         }
-        if !::buffa::json_helpers::skip_if::is_empty_str(self.refresh_token) {
-            __map.serialize_entry("refreshToken", self.refresh_token)?;
+        if !::buffa::json_helpers::skip_if::is_empty_str(self.password) {
+            __map.serialize_entry("password", self.password)?;
         }
-        {
-            if let ::core::option::Option::Some(__v) = self
-                .refresh_token_expiry
-                .as_option()
-            {
-                __map.serialize_entry("refreshTokenExpiry", __v)?;
-            }
+        if let ::core::option::Option::Some(__v) = self.remember_me {
+            __map.serialize_entry("rememberMe", &__v)?;
         }
-        {
-            if let ::core::option::Option::Some(__v) = self.small_data.as_option() {
-                __map.serialize_entry("smallData", __v)?;
-            }
+        if let ::core::option::Option::Some(__v) = self.redirect_to {
+            __map.serialize_entry("redirectTo", __v)?;
         }
         __map.end()
     }
 }
-impl<'a> ::buffa::MessageName for LoginResponseView<'a> {
+impl<'a> ::buffa::MessageName for PasswordLoginRequestView<'a> {
     const PACKAGE: &'static str = "auth.v2";
-    const NAME: &'static str = "LoginResponse";
-    const FULL_NAME: &'static str = "auth.v2.LoginResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.LoginResponse";
+    const NAME: &'static str = "PasswordLoginRequest";
+    const FULL_NAME: &'static str = "auth.v2.PasswordLoginRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.PasswordLoginRequest";
 }
-::buffa::impl_default_view_instance!(LoginResponseView);
-::buffa::impl_view_reborrow!(LoginResponseView);
-/** Self-contained, `'static` owned view of a `LoginResponse` message.
+::buffa::impl_default_view_instance!(PasswordLoginRequestView);
+::buffa::impl_view_reborrow!(PasswordLoginRequestView);
+/** Self-contained, `'static` owned view of a `PasswordLoginRequest` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`LoginResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`PasswordLoginRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`LoginResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`PasswordLoginRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct LoginResponseOwnedView(::buffa::OwnedView<LoginResponseView<'static>>);
-impl LoginResponseOwnedView {
+pub struct PasswordLoginRequestOwnedView(
+    ::buffa::OwnedView<PasswordLoginRequestView<'static>>,
+);
+impl PasswordLoginRequestOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -5264,7 +4831,7 @@ impl LoginResponseOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            LoginResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+            PasswordLoginRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -5279,7 +4846,9 @@ impl LoginResponseOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            LoginResponseOwnedView(::buffa::OwnedView::decode_with_options(bytes, opts)?),
+            PasswordLoginRequestOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
         )
     }
     /// Build from an owned message via an encode → decode round-trip.
@@ -5291,15 +4860,15 @@ impl LoginResponseOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::LoginResponse,
+        msg: &super::super::PasswordLoginRequest,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            LoginResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            PasswordLoginRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`LoginResponseView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`PasswordLoginRequestView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &LoginResponseView<'_> {
+    pub fn view(&self) -> &PasswordLoginRequestView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -5310,7 +4879,7 @@ impl LoginResponseOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::LoginResponse {
+    pub fn to_owned_message(&self) -> super::super::PasswordLoginRequest {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -5323,56 +4892,50 @@ impl LoginResponseOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Field 1: `jwt`
+    /// Field 1: `username`
     #[must_use]
-    pub fn jwt(&self) -> &'_ str {
-        self.0.reborrow().jwt
+    pub fn username(&self) -> &'_ str {
+        self.0.reborrow().username
     }
-    /// Field 2: `refresh_token`
+    /// Field 2: `password`
     #[must_use]
-    pub fn refresh_token(&self) -> &'_ str {
-        self.0.reborrow().refresh_token
+    pub fn password(&self) -> &'_ str {
+        self.0.reborrow().password
     }
-    /// Field 3: `refresh_token_expiry`
+    /// Field 3: `remember_me`
     #[must_use]
-    pub fn refresh_token_expiry(
-        &self,
-    ) -> &::buffa::MessageFieldView<
-        ::buffa_types::google::protobuf::__buffa::view::TimestampView<'_>,
-    > {
-        &self.0.reborrow().refresh_token_expiry
+    pub fn remember_me(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().remember_me
     }
-    /// Field 4: `small_data`
+    /// Field 4: `redirect_to`
     #[must_use]
-    pub fn small_data(
-        &self,
-    ) -> &::buffa::MessageFieldView<super::super::__buffa::view::SmallDataView<'_>> {
-        &self.0.reborrow().small_data
+    pub fn redirect_to(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().redirect_to
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<LoginResponseView<'static>>>
-for LoginResponseOwnedView {
-    fn from(inner: ::buffa::OwnedView<LoginResponseView<'static>>) -> Self {
-        LoginResponseOwnedView(inner)
+impl ::core::convert::From<::buffa::OwnedView<PasswordLoginRequestView<'static>>>
+for PasswordLoginRequestOwnedView {
+    fn from(inner: ::buffa::OwnedView<PasswordLoginRequestView<'static>>) -> Self {
+        PasswordLoginRequestOwnedView(inner)
     }
 }
-impl ::core::convert::From<LoginResponseOwnedView>
-for ::buffa::OwnedView<LoginResponseView<'static>> {
-    fn from(wrapper: LoginResponseOwnedView) -> Self {
+impl ::core::convert::From<PasswordLoginRequestOwnedView>
+for ::buffa::OwnedView<PasswordLoginRequestView<'static>> {
+    fn from(wrapper: PasswordLoginRequestOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<LoginResponseView<'static>>>
-for LoginResponseOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<LoginResponseView<'static>> {
+impl ::core::convert::AsRef<::buffa::OwnedView<PasswordLoginRequestView<'static>>>
+for PasswordLoginRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<PasswordLoginRequestView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::LoginResponse {
-    type View<'a> = LoginResponseView<'a>;
-    type ViewHandle = LoginResponseOwnedView;
+impl ::buffa::HasMessageView for super::super::PasswordLoginRequest {
+    type View<'a> = PasswordLoginRequestView<'a>;
+    type ViewHandle = PasswordLoginRequestOwnedView;
 }
-impl ::serde::Serialize for LoginResponseOwnedView {
+impl ::serde::Serialize for PasswordLoginRequestOwnedView {
     fn serialize<__S: ::serde::Serializer>(
         &self,
         __s: __S,
@@ -5380,7 +4943,7 @@ impl ::serde::Serialize for LoginResponseOwnedView {
         ::serde::Serialize::serialize(&self.0, __s)
     }
 }
-impl<'a> ::buffa_descriptor::reflect::ReflectMessage for LoginResponseView<'a> {
+impl<'a> ::buffa_descriptor::reflect::ReflectMessage for PasswordLoginRequestView<'a> {
     fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
         super::super::__buffa::reflect::descriptor_pool()
             .message(Self::__buffa_reflect_message_index())
@@ -5395,18 +4958,16 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for LoginResponseView<'a> {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         match field.number() {
-            1u32 => ::buffa_descriptor::reflect::ValueRef::String(self.jwt),
-            2u32 => ::buffa_descriptor::reflect::ValueRef::String(self.refresh_token),
+            1u32 => ::buffa_descriptor::reflect::ValueRef::String(self.username),
+            2u32 => ::buffa_descriptor::reflect::ValueRef::String(self.password),
             3u32 => {
-                ::buffa_descriptor::reflect::ValueRef::Message(
-                    ::buffa_descriptor::reflect::ReflectCow::Borrowed(
-                        &*self.refresh_token_expiry,
-                    ),
+                ::buffa_descriptor::reflect::ValueRef::Bool(
+                    self.remember_me.unwrap_or(false),
                 )
             }
             4u32 => {
-                ::buffa_descriptor::reflect::ValueRef::Message(
-                    ::buffa_descriptor::reflect::ReflectCow::Borrowed(&*self.small_data),
+                ::buffa_descriptor::reflect::ValueRef::String(
+                    self.redirect_to.unwrap_or(""),
                 )
             }
             _ => {
@@ -5421,10 +4982,10 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for LoginResponseView<'a> {
     }
     fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
         match field.number() {
-            1u32 => !self.jwt.is_empty(),
-            2u32 => !self.refresh_token.is_empty(),
-            3u32 => self.refresh_token_expiry.is_set(),
-            4u32 => self.small_data.is_set(),
+            1u32 => !self.username.is_empty(),
+            2u32 => !self.password.is_empty(),
+            3u32 => self.remember_me.is_some(),
+            4u32 => self.redirect_to.is_some(),
             _ => false,
         }
     }
@@ -5465,14 +5026,363 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for LoginResponseView<'a> {
             .expect("view re-encodes to bytes decodable against its own descriptor")
     }
 }
-impl<'a> ::buffa_descriptor::reflect::ReflectElement for LoginResponseView<'a> {
+impl<'a> ::buffa_descriptor::reflect::ReflectElement for PasswordLoginRequestView<'a> {
     fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
         ::buffa_descriptor::reflect::ValueRef::Message(
             ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
         )
     }
 }
-impl<'a> LoginResponseView<'a> {
+impl<'a> PasswordLoginRequestView<'a> {
+    /// Memoized `MessageIndex` for this view's message type, resolved
+    /// once against the package's embedded descriptor pool. An inherent
+    /// associated fn (not a free fn) so sibling views in the same module
+    /// do not collide.
+    #[doc(hidden)]
+    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+        *IDX
+            .get_or_init(|| {
+                super::super::__buffa::reflect::descriptor_pool()
+                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                    .expect(
+                        "generated view type is registered in the embedded descriptor pool",
+                    )
+            })
+    }
+}
+#[derive(Clone, Debug, Default)]
+pub struct PasswordLoginResponseView<'a> {
+    /// Field 1: `redirect_to`
+    pub redirect_to: &'a str,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for PasswordLoginResponseView<'a> {
+    type Owned = super::super::PasswordLoginResponse;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.redirect_to = ::buffa::types::borrow_str(&mut cur)?;
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::PasswordLoginResponse,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::PasswordLoginResponse,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::PasswordLoginResponse {
+            redirect_to: self.redirect_to.to_string(),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for PasswordLoginResponseView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if !self.redirect_to.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.redirect_to) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if !self.redirect_to.is_empty() {
+            ::buffa::types::put_string_field(1u32, &self.redirect_to, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+/// Serializes this view as protobuf JSON.
+///
+/// Implicit-presence fields with default values are omitted, `required`
+/// fields are always emitted, explicit-presence (`optional`) fields are
+/// emitted only when set, bytes fields are base64-encoded, and enum
+/// values are their proto name strings.
+///
+/// This impl uses `serialize_map(None)` because the number of emitted
+/// fields depends on default-omission rules; serializers that require
+/// known map lengths (e.g. `bincode`) will return a runtime error.
+/// Use the owned message type for those formats.
+impl<'__a> ::serde::Serialize for PasswordLoginResponseView<'__a> {
+    fn serialize<__S: ::serde::Serializer>(
+        &self,
+        __s: __S,
+    ) -> ::core::result::Result<__S::Ok, __S::Error> {
+        use ::serde::ser::SerializeMap as _;
+        let mut __map = __s.serialize_map(::core::option::Option::None)?;
+        if !::buffa::json_helpers::skip_if::is_empty_str(self.redirect_to) {
+            __map.serialize_entry("redirectTo", self.redirect_to)?;
+        }
+        __map.end()
+    }
+}
+impl<'a> ::buffa::MessageName for PasswordLoginResponseView<'a> {
+    const PACKAGE: &'static str = "auth.v2";
+    const NAME: &'static str = "PasswordLoginResponse";
+    const FULL_NAME: &'static str = "auth.v2.PasswordLoginResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.PasswordLoginResponse";
+}
+::buffa::impl_default_view_instance!(PasswordLoginResponseView);
+::buffa::impl_view_reborrow!(PasswordLoginResponseView);
+/** Self-contained, `'static` owned view of a `PasswordLoginResponse` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`PasswordLoginResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`PasswordLoginResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct PasswordLoginResponseOwnedView(
+    ::buffa::OwnedView<PasswordLoginResponseView<'static>>,
+);
+impl PasswordLoginResponseOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            PasswordLoginResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            PasswordLoginResponseOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::PasswordLoginResponse,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            PasswordLoginResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`PasswordLoginResponseView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &PasswordLoginResponseView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::PasswordLoginResponse {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `redirect_to`
+    #[must_use]
+    pub fn redirect_to(&self) -> &'_ str {
+        self.0.reborrow().redirect_to
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<PasswordLoginResponseView<'static>>>
+for PasswordLoginResponseOwnedView {
+    fn from(inner: ::buffa::OwnedView<PasswordLoginResponseView<'static>>) -> Self {
+        PasswordLoginResponseOwnedView(inner)
+    }
+}
+impl ::core::convert::From<PasswordLoginResponseOwnedView>
+for ::buffa::OwnedView<PasswordLoginResponseView<'static>> {
+    fn from(wrapper: PasswordLoginResponseOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<PasswordLoginResponseView<'static>>>
+for PasswordLoginResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<PasswordLoginResponseView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::PasswordLoginResponse {
+    type View<'a> = PasswordLoginResponseView<'a>;
+    type ViewHandle = PasswordLoginResponseOwnedView;
+}
+impl ::serde::Serialize for PasswordLoginResponseOwnedView {
+    fn serialize<__S: ::serde::Serializer>(
+        &self,
+        __s: __S,
+    ) -> ::core::result::Result<__S::Ok, __S::Error> {
+        ::serde::Serialize::serialize(&self.0, __s)
+    }
+}
+impl<'a> ::buffa_descriptor::reflect::ReflectMessage for PasswordLoginResponseView<'a> {
+    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+        super::super::__buffa::reflect::descriptor_pool()
+            .message(Self::__buffa_reflect_message_index())
+    }
+    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+        super::super::__buffa::reflect::descriptor_pool()
+    }
+    fn get(
+        &self,
+        field: &::buffa_descriptor::FieldDescriptor,
+    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match field.number() {
+            1u32 => ::buffa_descriptor::reflect::ValueRef::String(self.redirect_to),
+            _ => {
+                ::core::debug_assert!(
+                    false,
+                    "field number {} is not a member of this view's reflect get()", field
+                    .number(),
+                );
+                ::buffa_descriptor::reflect::ValueRef::Bool(false)
+            }
+        }
+    }
+    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+        match field.number() {
+            1u32 => !self.redirect_to.is_empty(),
+            _ => false,
+        }
+    }
+    fn for_each_set(
+        &self,
+        f: &mut dyn ::core::ops::FnMut(
+            &::buffa_descriptor::FieldDescriptor,
+            ::buffa_descriptor::reflect::ValueRef<'_>,
+        ),
+    ) {
+        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
+        for fd in md.fields() {
+            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+            }
+        }
+    }
+    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+        let bytes = ::buffa::ViewEncode::encode_to_vec(self);
+        let options = ::buffa::DecodeOptions::new()
+            .with_element_memory_limit(
+                bytes
+                    .len()
+                    .saturating_mul(128)
+                    .max(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT),
+            )
+            .with_unknown_field_limit(
+                bytes.len().max(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT),
+            );
+        ::buffa_descriptor::reflect::DynamicMessage::decode_with_options(
+                ::buffa::alloc::sync::Arc::clone(
+                    super::super::__buffa::reflect::descriptor_pool(),
+                ),
+                Self::__buffa_reflect_message_index(),
+                &bytes,
+                &options,
+            )
+            .expect("view re-encodes to bytes decodable against its own descriptor")
+    }
+}
+impl<'a> ::buffa_descriptor::reflect::ReflectElement for PasswordLoginResponseView<'a> {
+    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        ::buffa_descriptor::reflect::ValueRef::Message(
+            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+        )
+    }
+}
+impl<'a> PasswordLoginResponseView<'a> {
     /// Memoized `MessageIndex` for this view's message type, resolved
     /// once against the package's embedded descriptor pool. An inherent
     /// associated fn (not a free fn) so sibling views in the same module

@@ -3,69 +3,138 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>CSRF Test Page</title>
+        <title>CSRF Login Test</title>
         <style>
+            :root {
+                --bg: #1e1e2e;
+                --card: #2b2b3d;
+                --text: #cdd6f4;
+                --accent: #89b4fa;
+                --success: #a6e3a1;
+                --error: #f38ba8;
+            }
+
             body {
-                font-family: sans-serif;
-                max-width: 600px;
+                font-family:
+                    system-ui,
+                    -apple-system,
+                    sans-serif;
+                background-color: var(--bg);
+                color: var(--text);
+                max-width: 500px;
                 margin: 40px auto;
                 padding: 20px;
             }
-            button {
-                padding: 10px 15px;
-                margin: 5px 0;
-                cursor: pointer;
+
+            .card {
+                background-color: var(--card);
+                border-radius: 8px;
+                padding: 24px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             }
-            .box {
-                border: 1px solid #ccc;
-                padding: 15px;
-                margin: 15px 0;
-                border-radius: 5px;
+
+            .form-group {
+                margin-bottom: 16px;
             }
-            pre {
-                background: #f4f4f4;
+
+            label {
+                display: block;
+                margin-bottom: 6px;
+                font-size: 0.9rem;
+            }
+
+            input {
+                width: 100%;
                 padding: 10px;
                 border-radius: 4px;
+                border: 1px solid #45475a;
+                background-color: #181825;
+                color: #fff;
+                box-sizing: border-box;
+            }
+
+            button {
+                width: 100%;
+                padding: 12px;
+                border: none;
+                border-radius: 4px;
+                background-color: var(--accent);
+                color: #11111b;
+                font-weight: bold;
+                cursor: pointer;
+                transition: opacity 0.2s;
+            }
+
+            button:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            pre {
+                background-color: #181825;
+                padding: 12px;
+                border-radius: 6px;
+                font-size: 0.85rem;
                 overflow-x: auto;
+                white-space: pre-wrap;
+                word-break: break-all;
             }
-            .success {
-                color: green;
-                font-weight: bold;
+
+            .status-success {
+                color: var(--success);
             }
-            .error {
-                color: red;
-                font-weight: bold;
+            .status-error {
+                color: var(--error);
             }
         </style>
     </head>
     <body>
-        <h2>CSRF Stateless Flow Test</h2>
+        <div class="card">
+            <h2>Account Login</h2>
 
-        <div class="box">
-            <h3>Step 1: Get Token</h3>
-            <button id="getTokenBtn">POST /api/get_csrf</button>
-        </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        value="testuser"
+                        required />
+                </div>
 
-        <div class="box">
-            <h3>Step 2: Login (Protected Action)</h3>
-            <label for="username">Username:</label>
-            <input type="text" id="username" value="testuser" /><br /><br />
-            <button id="loginBtn">POST /api/login</button>
-        </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        value="secret123"
+                        required />
+                </div>
 
-        <div class="box">
-            <h3>Console Output</h3>
-            <pre id="output">Click a button to start the flow...</pre>
+                <button type="submit" id="submitBtn" disabled>
+                    Initializing CSRF...
+                </button>
+            </form>
+
+            <h3>System Log</h3>
+            <pre id="output">
+Initializing page and requesting CSRF token...</pre
+            >
         </div>
 
         <script>
-            // --- CONSTANTS ---
             const COOKIE_NAME = "csrf_token";
             const HEADER_NAME = "X-CSRF-Token";
             const ENDPOINT_GET_CSRF = "/auth.v2.AuthService/GetCSRFToken";
-            const ENDPOINT_LOGIN = "/auth.v2.AuthService/Login";
+            const ENDPOINT_LOGIN = "/auth.v2.AuthService/PasswordLogin";
 
-            // Helper function to extract a cookie value by name
+            const outputEl = document.getElementById("output");
+            const submitBtn = document.getElementById("submitBtn");
+            const loginForm = document.getElementById("loginForm");
+
+            // Extract cookie value by key name
             function getCookie(name) {
                 const value = `; ${document.cookie}`;
                 const parts = value.split(`; ${name}=`);
@@ -73,86 +142,141 @@
                 return null;
             }
 
-            const outputEl = document.getElementById("output");
-            function log(message, isError = false) {
-                outputEl.className = isError ? "error" : "success";
+            function log(message, type = "info") {
+                outputEl.className =
+                    type === "error"
+                        ? "status-error"
+                        : type === "success"
+                          ? "status-success"
+                          : "";
+                if (type === "error") {
+                    console.error(message);
+                } else if (type === "success") {
+                    console.log(message);
+                } else {
+                    console.info(message);
+                }
                 outputEl.innerText = `[${new Date().toLocaleTimeString()}] ${message}`;
             }
 
-            // 1. Call endpoint to fetch token (Sets cookie)
-            document
-                .getElementById("getTokenBtn")
-                .addEventListener("click", async () => {
-                    try {
-                        log(`Sending POST request to ${ENDPOINT_GET_CSRF}...`);
-                        const response = await fetch(ENDPOINT_GET_CSRF, {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                            body: "{}",
-                        });
+            // 1. Automatically fetch CSRF token on page initial load
+            async function initializeCsrfToken() {
+                try {
+                    log("Fetching initial CSRF token...");
+                    const res = await fetch(ENDPOINT_GET_CSRF, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: "{}",
+                    });
 
-                        if (response.ok) {
-                            const activeCookie = getCookie(COOKIE_NAME);
-                            log(
-                                `Token fetched successfully!\nCookie recorded: ${activeCookie}`,
-                            );
-                        } else {
-                            log(
-                                `Failed to fetch token. Status: ${response.status}`,
-                                true,
-                            );
-                        }
-                    } catch (err) {
-                        log(`Error: ${err.message}`, true);
-                    }
-                });
-
-            // 2. Try to login using the cookie value in the header
-            document
-                .getElementById("loginBtn")
-                .addEventListener("click", async () => {
-                    const token = getCookie(COOKIE_NAME);
-                    const username = document.getElementById("username").value;
-
-                    // if (!token) {
-                    //     log(
-                    //         `Aborting: No cookie found under "${COOKIE_NAME}". Run Step 1 first!`,
-                    //         true,
-                    //     );
-                    //     return;
-                    // }
-
-                    console.log(`Token from cookie: ${token}`);
-
-                    try {
+                    if (res.ok) {
+                        const token = getCookie(COOKIE_NAME);
                         log(
-                            `Sending payload to ${ENDPOINT_LOGIN} with header ${HEADER_NAME}...`,
+                            `CSRF Token initialized automatically.\nCookie recorded: ${token}`,
+                            "success",
+                        );
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "Log In";
+                    } else {
+                        log(
+                            `Failed to initialize CSRF token. Server status: ${res.status}`,
+                            "error",
+                        );
+                        submitBtn.innerText = "Retry Loading";
+                        submitBtn.disabled = false;
+                    }
+                } catch (err) {
+                    log(
+                        `Network error while initializing CSRF: ${err.message}`,
+                        "error",
+                    );
+                    submitBtn.innerText = "Connection Error";
+                }
+            }
+
+            // Execute automatically as soon as DOM is ready
+            document.addEventListener("DOMContentLoaded", initializeCsrfToken);
+
+            // 2. Handle Login Submit
+            loginForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                submitBtn.disabled = true;
+                submitBtn.innerText = "Authenticating...";
+
+                let token = getCookie(COOKIE_NAME);
+
+                // Auto-heal: If cookie missing, pull token once on the fly
+                if (!token) {
+                    log("CSRF Cookie missing. Fetching fresh token...", "info");
+                    await initializeCsrfToken();
+                    token = getCookie(COOKIE_NAME);
+
+                    if (!token) {
+                        log(
+                            "Could not obtain CSRF token. Aborting request.",
+                            "error",
+                        );
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "Log In";
+                        return;
+                    }
+                }
+
+                const payload = {
+                    username: document.getElementById("username").value,
+                    password: document.getElementById("password").value,
+                };
+
+                try {
+                    log(
+                        `Submitting login request with header ${HEADER_NAME}...`,
+                    );
+
+                    const response = await fetch(ENDPOINT_LOGIN, {
+                        method: "POST",
+                        headers: {
+                            [HEADER_NAME]: token,
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(payload),
+                    });
+
+                    const data = await response.json().catch(() => ({}));
+
+                    if (response.ok) {
+                        log(
+                            `Login successful!\nResponse Payload: ${JSON.stringify(data, null, 2)}`,
+                            "success",
                         );
 
-                        const response = await fetch(ENDPOINT_LOGIN, {
-                            method: "POST",
-                            headers: {
-                                [HEADER_NAME]: token,
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({ username: username }),
-                        });
-
-                        const text = await response.text();
-                        if (response.ok) {
-                            log(`Login Success! Response: ${text}`);
+                        // If server rotated the token in JSON payload or refreshed the cookie, log it
+                        const freshToken = getCookie(COOKIE_NAME);
+                        if (freshToken !== token) {
+                            log(
+                                `Login successful! (CSRF token was rotated by server)\nNew Token: ${freshToken}`,
+                                "success",
+                            );
                         } else {
                             log(
-                                `Login Blocked! Status: ${response.status}\nMessage: ${text}`,
-                                true,
+                                `Login successful! (CSRF token unchanged)\nToken: ${token}`,
+                                "success",
                             );
                         }
-                    } catch (err) {
-                        log(`Error: ${err.message}`, true);
+                    } else {
+                        log(
+                            `Login Failed (${response.status}):\n${JSON.stringify(data, null, 2)}`,
+                            "error",
+                        );
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "Log In";
                     }
-                });
+                } catch (err) {
+                    log(`Network Error during login: ${err.message}`, "error");
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Log In";
+                }
+            });
         </script>
     </body>
 </html>

@@ -11,7 +11,7 @@ use axum_extra::extract::{
 };
 use base64::prelude::*;
 use http::StatusCode;
-use hxi2_proto::proto::auth::v2::SmallData;
+use hxi2_proto::proto::auth::v2::{PasswordLoginResponse, SmallData};
 use rand::RngExt;
 use tracing::{error, instrument, trace};
 
@@ -244,6 +244,7 @@ impl LoginManager {
 
         // redirect to the default redirect URL after logout
         let redirect_url = cfg.default_redirect_url.clone();
+
         Ok((
             jar.remove(jwt_cookie)
                 .remove(refresh_token_cookie)
