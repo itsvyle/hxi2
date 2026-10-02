@@ -190,12 +190,12 @@ fn write_embedded_structs(perms: &PermissionsOutput) -> Option<String> {
                         return true;
                     }}
                     // take into account the case where the user is logged in, and the "Permission::PERMISSION_ANY_AUTHENTICATED" is set, which is a special case that allows any logged-in user to access the route
-                    else if self.compiled_permissions_bitfield & {} > 0
+                    else if self.compiled_permissions_bitfield & {} != 0
                         && user_permissions > 0
                     {{
                         return true;
                     }}
-                    (user_permissions & self.compiled_permissions_bitfield) > 0
+                    (user_permissions & self.compiled_permissions_bitfield) != 0
                 }}
             }}
 
@@ -236,7 +236,7 @@ fn write_embedded_structs(perms: &PermissionsOutput) -> Option<String> {
                 get_compiled_permissions().get_by_route(route)
             }}
         "#},
-        (Permission::PERMISSION_ANY_AUTHENTICATED as i64) << 1,
+        1 << (Permission::PERMISSION_ANY_AUTHENTICATED as i64),
         match_arms,
         array_entries,
         perms.hash

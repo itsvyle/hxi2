@@ -74,7 +74,7 @@ service AuthService {
         option (permission_level).allow_role = PERMISSION_ANY_AUTHENTICATED;
     }
 
-    rpc RemovePassword(google.protobuf.Empty) returns (google.protobuf.Empty) {
+    rpc RemovePassword(RemovePasswordRequest) returns (google.protobuf.Empty) {
         option (permission_level).is_public = false;
         option (permission_level).allow_role = PERMISSION_ANY_AUTHENTICATED;
     }
@@ -140,6 +140,13 @@ message CreateUserResponse {
 
 message AddPasswordRequest {
     string password = 1;
+    // This user_id can be provided by a user with the PERMISSION_ADMIN role, to change someone else's password. If not provided, the password will be set for the currently authenticated user.
+    optional int64 user_id = 2;
+}
+
+message RemovePasswordRequest {
+    // This user_id can be provided by a user with the PERMISSION_ADMIN role, to remove someone else's password. If not provided, the password will be removed for the currently authenticated user.
+    optional int64 user_id = 1;
 }
 
 

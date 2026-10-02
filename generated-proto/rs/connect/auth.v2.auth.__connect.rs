@@ -66,6 +66,10 @@ pub type OwnedGetCsrfTokenResponseView = ::buffa::view::OwnedView<
 pub type OwnedAddPasswordRequestView = ::buffa::view::OwnedView<
     crate::proto::auth::v2::__buffa::view::AddPasswordRequestView<'static>,
 >;
+///Shorthand for `OwnedView<RemovePasswordRequestView<'static>>`.
+pub type OwnedRemovePasswordRequestView = ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::RemovePasswordRequestView<'static>,
+>;
 impl ::connectrpc::Encodable<crate::proto::auth::v2::GetJWTPublicKeyResponse>
 for crate::proto::auth::v2::__buffa::view::GetJWTPublicKeyResponseView<'_> {
     fn encode(
@@ -750,7 +754,10 @@ pub trait AuthService: Send + Sync + 'static {
     fn remove_password<'a>(
         &'a self,
         ctx: ::connectrpc::RequestContext,
-        request: ::connectrpc::ServiceRequest<'_, ::buffa_types::google::protobuf::Empty>,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::auth::v2::RemovePasswordRequest,
+        >,
     ) -> impl ::std::future::Future<
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
@@ -1148,7 +1155,7 @@ impl<S: AuthService> AuthServiceExt for S {
                     ::connectrpc::view_handler_fn(move |
                         ctx,
                         req: ::buffa::view::OwnedView<
-                            ::buffa_types::google::protobuf::__buffa::view::EmptyView<
+                            crate::proto::auth::v2::__buffa::view::RemovePasswordRequestView<
                                 'static,
                             >,
                         >,
@@ -1157,7 +1164,7 @@ impl<S: AuthService> AuthServiceExt for S {
                         let svc = ::std::sync::Arc::clone(&svc);
                         async move {
                             let sreq = ::connectrpc::ServiceRequest::<
-                                ::buffa_types::google::protobuf::Empty,
+                                crate::proto::auth::v2::RemovePasswordRequest,
                             >::from_parts(req.reborrow(), req.bytes());
                             svc.remove_password(ctx, sreq)
                                 .await?
@@ -1591,16 +1598,16 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
                     let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        ::buffa_types::google::protobuf::Empty,
+                        crate::proto::auth::v2::RemovePasswordRequest,
                     >(request.encoded()?, format)?;
-                    let req: ::buffa_types::google::protobuf::__buffa::view::EmptyView<
+                    let req: crate::proto::auth::v2::__buffa::view::RemovePasswordRequestView<
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
                         ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
-                        ::buffa_types::google::protobuf::Empty,
+                        crate::proto::auth::v2::RemovePasswordRequest,
                     >::from_parts(&req, &body);
                     svc.remove_password(ctx, req)
                         .await?
@@ -2246,7 +2253,7 @@ where
     /// Call the RemovePassword RPC. Sends a request to /auth.v2.AuthService/RemovePassword.
     pub async fn remove_password(
         &self,
-        request: ::buffa_types::google::protobuf::Empty,
+        request: crate::proto::auth::v2::RemovePasswordRequest,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
@@ -2264,7 +2271,7 @@ where
     /// Call the RemovePassword RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
     pub async fn remove_password_with_options(
         &self,
-        request: ::buffa_types::google::protobuf::Empty,
+        request: crate::proto::auth::v2::RemovePasswordRequest,
         options: ::connectrpc::client::CallOptions,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<

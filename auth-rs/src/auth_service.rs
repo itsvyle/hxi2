@@ -9,7 +9,8 @@ pub use hxi2_proto::connect::auth::v2::AuthServiceExt;
 use hxi2_proto::proto::auth::v2::{
     AddPasswordRequest, CreateUserRequest, CreateUserResponse, DBUser, GetCSRFTokenRequest,
     GetCSRFTokenResponse, GetJWTPublicKeyRequest, GetJWTPublicKeyResponse, ListUsersRequest,
-    ListUsersResponse, LoginRequest, LoginResponse, RenewJWTRequest, RenewJWTResponse, SmallData,
+    ListUsersResponse, LoginRequest, LoginResponse, Permission, RemovePasswordRequest,
+    RenewJWTRequest, RenewJWTResponse, SmallData,
 };
 use hxi2_proto::{
     connect::auth::v2::AuthService,
@@ -278,19 +279,31 @@ impl AuthService for AuthServiceImpl {
     async fn add_password(
         &self,
         ctx: RequestContext,
-        request: ServiceRequest<'_, AddPasswordRequest>,
+        req: ServiceRequest<'_, AddPasswordRequest>,
     ) -> ServiceResult<Empty> {
         let auth_state = ctx.extensions().get::<ReqAuthState>().ok_or_else(|| {
             ConnectError::permission_denied("ReqAuthState not found in request extensions")
         })?;
-        let user_id = auth_state
+
+        let current_user = &auth_state
             .claims
             .as_ref()
             .ok_or_else(|| ConnectError::permission_denied("Claims not found in ReqAuthState"))?
-            .data
-            .user_id;
+            .data;
+        let user_id = if (current_user.permissions & (1 << Permission::PERMISSION_ADMIN as i64)
+            != 0)
+            && let Some(target_user_id) = req.user_id
+        {
+            target_user_id
+        } else if req.user_id.is_some() {
+            return Err(ConnectError::permission_denied(
+                "You do not have permission to add a password for another user",
+            ));
+        } else {
+            current_user.user_id
+        };
 
-        let req = request.to_owned_message();
+        let req = req.to_owned_message();
 
         if req.password.trim().is_empty() {
             return Err(ConnectError::invalid_argument(
@@ -312,17 +325,29 @@ impl AuthService for AuthServiceImpl {
     async fn remove_password(
         &self,
         ctx: RequestContext,
-        _request: ServiceRequest<'_, Empty>,
+        req: ServiceRequest<'_, RemovePasswordRequest>,
     ) -> ServiceResult<Empty> {
         let auth_state = ctx.extensions().get::<ReqAuthState>().ok_or_else(|| {
             ConnectError::permission_denied("ReqAuthState not found in request extensions")
         })?;
-        let user_id = auth_state
+
+        let current_user = &auth_state
             .claims
             .as_ref()
             .ok_or_else(|| ConnectError::permission_denied("Claims not found in ReqAuthState"))?
-            .data
-            .user_id;
+            .data;
+        let user_id = if (current_user.permissions & (1 << Permission::PERMISSION_ADMIN as i64)
+            != 0)
+            && let Some(target_user_id) = req.user_id
+        {
+            target_user_id
+        } else if req.user_id.is_some() {
+            return Err(ConnectError::permission_denied(
+                "You do not have permission to remove a password for another user",
+            ));
+        } else {
+            current_user.user_id
+        };
 
         self.password_login_manager
             .remove_password(user_id)

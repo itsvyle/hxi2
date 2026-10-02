@@ -20,6 +20,7 @@ PORT := "8080"
 export CONFIG_RUNNING_PORT := PORT
 
 export CONFIG_ENVIRONMENT := "development"
+export RUST_LOG := "auth_rs=trace"
 
 jwt_token_payload := '{"user_id": "42", "roles": [
     "PERMISSION_ADMIN"

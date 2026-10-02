@@ -49,12 +49,12 @@ impl MethodPermissionsOptionExt for MethodPermissions {
             return true;
         }
         // take into account the case where the user is logged in, and the "Permission::PERMISSION_ANY_AUTHENTICATED" is set, which is a special case that allows any logged-in user to access the route
-        else if self.compiled_permissions_bitfield & 12 > 0
+        else if self.compiled_permissions_bitfield & 64 != 0
             && user_permissions > 0
         {
             return true;
         }
-        (user_permissions & self.compiled_permissions_bitfield) > 0
+        (user_permissions & self.compiled_permissions_bitfield) != 0
     }
 }
 
@@ -105,7 +105,7 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 ],
                 is_public: false,
                 public_url: None,
-                compiled_permissions_bitfield: 14,
+                compiled_permissions_bitfield: 66,
                 csrf_token_header: Some("X-CSRF-Token"),
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
@@ -205,7 +205,7 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 ],
                 is_public: false,
                 public_url: None,
-                compiled_permissions_bitfield: 10,
+                compiled_permissions_bitfield: 18,
                 csrf_token_header: Some("X-CSRF-Token"),
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
@@ -220,7 +220,7 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 ],
                 is_public: false,
                 public_url: None,
-                compiled_permissions_bitfield: 10,
+                compiled_permissions_bitfield: 34,
                 csrf_token_header: Some("X-CSRF-Token"),
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
@@ -263,7 +263,7 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 ],
                 is_public: false,
                 public_url: None,
-                compiled_permissions_bitfield: 14,
+                compiled_permissions_bitfield: 66,
                 csrf_token_header: Some("X-CSRF-Token"),
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
@@ -278,7 +278,7 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 ],
                 is_public: false,
                 public_url: None,
-                compiled_permissions_bitfield: 10,
+                compiled_permissions_bitfield: 18,
                 csrf_token_header: Some("X-CSRF-Token"),
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
