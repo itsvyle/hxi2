@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use chrono::{DateTime, Duration, Utc};
 use rand::RngExt;
 use serde::{Deserialize, Serialize};
@@ -58,11 +59,9 @@ fn generate_6_digit_number() -> Result<String, DbError> {
 }
 fn jwt_generate_refresh_token() -> Result<String, DbError> {
     unimplemented!("Implement a secure random refresh token generator here");
-    Ok("mock_refresh_token".into())
 }
 fn jwt_generate_jti_token() -> Result<String, DbError> {
     unimplemented!("Implement a secure random JTI token generator here");
-    Ok("mock_jti".into())
 }
 
 // -----------------------------------------------------------------------------
