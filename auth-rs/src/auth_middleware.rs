@@ -6,7 +6,6 @@ use hxi2_proto::proto::auth::v2::JwtClaims;
 
 use axum::extract::FromRequestParts;
 use axum::response::{IntoResponse, Response};
-use tracing::trace;
 
 use crate::permissions_checking::{self, MethodPermissionsOptionExt};
 

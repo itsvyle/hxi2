@@ -1,11 +1,11 @@
-use std::{fmt, fs};
+use std::fs;
 
 use anyhow::{Context, Result};
 use chrono::Duration;
 use derivative::Derivative;
 use ed25519_dalek::pkcs8::EncodePublicKey;
 use once_cell::sync::Lazy;
-use sqlx::{AssertSqlSafe, Execute};
+use sqlx::AssertSqlSafe;
 use tokio::sync::OnceCell;
 use utils::cfg_from_env_or;
 

@@ -1,5 +1,5 @@
 use chrono::{DateTime, Duration, Utc};
-use rand::{Rng, RngExt};
+use rand::RngExt;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use sqlx::{FromRow, sqlite::SqlitePool};
@@ -385,7 +385,7 @@ impl DatabaseManager {
         let users = sqlx::query_as::<_, DbApiUser>("SELECT * FROM API_TOKENS")
             .fetch_all(&self.pool)
             .await
-            .map_err(|e| DbError::Sqlx(e))?;
+            .map_err(DbError::Sqlx)?;
         Ok(users)
     }
 }
@@ -445,7 +445,7 @@ impl DatabaseManager {
             return Err(DbError::Expired);
         }
 
-        if let Err(e) = sqlx::query("DELETE FROM ONE_TIME_CODES WHERE id = ?")
+        if let Err(_e) = sqlx::query("DELETE FROM ONE_TIME_CODES WHERE id = ?")
             .bind(otc.id)
             .execute(&self.pool)
             .await
@@ -471,7 +471,7 @@ impl DatabaseManager {
             .bind(expires_at)
             .execute(&self.pool)
             .await
-            .map_err(|e| DbError::Sqlx(e))?;
+            .map_err(DbError::Sqlx)?;
 
         Ok(code)
     }
