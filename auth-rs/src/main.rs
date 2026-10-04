@@ -66,7 +66,7 @@ async fn main() -> Result<()> {
         subdomain: format!("auth.{}", cfg.tld),
         signer: &GLOBAL_JWT_SIGNER,
         verifier: &GLOBAL_JWT_VERIFIER,
-        login_manager,
+        login_manager: login_manager.clone(),
         password_login_manager,
     });
     let connect = service.register(ConnectRouter::new());
