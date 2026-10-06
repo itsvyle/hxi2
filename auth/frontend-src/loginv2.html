@@ -11,23 +11,9 @@
     </head>
     <body>
         <div class="main-container">
-            <div class="header">
-                <p style="font-size: 1.2rem; margin-bottom: 15px">
-                    Ce site est protégé par Dodu. Connectez-vous pour continuer.
-                </p>
-                <img
-                    alt="dodu protege ce site internet"
-                    src="static:dodu-protege.jpg" />
-            </div>
-            <div class="login-options-container">
-                <a href="/api/login" class="connect"
-                    ><iconify-icon
-                        icon="ion:logo-discord"
-                        style="font-size: 1.2em"></iconify-icon>
-                    Se connecter avec Discord</a
-                >
-                <span>-- Ou --</span>
-                <form method="POST">
+            <div class="login-option-container" id="loginOptionOTP">
+                <h4>Login with one time code</h4>
+                <form method="POST" id="oneTimeCodeForm">
                     <label for="code"
                         >Entrez un code à usage unique, obtenu sur le Discord
                         parrains-bizuths en faisant <b>/login</b> dans n'importe
@@ -40,6 +26,97 @@
                         placeholder="Code à usage unique" />
                     <button type="submit">Se connecter</button>
                 </form>
+                <div
+                    style="
+                        margin-top: 0.25rem;
+                        width: 100%;
+                        height: 1px;
+                        background-color: var(--foreground-primary);
+                    "></div>
+                <div class="back-to-login-options">
+                    <iconify-icon
+                        icon="ion:chevron-back-outline"
+                        style="font-size: 1.2rem"></iconify-icon>
+                    Retour aux options de connexion
+                </div>
+            </div>
+            <div class="login-option-container" id="loginOptionUsername">
+                <h4>Login with username and password</h4>
+                <form method="POST" id="loginForm">
+                    <label for="username">Username</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Username" />
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Password" />
+                    <button type="submit">Se connecter</button>
+                </form>
+                <div style="margin-top: 0.75rem">
+                    <!-- <a href="/reset_password">Mot de passe oublié ?</a> -->
+                </div>
+                
+                <div
+                    style="
+                        margin-top: 0.25rem;
+                        width: 100%;
+                        height: 1px;
+                        background-color: var(--foreground-primary);
+                    "></div>
+                <div class="back-to-login-options">
+                    <iconify-icon
+                        icon="ion:chevron-back-outline"
+                        style="font-size: 1.2rem"></iconify-icon>
+                    Retour aux options de connexion
+                </div>
+            </div>
+
+            <div class="header" id="header">
+                <p style="font-size: 1.2rem; margin-bottom: 15px">
+                    Ce site est protégé par Dodu. Connectez-vous pour continuer.
+                </p>
+                <img
+                    alt="dodu protege ce site internet"
+                    src="static:dodu-protege.jpg" />
+            </div>
+
+            <div
+                class="login-option-choice-container"
+                id="loginOptionChoiceContainer">
+                <h3>Chose a login option:</h3>
+                <a
+                    class="login-option"
+                    id="discordOptionButton"
+                    href="/api/login">
+                    <span>Discord</span>
+                    <iconify-icon
+                        icon="ion:chevron-forward-outline"
+                        style="font-size: 2em"></iconify-icon>
+                </a>
+                <div class="login-option" id="oneTimeCodeOptionButton">
+                    <span>One Time Code</span>
+                    <iconify-icon
+                        icon="ion:chevron-forward-outline"
+                        style="font-size: 2em"></iconify-icon>
+                </div>
+                <div class="login-option" id="usernameOptionButton">
+                    <span>Username</span>
+                    <iconify-icon
+                        icon="ion:chevron-forward-outline"
+                        style="font-size: 2em"></iconify-icon>
+                </div>
+                <h3>or</h3>
+                <a href="/create_account" class="create-account"
+                    ><iconify-icon
+                        icon="ion:add-outline"
+                        style="font-size: 1.2em"></iconify-icon>
+                    Create an account</a
+                >
             </div>
         </div>
     </body>
