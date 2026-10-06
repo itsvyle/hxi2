@@ -51,7 +51,7 @@
       "allow_roles": [
         1
       ],
-      "is_public": false,
+      "is_public": true,
       "public_url": [
         "/api/discord_callback"
       ],
@@ -84,7 +84,7 @@
       "allow_roles": [
         1
       ],
-      "is_public": false,
+      "is_public": true,
       "public_url": [
         "/dist/login.bundle.css"
       ],
@@ -100,7 +100,7 @@
       "allow_roles": [
         1
       ],
-      "is_public": false,
+      "is_public": true,
       "public_url": [
         "/dist/login.bundle.js"
       ],

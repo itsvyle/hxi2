@@ -150,7 +150,7 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 allow_roles: &[
 					Permission::PERMISSION_ADMIN,
                 ],
-                is_public: false,
+                is_public: true,
                 public_url: Some(&["/api/discord_callback"]),
                 compiled_permissions_bitfield: 2,
                 csrf_token_header: Some("X-CSRF-Token"),
@@ -178,7 +178,7 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 allow_roles: &[
 					Permission::PERMISSION_ADMIN,
                 ],
-                is_public: false,
+                is_public: true,
                 public_url: Some(&["/dist/login.bundle.css"]),
                 compiled_permissions_bitfield: 2,
                 csrf_token_header: Some("X-CSRF-Token"),
@@ -192,7 +192,7 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 allow_roles: &[
 					Permission::PERMISSION_ADMIN,
                 ],
-                is_public: false,
+                is_public: true,
                 public_url: Some(&["/dist/login.bundle.js"]),
                 compiled_permissions_bitfield: 2,
                 csrf_token_header: Some("X-CSRF-Token"),

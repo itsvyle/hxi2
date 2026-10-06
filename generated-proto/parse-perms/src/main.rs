@@ -43,7 +43,7 @@ where
 }
 
 fn method_permissions_from_permissions(perms_msg: Permissions, base: &mut MethodPermissions) {
-    base.is_public = perms_msg.is_public.unwrap_or(false);
+    base.is_public = perms_msg.is_public.unwrap_or(base.is_public);
     base.allow_roles.extend(
         perms_msg
             .allow_role

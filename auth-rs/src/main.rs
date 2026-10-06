@@ -30,8 +30,7 @@ use crate::{
     jwt_verifier::GLOBAL_JWT_VERIFIER,
 };
 
-use axum::{http::StatusCode, response::Html};
-use tracing::{debug, error, info};
+use tracing::{debug, info};
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
