@@ -34,8 +34,8 @@ window.grpcClient = grpcClient;
 // should handle getting a CSRFToken; on the page load, I'd like to start loading one; when i call "get" on this class, if I'm currently fetching one, wait for it to be done... otherwise potentially retry getting one
 class CSRFToken {
     HeaderName = "x-csrf-token";
-    value: string | null = null;
-    initTask: Promise<void> | null = null;
+    private value: string | null = null;
+    private initTask: Promise<void> | null = null;
     async init() {
         let res = await grpcClient
             .getCSRFToken(
@@ -67,7 +67,11 @@ class CSRFToken {
 let csrfToken = new CSRFToken();
 document.addEventListener("DOMContentLoaded", () => csrfToken.init());
 
-let loginOptionDivIDs = ["loginOptionOTP", "loginOptionUsername"];
+let loginOptionDivIDs = [
+    "loginOptionOTP",
+    "loginOptionUsername",
+    "loginOptionDiscordRedirect",
+];
 function showLoginOptionDiv(divID: string) {
     loginOptionDivIDs.forEach((id) => {
         let div = document.getElementById(id);
@@ -91,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let usernameOption = document.getElementById("usernameOptionButton");
     if (discordOption) {
         discordOption.addEventListener("click", () => {
-            showLoginOptionDiv("loginOptionDiscord");
+            showLoginOptionDiv("loginOptionDiscordRedirect");
         });
     }
     if (oneTimeCodeOption) {

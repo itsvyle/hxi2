@@ -43,7 +43,9 @@
             <div class="login-option-container" id="loginOptionUsername">
                 <h4>Login with username and password</h4>
                 <form method="POST" id="loginForm">
-                    <label for="username">Username</label>
+                    <label for="username"
+                        >Username (default is discord username)</label
+                    >
                     <input
                         type="text"
                         id="username"
@@ -60,7 +62,7 @@
                 <div style="margin-top: 0.75rem">
                     <!-- <a href="/reset_password">Mot de passe oublié ?</a> -->
                 </div>
-                
+
                 <div
                     style="
                         margin-top: 0.25rem;
@@ -74,6 +76,10 @@
                         style="font-size: 1.2rem"></iconify-icon>
                     Retour aux options de connexion
                 </div>
+            </div>
+
+            <div class="login-option-container" id="loginOptionDiscordRedirect">
+                <h4>Redirecting to Discord login...</h4>
             </div>
 
             <div class="header" id="header">
