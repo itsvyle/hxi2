@@ -10,6 +10,7 @@ mod jwt_verifier;
 mod login_manager;
 mod password_login;
 mod permissions_checking;
+mod static_serve;
 
 use anyhow::{Context as _, Result};
 use app_config::AppConfiguration;
@@ -71,33 +72,7 @@ async fn main() -> Result<()> {
     });
     let connect = service.register(ConnectRouter::new());
 
-    for (_, method_perms) in permissions_checking::get_compiled_permissions().permissions {
-        if method_perms.is_frontend
-            && method_perms.is_public
-            && let Some(file_path) = method_perms.frontend_static_file
-        {
-            for url in method_perms.public_url.unwrap_or(&[]) {
-                app = app.route(
-                    url,
-                    get(move || async move {
-                        let file_content = tokio::fs::read(format!("./src/{file_path}"))
-                            .await
-                            .map_err(|err| {
-                                error!(
-                                    error = %err,
-                                    file_path = "./src/{file_path}",
-                                    "Failed to read file from disk"
-                                );
-                                (StatusCode::INTERNAL_SERVER_ERROR, "Failed to read file")
-                            })?;
-
-                        Ok::<_, (StatusCode, &'static str)>(Html(file_content))
-                    }),
-                );
-                debug!("Registered static file route: {} -> {}", url, file_path);
-            }
-        }
-    }
+    app = app.merge(static_serve::router().context("Failed to create static file router")?);
 
     app = app
         .route("/health", get(|| async { "OK" }))

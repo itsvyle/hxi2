@@ -31,13 +31,13 @@
       "is_frontend": false,
       "frontend_static_file": null
     },
-    "/auth.v2.AuthService/DiscordCallback": {
+    "/auth.v2.AuthService/DiscordLogin": {
       "allow_roles": [
         1
       ],
       "is_public": true,
       "public_url": [
-        "/api/discord_callback"
+        "/api/login"
       ],
       "compiled_permissions_bitfield": 2,
       "csrf_token_header": "X-CSRF-Token",
@@ -47,13 +47,13 @@
       "is_frontend": false,
       "frontend_static_file": null
     },
-    "/auth.v2.AuthService/DiscordLogin": {
+    "/auth.v2.AuthService/DiscordLogin/api/discord_callback": {
       "allow_roles": [
         1
       ],
-      "is_public": true,
+      "is_public": false,
       "public_url": [
-        "/api/login"
+        "/api/discord_callback"
       ],
       "compiled_permissions_bitfield": 2,
       "csrf_token_header": "X-CSRF-Token",
@@ -78,7 +78,39 @@
       "response_cors_headers": null,
       "enforce_csrf": false,
       "is_frontend": true,
-      "frontend_static_file": "index.html"
+      "frontend_static_file": "dist/login.html"
+    },
+    "/auth.v2.AuthService/FrontendIndex/dist/login.bundle.css": {
+      "allow_roles": [
+        1
+      ],
+      "is_public": false,
+      "public_url": [
+        "/dist/login.bundle.css"
+      ],
+      "compiled_permissions_bitfield": 2,
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": false,
+      "is_frontend": true,
+      "frontend_static_file": "dist/login.bundle.css"
+    },
+    "/auth.v2.AuthService/FrontendIndex/dist/login.bundle.js": {
+      "allow_roles": [
+        1
+      ],
+      "is_public": false,
+      "public_url": [
+        "/dist/login.bundle.js"
+      ],
+      "compiled_permissions_bitfield": 2,
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": false,
+      "is_frontend": true,
+      "frontend_static_file": "dist/login.bundle.js"
     },
     "/auth.v2.AuthService/GetCSRFToken": {
       "allow_roles": [

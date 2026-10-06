@@ -25,6 +25,8 @@ pub struct MethodPermissions {
     pub enforce_csrf: bool,
     pub is_frontend: bool,
     pub frontend_static_file: Option<String>,
+    #[serde(skip_serializing)]
+    pub related: Option<Vec<Permissions>>,
 }
 
 fn serialize_roles_as_ints<S>(roles: &[Permission], serializer: S) -> Result<S::Ok, S::Error>
@@ -51,6 +53,9 @@ fn method_permissions_from_permissions(perms_msg: Permissions, base: &mut Method
     );
     if !perms_msg.public_url.is_empty() {
         base.public_url = Some(perms_msg.public_url);
+    }
+    if !perms_msg.related.is_empty() {
+        base.related = Some(perms_msg.related);
     }
     if let Some(header) = perms_msg.csrf_token_header {
         if header.is_empty() {
@@ -120,6 +125,7 @@ fn get_permissions(descriptor_bytes: &[u8]) -> Result<BTreeMap<String, MethodPer
             enforce_csrf: false,
             is_frontend: false,
             frontend_static_file: None,
+            related: None,
         };
         if let Some(options) = service.options()
             && let Some(perms_msg) = options.extension(&PERMISSION_LEVEL_SERVICE)
@@ -139,6 +145,39 @@ fn get_permissions(descriptor_bytes: &[u8]) -> Result<BTreeMap<String, MethodPer
 
             cache.insert(path, method_perms);
         }
+    }
+
+    // Expand the "related_files", inheriting the same permissions as the parent, but overwriting certain things
+    let mut pending_inserts = Vec::new();
+
+    for (key, parent_perms) in &cache {
+        if let Some(related_files) = &parent_perms.related {
+            for related_file in related_files {
+                let mut new_perms = parent_perms.clone();
+                method_permissions_from_permissions(related_file.to_owned(), &mut new_perms);
+
+                let new_key = format!(
+                    "{key}/{}",
+                    related_file
+                        .public_url
+                        .first()
+                        .map(|s| {
+                            if s.starts_with("/") {
+                                s.strip_prefix("/").unwrap_or(s)
+                            } else {
+                                s
+                            }
+                        })
+                        .unwrap_or("a_file")
+                );
+
+                pending_inserts.push((new_key, new_perms));
+            }
+        }
+    }
+
+    for (url, perms) in pending_inserts {
+        cache.insert(url, perms);
     }
 
     Ok(cache)

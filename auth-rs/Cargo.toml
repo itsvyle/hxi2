@@ -22,10 +22,12 @@ http-body = { workspace = true }
 http-body-util = { workspace = true }
 hxi2-proto = { workspace = true }
 jsonwebtoken = { workspace = true }
+mime_guess = { workspace = true }
 oauth2 = "4"
 once_cell = { workspace = true }
 rand = "0.10.1"
 reqwest = { workspace = true }
+rust-embed = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 sha2 = { workspace = true }

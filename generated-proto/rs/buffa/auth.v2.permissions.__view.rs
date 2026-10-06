@@ -28,6 +28,11 @@ pub struct PermissionsView<'a> {
     pub is_frontend: ::core::option::Option<bool>,
     /// Field 9: `frontend_static_file`
     pub frontend_static_file: ::core::option::Option<&'a str>,
+    /// related is a list of routes that are closely related (such as image, css, js); the parser will expand them,
+    /// inheriting the same permissions as the parent
+    ///
+    /// Field 10: `related`
+    pub related: ::buffa::RepeatedView<'a, Self>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for PermissionsView<'a> {
@@ -142,6 +147,26 @@ impl<'a> ::buffa::MessageView<'a> for PermissionsView<'a> {
                 )?;
                 view.public_url.push(__elem);
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                ctx.register_element_memory(
+                    ::core::mem::size_of::<
+                        super::super::__buffa::view::PermissionsView,
+                    >(),
+                )?;
+                view.related
+                    .push(
+                        <super::super::__buffa::view::PermissionsView as ::buffa::MessageView>::decode_view_ctx(
+                            sub,
+                            __sub_ctx,
+                        )?,
+                    );
+            }
             6u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -218,6 +243,11 @@ impl<'a> ::buffa::MessageView<'a> for PermissionsView<'a> {
             enforce_csrf: self.enforce_csrf,
             is_frontend: self.is_frontend,
             frontend_static_file: self.frontend_static_file.map(|s| s.to_string()),
+            related: self
+                .related
+                .iter()
+                .map(|v| v.to_owned_from_source(__buffa_src))
+                .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -225,7 +255,7 @@ impl<'a> ::buffa::MessageView<'a> for PermissionsView<'a> {
 }
 impl<'a> ::buffa::ViewEncode<'a> for PermissionsView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
@@ -264,13 +294,21 @@ impl<'a> ::buffa::ViewEncode<'a> for PermissionsView<'a> {
         if let Some(ref v) = self.frontend_static_file {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        for v in &self.related {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     #[allow(clippy::needless_borrow)]
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
@@ -328,6 +366,14 @@ impl<'a> ::buffa::ViewEncode<'a> for PermissionsView<'a> {
         }
         if let Some(ref v) = self.frontend_static_file {
             ::buffa::types::put_string_field(9u32, v, buf);
+        }
+        for v in &self.related {
+            ::buffa::types::put_len_delimited_header(
+                10u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -399,6 +445,9 @@ impl<'__a> ::serde::Serialize for PermissionsView<'__a> {
         }
         if let ::core::option::Option::Some(__v) = self.frontend_static_file {
             __map.serialize_entry("frontendStaticFile", __v)?;
+        }
+        if !self.related.is_empty() {
+            __map.serialize_entry("related", &*self.related)?;
         }
         __map.end()
     }
@@ -542,6 +591,16 @@ impl PermissionsOwnedView {
     pub fn frontend_static_file(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().frontend_static_file
     }
+    /// related is a list of routes that are closely related (such as image, css, js); the parser will expand them,
+    /// inheriting the same permissions as the parent
+    ///
+    /// Field 10: `related`
+    #[must_use]
+    pub fn related(
+        &self,
+    ) -> &::buffa::RepeatedView<'_, super::super::__buffa::view::PermissionsView<'_>> {
+        &self.0.reborrow().related
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<PermissionsView<'static>>>
 for PermissionsOwnedView {
@@ -619,6 +678,7 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for PermissionsView<'a> {
                     self.frontend_static_file.unwrap_or(""),
                 )
             }
+            10u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.related),
             _ => {
                 ::core::debug_assert!(
                     false,
@@ -640,6 +700,7 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for PermissionsView<'a> {
             7u32 => self.enforce_csrf,
             8u32 => self.is_frontend.is_some(),
             9u32 => self.frontend_static_file.is_some(),
+            10u32 => !::buffa::RepeatedView::is_empty(&self.related),
             _ => false,
         }
     }

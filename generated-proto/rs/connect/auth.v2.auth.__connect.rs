@@ -392,12 +392,6 @@ pub const AUTH_SERVICE_DISCORD_LOGIN_SPEC: ::connectrpc::Spec = ::connectrpc::Sp
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// Static [`Spec`](::connectrpc::Spec) for the `DiscordCallback` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const AUTH_SERVICE_DISCORD_CALLBACK_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/auth.v2.AuthService/DiscordCallback",
-        ::connectrpc::StreamType::Unary,
-    )
-    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// Static [`Spec`](::connectrpc::Spec) for the `AddPassword` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_ADD_PASSWORD_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/AddPassword",
@@ -649,26 +643,6 @@ pub trait AuthService: Send + Sync + 'static {
     /// `.to_owned_message()` (or copy the specific fields) for anything
     /// returned, stored, or moved into `tokio::spawn`.
     fn discord_login<'a>(
-        &'a self,
-        ctx: ::connectrpc::RequestContext,
-        request: ::connectrpc::ServiceRequest<'_, ::buffa_types::google::protobuf::Empty>,
-    ) -> impl ::std::future::Future<
-        Output = ::connectrpc::ServiceResult<
-            impl ::connectrpc::Encodable<
-                ::buffa_types::google::protobuf::Empty,
-            > + Send + use<'a, Self>,
-        >,
-    > + Send;
-    /// Handle the DiscordCallback RPC.
-    ///
-    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
-    ///
-    /// `request` is borrowed from the request body and is valid for the
-    /// duration of the call; message fields are read directly on it
-    /// (zero-copy). The response cannot borrow from `request` — use
-    /// `.to_owned_message()` (or copy the specific fields) for anything
-    /// returned, stored, or moved into `tokio::spawn`.
-    fn discord_callback<'a>(
         &'a self,
         ctx: ::connectrpc::RequestContext,
         request: ::connectrpc::ServiceRequest<'_, ::buffa_types::google::protobuf::Empty>,
@@ -1044,33 +1018,6 @@ impl<S: AuthService> AuthServiceExt for S {
             .with_spec(AUTH_SERVICE_DISCORD_LOGIN_SPEC)
             .route_view(
                 AUTH_SERVICE_SERVICE_NAME,
-                "DiscordCallback",
-                {
-                    let svc = ::std::sync::Arc::clone(&self);
-                    ::connectrpc::view_handler_fn(move |
-                        ctx,
-                        req: ::buffa::view::OwnedView<
-                            ::buffa_types::google::protobuf::__buffa::view::EmptyView<
-                                'static,
-                            >,
-                        >,
-                        format|
-                    {
-                        let svc = ::std::sync::Arc::clone(&svc);
-                        async move {
-                            let sreq = ::connectrpc::ServiceRequest::<
-                                ::buffa_types::google::protobuf::Empty,
-                            >::from_parts(req.reborrow(), req.bytes());
-                            svc.discord_callback(ctx, sreq)
-                                .await?
-                                .encode::<::buffa_types::google::protobuf::Empty>(format)
-                        }
-                    })
-                },
-            )
-            .with_spec(AUTH_SERVICE_DISCORD_CALLBACK_SPEC)
-            .route_view(
-                AUTH_SERVICE_SERVICE_NAME,
                 "AddPassword",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -1308,12 +1255,6 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         .with_spec(AUTH_SERVICE_DISCORD_LOGIN_SPEC),
                 )
             }
-            "DiscordCallback" => {
-                Some(
-                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
-                        .with_spec(AUTH_SERVICE_DISCORD_CALLBACK_SPEC),
-                )
-            }
             "AddPassword" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
@@ -1515,26 +1456,6 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         ::buffa_types::google::protobuf::Empty,
                     >::from_parts(&req, &body);
                     svc.discord_login(ctx, req)
-                        .await?
-                        .encode::<::buffa_types::google::protobuf::Empty>(format)
-                })
-            }
-            "DiscordCallback" => {
-                let svc = ::std::sync::Arc::clone(&self.inner);
-                Box::pin(async move {
-                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        ::buffa_types::google::protobuf::Empty,
-                    >(request.encoded()?, format)?;
-                    let req: ::buffa_types::google::protobuf::__buffa::view::EmptyView<
-                        '_,
-                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
-                        &body,
-                        ctx.decode_options(),
-                    )?;
-                    let req = ::connectrpc::ServiceRequest::<
-                        ::buffa_types::google::protobuf::Empty,
-                    >::from_parts(&req, &body);
-                    svc.discord_callback(ctx, req)
                         .await?
                         .encode::<::buffa_types::google::protobuf::Empty>(format)
                 })
@@ -2093,47 +2014,6 @@ where
                 &self.transport,
                 &self.config,
                 AUTH_SERVICE_DISCORD_LOGIN_SPEC
-                    .with_origin(::connectrpc::SpecOrigin::Client),
-                request,
-                options,
-            )
-            .await
-    }
-    /// Call the DiscordCallback RPC. Sends a request to /auth.v2.AuthService/DiscordCallback.
-    pub async fn discord_callback(
-        &self,
-        request: ::buffa_types::google::protobuf::Empty,
-    ) -> Result<
-        ::connectrpc::client::UnaryResponse<
-            ::buffa::view::OwnedView<
-                ::buffa_types::google::protobuf::__buffa::view::EmptyView<'static>,
-            >,
-        >,
-        ::connectrpc::ConnectError,
-    > {
-        self.discord_callback_with_options(
-                request,
-                ::connectrpc::client::CallOptions::default(),
-            )
-            .await
-    }
-    /// Call the DiscordCallback RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn discord_callback_with_options(
-        &self,
-        request: ::buffa_types::google::protobuf::Empty,
-        options: ::connectrpc::client::CallOptions,
-    ) -> Result<
-        ::connectrpc::client::UnaryResponse<
-            ::buffa::view::OwnedView<
-                ::buffa_types::google::protobuf::__buffa::view::EmptyView<'static>,
-            >,
-        >,
-        ::connectrpc::ConnectError,
-    > {
-        ::connectrpc::client::call_unary(
-                &self.transport,
-                &self.config,
-                AUTH_SERVICE_DISCORD_CALLBACK_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

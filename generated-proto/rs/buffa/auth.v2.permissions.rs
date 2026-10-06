@@ -272,6 +272,16 @@ pub struct Permissions {
         skip_serializing_if = "::core::option::Option::is_none"
     )]
     pub frontend_static_file: ::core::option::Option<::buffa::alloc::string::String>,
+    /// related is a list of routes that are closely related (such as image, css, js); the parser will expand them,
+    /// inheriting the same permissions as the parent
+    ///
+    /// Field 10: `related`
+    #[serde(
+        rename = "related",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_vec",
+        deserialize_with = "::buffa::json_helpers::null_as_default"
+    )]
+    pub related: ::buffa::alloc::vec::Vec<Self>,
     #[serde(skip)]
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
@@ -288,6 +298,7 @@ impl ::core::fmt::Debug for Permissions {
             .field("enforce_csrf", &self.enforce_csrf)
             .field("is_frontend", &self.is_frontend)
             .field("frontend_static_file", &self.frontend_static_file)
+            .field("related", &self.related)
             .finish()
     }
 }
@@ -394,6 +405,7 @@ impl ::buffa_descriptor::reflect::ReflectMessage for Permissions {
                     self.frontend_static_file.as_deref().unwrap_or(""),
                 )
             }
+            10u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.related),
             _ => {
                 ::core::debug_assert!(
                     false,
@@ -415,6 +427,7 @@ impl ::buffa_descriptor::reflect::ReflectMessage for Permissions {
             7u32 => self.enforce_csrf,
             8u32 => self.is_frontend.is_some(),
             9u32 => self.frontend_static_file.is_some(),
+            10u32 => !self.related.is_empty(),
             _ => false,
         }
     }
@@ -488,7 +501,7 @@ impl ::buffa::Message for Permissions {
     /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
     /// points reject, never a silently wrapped size.
     #[allow(clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
@@ -527,12 +540,20 @@ impl ::buffa::Message for Permissions {
         if let Some(ref v) = self.frontend_static_file {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        for v in &self.related {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
@@ -573,6 +594,14 @@ impl ::buffa::Message for Permissions {
         }
         if let Some(ref v) = self.frontend_static_file {
             ::buffa::types::put_string_field(9u32, v, buf);
+        }
+        for v in &self.related {
+            ::buffa::types::put_len_delimited_header(
+                10u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -708,6 +737,18 @@ impl ::buffa::Message for Permissions {
                     buf,
                 )?;
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.related.push(elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -725,6 +766,7 @@ impl ::buffa::Message for Permissions {
         self.enforce_csrf = false;
         self.is_frontend = ::core::option::Option::None;
         self.frontend_static_file = ::core::option::Option::None;
+        self.related.clear();
         self.__buffa_unknown_fields.clear();
     }
 }

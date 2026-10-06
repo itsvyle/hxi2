@@ -23,6 +23,9 @@ message Permissions {
     bool enforce_csrf = 7;
     optional bool is_frontend = 8;
     optional string frontend_static_file = 9;
+    // related is a list of routes that are closely related (such as image, css, js); the parser will expand them,
+    // inheriting the same permissions as the parent
+    repeated Permissions related = 10;
 }
 
 enum Permission {

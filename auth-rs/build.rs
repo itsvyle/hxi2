@@ -1,3 +1,5 @@
+use std::{fs, path::Path};
+
 use anyhow::Context as _;
 fn main() -> anyhow::Result<()> {
     let permissions_file = generate_permissions_checking::find_permissions_path()
