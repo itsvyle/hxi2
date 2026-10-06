@@ -154,6 +154,10 @@ function initLoginForm() {
                     },
                 },
             );
+            submitBtn.innerText = "Redirecting...";
+            (document.getElementById("password") as HTMLInputElement).value =
+                "";
+            window.location.href = res.redirectTo || "/";
         } catch (err: ConnectError | any) {
             console.error("Error during login:", err);
             Dialog.error(
