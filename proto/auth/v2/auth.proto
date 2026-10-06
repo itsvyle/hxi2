@@ -79,17 +79,18 @@ service AuthService {
         option (permission_level).is_public = true;
         option (permission_level).is_frontend = true;
         option (permission_level).public_url = "/";
+        option (permission_level).public_url = "/login";
         option (permission_level).public_url = "/index.html";
-        option (permission_level).frontend_static_file = "dist/login.html";
+        option (permission_level).frontend_static_file = "dist/loginv2.html";
 
         option (permission_level).related = {
-            public_url: "/dist/login.bundle.css"
-            frontend_static_file: "dist/login.bundle.css"
+            public_url: "/dist/loginv2.bundle.css"
+            frontend_static_file: "dist/loginv2.bundle.css"
         };
 
         option (permission_level).related = {
-            public_url: "/dist/login.bundle.js"
-            frontend_static_file: "dist/login.bundle.js"
+            public_url: "/dist/loginv2.bundle.js"
+            frontend_static_file: "dist/loginv2.bundle.js"
         };
     }
 

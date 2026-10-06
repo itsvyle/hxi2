@@ -70,6 +70,7 @@
       "is_public": true,
       "public_url": [
         "/",
+        "/login",
         "/index.html"
       ],
       "compiled_permissions_bitfield": 2,
@@ -78,15 +79,15 @@
       "response_cors_headers": null,
       "enforce_csrf": false,
       "is_frontend": true,
-      "frontend_static_file": "dist/login.html"
+      "frontend_static_file": "dist/loginv2.html"
     },
-    "/auth.v2.AuthService/FrontendIndex/dist/login.bundle.css": {
+    "/auth.v2.AuthService/FrontendIndex/dist/loginv2.bundle.css": {
       "allow_roles": [
         1
       ],
       "is_public": true,
       "public_url": [
-        "/dist/login.bundle.css"
+        "/dist/loginv2.bundle.css"
       ],
       "compiled_permissions_bitfield": 2,
       "csrf_token_header": "X-CSRF-Token",
@@ -94,15 +95,15 @@
       "response_cors_headers": null,
       "enforce_csrf": false,
       "is_frontend": true,
-      "frontend_static_file": "dist/login.bundle.css"
+      "frontend_static_file": "dist/loginv2.bundle.css"
     },
-    "/auth.v2.AuthService/FrontendIndex/dist/login.bundle.js": {
+    "/auth.v2.AuthService/FrontendIndex/dist/loginv2.bundle.js": {
       "allow_roles": [
         1
       ],
       "is_public": true,
       "public_url": [
-        "/dist/login.bundle.js"
+        "/dist/loginv2.bundle.js"
       ],
       "compiled_permissions_bitfield": 2,
       "csrf_token_header": "X-CSRF-Token",
@@ -110,7 +111,7 @@
       "response_cors_headers": null,
       "enforce_csrf": false,
       "is_frontend": true,
-      "frontend_static_file": "dist/login.bundle.js"
+      "frontend_static_file": "dist/loginv2.bundle.js"
     },
     "/auth.v2.AuthService/GetCSRFToken": {
       "allow_roles": [
