@@ -17,11 +17,16 @@ export default (env, argv) => {
         devProxy: [
             {
                 context: ["/api"],
-                target: "http://localhost:8041",
+                target: "http://localhost:8080",
+            },
+            {
+                context: ["/auth.v2.AuthService"],
+                target: "http://localhost:8080",
             },
         ],
         entries: {
             login: SRCDIR + "/login.ts",
+            loginv2: SRCDIR + "/loginv2.ts",
         },
         outputDirName: "dist",
         srcDir: SRCDIR,

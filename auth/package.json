@@ -20,5 +20,10 @@
     "volta": {
         "node": "22.15.0",
         "pnpm": "10.11.0"
+    },
+    "dependencies": {
+        "@bufbuild/protobuf": "^2.16.0",
+        "@connectrpc/connect": "^2.2.0",
+        "@connectrpc/connect-web": "^2.2.0"
     }
 }

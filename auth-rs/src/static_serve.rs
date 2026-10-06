@@ -15,8 +15,6 @@ pub fn router() -> anyhow::Result<Router> {
     let mut router = Router::new();
 
     let v = EmbedAsset::iter().collect::<Vec<_>>();
-    println!("Embedded files: {:?}", v);
-
     for (_, method_perms) in permissions_checking::get_compiled_permissions().permissions {
         if method_perms.is_frontend
             && let Some(file_path) = method_perms.frontend_static_file.to_owned()
