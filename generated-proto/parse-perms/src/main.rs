@@ -78,10 +78,8 @@ fn method_permissions_from_permissions(perms_msg: Permissions, base: &mut Method
         }
         base.response_cors_headers = Some(headers_map);
     }
-    base.enforce_csrf = perms_msg.enforce_csrf;
-    if let Some(is_frontend) = perms_msg.is_frontend {
-        base.is_frontend = is_frontend;
-    }
+    base.enforce_csrf = perms_msg.enforce_csrf.unwrap_or(base.enforce_csrf);
+    base.is_frontend = perms_msg.is_frontend.unwrap_or(base.is_frontend);
     if let Some(frontend_static_file) = perms_msg.frontend_static_file {
         if frontend_static_file.is_empty() {
             base.frontend_static_file = None;

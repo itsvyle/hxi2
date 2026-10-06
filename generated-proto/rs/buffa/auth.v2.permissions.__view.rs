@@ -23,7 +23,7 @@ pub struct PermissionsView<'a> {
     /// Field 6: `response_cors_headers` (map)
     pub response_cors_headers: ::buffa::MapView<'a, &'a str, &'a str>,
     /// Field 7: `enforce_csrf`
-    pub enforce_csrf: bool,
+    pub enforce_csrf: ::core::option::Option<bool>,
     /// Field 8: `is_frontend`
     pub is_frontend: ::core::option::Option<bool>,
     /// Field 9: `frontend_static_file`
@@ -91,7 +91,7 @@ impl<'a> ::buffa::MessageView<'a> for PermissionsView<'a> {
                     tag,
                     ::buffa::encoding::WireType::Varint,
                 )?;
-                view.enforce_csrf = ::buffa::types::decode_bool(&mut cur)?;
+                view.enforce_csrf = Some(::buffa::types::decode_bool(&mut cur)?);
             }
             8u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -285,7 +285,7 @@ impl<'a> ::buffa::ViewEncode<'a> for PermissionsView<'a> {
                 + 1u64 + ::buffa::types::string_encoded_len(v) as u64;
             size += 1u64 + ::buffa::encoding::varint_len(entry_size) as u64 + entry_size;
         }
-        if self.enforce_csrf {
+        if self.enforce_csrf.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         if self.is_frontend.is_some() {
@@ -358,8 +358,8 @@ impl<'a> ::buffa::ViewEncode<'a> for PermissionsView<'a> {
                 .encode(buf);
             ::buffa::types::encode_string(v, buf);
         }
-        if self.enforce_csrf {
-            ::buffa::types::put_bool_field(7u32, self.enforce_csrf, buf);
+        if let Some(v) = self.enforce_csrf {
+            ::buffa::types::put_bool_field(7u32, v, buf);
         }
         if let Some(v) = self.is_frontend {
             ::buffa::types::put_bool_field(8u32, v, buf);
@@ -437,8 +437,8 @@ impl<'__a> ::serde::Serialize for PermissionsView<'__a> {
                     &_WM(&self.response_cors_headers),
                 )?;
         }
-        if self.enforce_csrf {
-            __map.serialize_entry("enforceCsrf", &self.enforce_csrf)?;
+        if let ::core::option::Option::Some(__v) = self.enforce_csrf {
+            __map.serialize_entry("enforceCsrf", &__v)?;
         }
         if let ::core::option::Option::Some(__v) = self.is_frontend {
             __map.serialize_entry("isFrontend", &__v)?;
@@ -578,7 +578,7 @@ impl PermissionsOwnedView {
     }
     /// Field 7: `enforce_csrf`
     #[must_use]
-    pub fn enforce_csrf(&self) -> bool {
+    pub fn enforce_csrf(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().enforce_csrf
     }
     /// Field 8: `is_frontend`
@@ -667,7 +667,11 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for PermissionsView<'a> {
             6u32 => {
                 ::buffa_descriptor::reflect::ValueRef::Map(&self.response_cors_headers)
             }
-            7u32 => ::buffa_descriptor::reflect::ValueRef::Bool(self.enforce_csrf),
+            7u32 => {
+                ::buffa_descriptor::reflect::ValueRef::Bool(
+                    self.enforce_csrf.unwrap_or(false),
+                )
+            }
             8u32 => {
                 ::buffa_descriptor::reflect::ValueRef::Bool(
                     self.is_frontend.unwrap_or(false),
@@ -697,7 +701,7 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for PermissionsView<'a> {
             4u32 => self.csrf_token_header.is_some(),
             5u32 => self.csrf_token_cookie.is_some(),
             6u32 => !::buffa::MapView::is_empty(&self.response_cors_headers),
-            7u32 => self.enforce_csrf,
+            7u32 => self.enforce_csrf.is_some(),
             8u32 => self.is_frontend.is_some(),
             9u32 => self.frontend_static_file.is_some(),
             10u32 => !::buffa::RepeatedView::is_empty(&self.related),

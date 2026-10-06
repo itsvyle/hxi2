@@ -254,10 +254,9 @@ pub struct Permissions {
     #[serde(
         rename = "enforceCsrf",
         alias = "enforce_csrf",
-        with = "::buffa::json_helpers::proto_bool",
-        skip_serializing_if = "::buffa::json_helpers::skip_if::is_false"
+        skip_serializing_if = "::core::option::Option::is_none"
     )]
-    pub enforce_csrf: bool,
+    pub enforce_csrf: ::core::option::Option<bool>,
     /// Field 8: `is_frontend`
     #[serde(
         rename = "isFrontend",
@@ -339,6 +338,13 @@ impl Permissions {
     }
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
+    ///Sets [`Self::enforce_csrf`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_enforce_csrf(mut self, value: bool) -> Self {
+        self.enforce_csrf = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
     ///Sets [`Self::is_frontend`] to `Some(value)`, consuming and returning `self`.
     pub fn with_is_frontend(mut self, value: bool) -> Self {
         self.is_frontend = Some(value);
@@ -394,7 +400,11 @@ impl ::buffa_descriptor::reflect::ReflectMessage for Permissions {
             6u32 => {
                 ::buffa_descriptor::reflect::ValueRef::Map(&self.response_cors_headers)
             }
-            7u32 => ::buffa_descriptor::reflect::ValueRef::Bool(self.enforce_csrf),
+            7u32 => {
+                ::buffa_descriptor::reflect::ValueRef::Bool(
+                    self.enforce_csrf.unwrap_or(false),
+                )
+            }
             8u32 => {
                 ::buffa_descriptor::reflect::ValueRef::Bool(
                     self.is_frontend.unwrap_or(false),
@@ -424,7 +434,7 @@ impl ::buffa_descriptor::reflect::ReflectMessage for Permissions {
             4u32 => self.csrf_token_header.is_some(),
             5u32 => self.csrf_token_cookie.is_some(),
             6u32 => !self.response_cors_headers.is_empty(),
-            7u32 => self.enforce_csrf,
+            7u32 => self.enforce_csrf.is_some(),
             8u32 => self.is_frontend.is_some(),
             9u32 => self.frontend_static_file.is_some(),
             10u32 => !self.related.is_empty(),
@@ -531,7 +541,7 @@ impl ::buffa::Message for Permissions {
                 ::buffa::map_codec::Str,
                 _,
             >(&self.response_cors_headers, 1u64);
-        if self.enforce_csrf {
+        if self.enforce_csrf.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         if self.is_frontend.is_some() {
@@ -586,8 +596,8 @@ impl ::buffa::Message for Permissions {
             ::buffa::map_codec::Str,
             _,
         >(&self.response_cors_headers, 6u32, buf);
-        if self.enforce_csrf {
-            ::buffa::types::put_bool_field(7u32, self.enforce_csrf, buf);
+        if let Some(v) = self.enforce_csrf {
+            ::buffa::types::put_bool_field(7u32, v, buf);
         }
         if let Some(v) = self.is_frontend {
             ::buffa::types::put_bool_field(8u32, v, buf);
@@ -714,7 +724,9 @@ impl ::buffa::Message for Permissions {
                     tag,
                     ::buffa::encoding::WireType::Varint,
                 )?;
-                self.enforce_csrf = ::buffa::types::decode_bool(buf)?;
+                self.enforce_csrf = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
             }
             8u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -763,7 +775,7 @@ impl ::buffa::Message for Permissions {
         self.csrf_token_header = ::core::option::Option::None;
         self.csrf_token_cookie = ::core::option::Option::None;
         self.response_cors_headers.clear();
-        self.enforce_csrf = false;
+        self.enforce_csrf = ::core::option::Option::None;
         self.is_frontend = ::core::option::Option::None;
         self.frontend_static_file = ::core::option::Option::None;
         self.related.clear();
