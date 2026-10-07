@@ -28,6 +28,7 @@ once_cell = { workspace = true }
 rand = "0.10.1"
 reqwest = { workspace = true }
 rust-embed = { workspace = true }
+schemars = { version = "0.8", optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 sha2 = { workspace = true }
@@ -40,6 +41,11 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 utils = { workspace = true }
 zeroize = "1.9.0"
+
+[features]
+default = []
+# Feature to enable schema generation
+schema-gen = ["dep:schemars"]
 
 [build-dependencies]
 generate-permissions-checking = { workspace = true }

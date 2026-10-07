@@ -4,6 +4,9 @@ set fallback
 _default: 
     just --list
 
+generate-schema:
+    cargo test generate_json_schema --features schema-gen -- --nocapture
+
 create-jwt-private-key:
     openssl genpkey -algorithm Ed25519 -out jwt_private_key.pem
 

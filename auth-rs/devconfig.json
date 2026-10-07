@@ -1,0 +1,9 @@
+{
+    "$schema": "./auth_config.schema.json",
+    "auth_url": "http://localhost:8080",
+    "auth_endpoint": "http://localhost:8080",
+    "cookie_domain": "localhost",
+    "tld": "hxi2.fr",
+    "default_redirect_url": "/",
+    "running_port": "env:PORT"
+}

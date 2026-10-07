@@ -1,0 +1,161 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AuthConfig",
+    "description": "Represents the configuration for the authentication service. You can use `env:VAR_NAME` to load a value from an environment variable, or `file:PATH` to load a value from a file.",
+    "type": "object",
+    "required": [
+        "auth_endpoint",
+        "auth_url",
+        "cookie_domain",
+        "discord_application_id",
+        "discord_client_id",
+        "discord_client_secret",
+        "jwt_private_key",
+        "tld"
+    ],
+    "properties": {
+        "$schema": {
+            "description": "Path or URL to the JSON Schema for validation and auto-completion",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "auth_endpoint": {
+            "description": "Endpoint to call internally to renew tokens, or control other authentication stuff; it can be a local url",
+            "type": "string"
+        },
+        "auth_url": {
+            "description": "Domain name and protocol of the **internet facing** auth domain (used for redirecting in case the user isn't logged in, to log in)",
+            "type": "string"
+        },
+        "cookie_domain": {
+            "description": "Domain of global cookies, most importantly token/refreshtoken/smalldata",
+            "type": "string"
+        },
+        "cookies": {
+            "description": "Optional nested cookie configuration",
+            "default": {
+                "jwt_token_cookie_name": "HXI2_TOKEN",
+                "jwt_token_validity_seconds": 900,
+                "refresh_token_cookie_name": "HXI2_REFRESH_TOKEN",
+                "refresh_token_validity_seconds": 2592000,
+                "small_data_cookie_name": "HXI2_SMALL_DATA"
+            },
+            "allOf": [
+                {
+                    "$ref": "#/definitions/CookiesConfig"
+                }
+            ]
+        },
+        "db_path": {
+            "description": "Path to the database file",
+            "default": "./auth.db",
+            "type": "string"
+        },
+        "default_redirect_url": {
+            "description": "Default redirect url after login/logout",
+            "default": "/",
+            "type": "string"
+        },
+        "discord_application_id": {
+            "description": "Discord application id",
+            "type": "string"
+        },
+        "discord_client_id": {
+            "description": "Discord Client ID for OAuth2",
+            "type": "string"
+        },
+        "discord_client_secret": {
+            "description": "Discord Client Secret for OAuth2",
+            "type": "string"
+        },
+        "environment": {
+            "description": "Running environment",
+            "default": "PRODUCTION",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/Environnement"
+                }
+            ]
+        },
+        "jwt_private_key": {
+            "description": "Your private key to sign JWTs with. It should be a PEM encoded Ed25519 private key. You can generate one with: openssl genpkey -algorithm Ed25519 -out jwt_private_key.pem",
+            "type": "string"
+        },
+        "running_port": {
+            "description": "Port to run the auth service on",
+            "default": 8080,
+            "allOf": [
+                {
+                    "$ref": "#/definitions/StringOrNumber_int32"
+                }
+            ]
+        },
+        "tld": {
+            "description": "Domain name",
+            "type": "string"
+        }
+    },
+    "additionalProperties": false,
+    "definitions": {
+        "CookiesConfig": {
+            "type": "object",
+            "properties": {
+                "jwt_token_cookie_name": {
+                    "description": "The name of the cookie that will hold the JWT token",
+                    "default": "HXI2_TOKEN",
+                    "type": "string"
+                },
+                "jwt_token_validity_seconds": {
+                    "description": "The validity of the JWT token, in seconds",
+                    "default": 900,
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/StringOrNumber_int32"
+                        }
+                    ]
+                },
+                "refresh_token_cookie_name": {
+                    "description": "The name of the cookie that will hold the refresh token",
+                    "default": "HXI2_REFRESH_TOKEN",
+                    "type": "string"
+                },
+                "refresh_token_validity_seconds": {
+                    "description": "The validity of the refresh token, in seconds",
+                    "default": 2592000,
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/StringOrNumber_int32"
+                        }
+                    ]
+                },
+                "small_data_cookie_name": {
+                    "description": "The name of the cookie that will hold the small data",
+                    "default": "HXI2_SMALL_DATA",
+                    "type": "string"
+                }
+            }
+        },
+        "Environnement": {
+            "description": "The environment the application is running in",
+            "type": "string",
+            "enum": [
+                "PRODUCTION",
+                "DEVELOPMENT"
+            ]
+        },
+        "StringOrNumber_int32": {
+            "description": "Can be specified either directly as a number (e.g. 8080) or as a string reference ('env:PORT', 'file:/path')",
+            "anyOf": [
+                {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        }
+    }
+}
