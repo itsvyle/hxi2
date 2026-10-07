@@ -106,6 +106,16 @@ fn get_proto_folder_hash() -> Result<String> {
     Ok(hasher.finalize().to_hex().to_string())
 }
 
+fn list_roles() -> Result<BTreeMap<String, i32>> {
+    let mut roles_map = BTreeMap::new();
+    for role in Permission::values() {
+        let name = format!("{:?}", role);
+        let value = role.to_i32();
+        roles_map.insert(name, value);
+    }
+    Ok(roles_map)
+}
+
 fn get_permissions(descriptor_bytes: &[u8]) -> Result<BTreeMap<String, MethodPermissions>> {
     let mut cache: BTreeMap<String, MethodPermissions> = BTreeMap::new();
 
@@ -184,6 +194,7 @@ fn get_permissions(descriptor_bytes: &[u8]) -> Result<BTreeMap<String, MethodPer
 #[derive(serde::Serialize)]
 pub struct PermissionsOutput {
     pub permissions: BTreeMap<String, MethodPermissions>,
+    pub roles: BTreeMap<String, i32>,
 }
 
 fn main() -> Result<()> {
@@ -208,8 +219,12 @@ fn main() -> Result<()> {
         })
         .collect();
     // println!("Permissions: {:#?}", perms);
+    let roles_list = list_roles().context("list_roles")?;
 
-    let output = PermissionsOutput { permissions: perms };
+    let output = PermissionsOutput {
+        permissions: perms,
+        roles: roles_list,
+    };
     let json =
         serde_json::to_string_pretty(&output).context("Failed to serialize permissions to JSON")?;
 

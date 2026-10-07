@@ -1,6 +1,7 @@
 syntax = "proto3";
 package auth.v2;
 
+import "google/protobuf/timestamp.proto";
 import "auth/v2/permissions.proto";
 
 message SmallData {
@@ -10,6 +11,8 @@ message SmallData {
     optional string last_name = 4;
     int64 permissions = 5;
     int32 promotion = 6;
+    optional google.protobuf.Timestamp expiration = 7;
+    repeated Permission roles = 8;
 }
 
 message JwtClaims {

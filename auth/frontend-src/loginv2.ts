@@ -1,3 +1,4 @@
+//@ts-ignore
 import "./loginv2.scss";
 import Dialog from "../../global-frontend-dependencies/ui_dialog";
 import {

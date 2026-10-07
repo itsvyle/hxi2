@@ -91,9 +91,31 @@
                     src="static:dodu-protege.jpg" />
             </div>
 
+            <div class="logged-in-container visible" id="loggedInContainer">
+                <h4>You are logged in!</h4>
+                <p>
+                    You are already logged in as
+                    <span id="loggedInUsername"></span>
+                </p>
+                <div
+                    style="
+                        margin-top: 0.25rem;
+                        width: 100%;
+                        height: 1px;
+                        background-color: var(--foreground-primary);
+                    "></div>
+                <a href="/logout?redirect_to=/" class="logout-button"
+                    ><iconify-icon
+                        icon="ion:log-out-outline"
+                        style="font-size: 1.2em"></iconify-icon>
+                    Logout</a
+                >
+            </div>
+
             <div
                 class="login-option-choice-container"
-                id="loginOptionChoiceContainer">
+                id="loginOptionChoiceContainer"
+                style="display: none">
                 <h3>Chose a login option:</h3>
                 <a
                     class="login-option"

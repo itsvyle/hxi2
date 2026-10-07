@@ -15,6 +15,12 @@ pub struct SmallDataView<'a> {
     pub permissions: i64,
     /// Field 6: `promotion`
     pub promotion: i32,
+    /// Field 7: `expiration`
+    pub expiration: ::buffa::MessageFieldView<
+        ::buffa_types::google::protobuf::__buffa::view::TimestampView<'a>,
+    >,
+    /// Field 8: `roles`
+    pub roles: ::buffa::RepeatedView<'a, ::buffa::EnumValue<super::super::Permission>>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for SmallDataView<'a> {
@@ -89,6 +95,56 @@ impl<'a> ::buffa::MessageView<'a> for SmallDataView<'a> {
                 )?;
                 view.promotion = ::buffa::types::decode_int32(&mut cur)?;
             }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.expiration.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.expiration = ::buffa::MessageFieldView::set(
+                            <::buffa_types::google::protobuf::__buffa::view::TimestampView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            8u32 => {
+                if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
+                    let payload = ::buffa::types::borrow_bytes(&mut cur)?;
+                    view.roles.reserve(::buffa::encoding::count_varints(payload));
+                    let mut pcur: &[u8] = payload;
+                    while !pcur.is_empty() {
+                        view.roles
+                            .push(
+                                ::buffa::EnumValue::from(
+                                    ::buffa::types::decode_int32_packed(&mut pcur)?,
+                                ),
+                            );
+                    }
+                } else if tag.wire_type() == ::buffa::encoding::WireType::Varint {
+                    view.roles
+                        .push(
+                            ::buffa::EnumValue::from(
+                                ::buffa::types::decode_int32(&mut cur)?,
+                            ),
+                        );
+                } else {
+                    return Err(
+                        ::buffa::encoding::wire_type_mismatch(
+                            tag,
+                            ::buffa::encoding::WireType::LengthDelimited,
+                        ),
+                    );
+                }
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -117,6 +173,16 @@ impl<'a> ::buffa::MessageView<'a> for SmallDataView<'a> {
             last_name: self.last_name.map(|s| s.to_string()),
             permissions: self.permissions,
             promotion: self.promotion,
+            expiration: match self.expiration.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        ::buffa_types::google::protobuf::Timestamp,
+                        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            roles: self.roles.to_vec(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -124,7 +190,7 @@ impl<'a> ::buffa::MessageView<'a> for SmallDataView<'a> {
 }
 impl<'a> ::buffa::ViewEncode<'a> for SmallDataView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
@@ -146,13 +212,29 @@ impl<'a> ::buffa::ViewEncode<'a> for SmallDataView<'a> {
         if self.promotion != 0i32 {
             size += 1u64 + ::buffa::types::int32_encoded_len(self.promotion) as u64;
         }
+        if self.expiration.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.expiration.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if !self.roles.is_empty() {
+            let payload: u64 = self
+                .roles
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     #[allow(clippy::needless_borrow)]
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
@@ -174,6 +256,25 @@ impl<'a> ::buffa::ViewEncode<'a> for SmallDataView<'a> {
         }
         if self.promotion != 0i32 {
             ::buffa::types::put_int32_field(6u32, self.promotion, buf);
+        }
+        if self.expiration.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                7u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.expiration.write_to(__cache, buf);
+        }
+        if !self.roles.is_empty() {
+            let payload: u64 = self
+                .roles
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            ::buffa::types::put_len_delimited_header(8u32, payload, buf);
+            for v in &self.roles {
+                ::buffa::types::encode_int32(v.to_i32(), buf);
+            }
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -224,6 +325,18 @@ impl<'__a> ::serde::Serialize for SmallDataView<'__a> {
                 .serialize_entry(
                     "promotion",
                     &::buffa::json_helpers::ProtoJson(&self.promotion),
+                )?;
+        }
+        {
+            if let ::core::option::Option::Some(__v) = self.expiration.as_option() {
+                __map.serialize_entry("expiration", __v)?;
+            }
+        }
+        if !self.roles.is_empty() {
+            __map
+                .serialize_entry(
+                    "roles",
+                    &::buffa::json_helpers::EnumSeqJson(&self.roles),
                 )?;
         }
         __map.end()
@@ -347,6 +460,22 @@ impl SmallDataOwnedView {
     pub fn promotion(&self) -> i32 {
         self.0.reborrow().promotion
     }
+    /// Field 7: `expiration`
+    #[must_use]
+    pub fn expiration(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        ::buffa_types::google::protobuf::__buffa::view::TimestampView<'_>,
+    > {
+        &self.0.reborrow().expiration
+    }
+    /// Field 8: `roles`
+    #[must_use]
+    pub fn roles(
+        &self,
+    ) -> &::buffa::RepeatedView<'_, ::buffa::EnumValue<super::super::Permission>> {
+        &self.0.reborrow().roles
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<SmallDataView<'static>>>
 for SmallDataOwnedView {
@@ -403,6 +532,12 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for SmallDataView<'a> {
             }
             5u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.permissions),
             6u32 => ::buffa_descriptor::reflect::ValueRef::I32(self.promotion),
+            7u32 => {
+                ::buffa_descriptor::reflect::ValueRef::Message(
+                    ::buffa_descriptor::reflect::ReflectCow::Borrowed(&*self.expiration),
+                )
+            }
+            8u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.roles),
             _ => {
                 ::core::debug_assert!(
                     false,
@@ -421,6 +556,8 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for SmallDataView<'a> {
             4u32 => self.last_name.is_some(),
             5u32 => self.permissions != 0,
             6u32 => self.promotion != 0,
+            7u32 => self.expiration.is_set(),
+            8u32 => !::buffa::RepeatedView::is_empty(&self.roles),
             _ => false,
         }
     }

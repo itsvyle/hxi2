@@ -10,8 +10,10 @@ use axum_extra::extract::{
     cookie::{Cookie, SameSite},
 };
 use base64::prelude::*;
+use buffa::{Enumeration, MessageField};
+use buffa_types::Timestamp;
 use http::StatusCode;
-use hxi2_proto::proto::auth::v2::SmallData;
+use hxi2_proto::proto::auth::v2::{Permission, SmallData};
 use rand::RngExt;
 use tracing::{error, instrument, trace};
 
@@ -94,6 +96,22 @@ impl LoginManager {
         Self { signer, verifier }
     }
 
+    #[instrument(level = "trace", ret)]
+    pub fn roles_from_bitfield(bitfield: i64) -> Vec<Permission> {
+        let mut roles = Vec::new();
+        let mut copy = bitfield;
+        while copy != 0 {
+            let index = copy.trailing_zeros();
+            if let Some(role) = Permission::from_i32(index as i32) {
+                roles.push(role);
+            } else {
+                trace!("Unknown role index {} in bitfield {}", index, bitfield);
+            }
+            copy &= copy - 1;
+        }
+        roles
+    }
+
     fn small_data_from_user(&self, user: &DbUser) -> SmallData {
         SmallData {
             user_id: user.id,
@@ -102,6 +120,11 @@ impl LoginManager {
             last_name: user.last_name.clone(),
             permissions: user.permissions,
             promotion: user.promotion,
+            expiration: MessageField::none(),
+            roles: Self::roles_from_bitfield(user.permissions)
+                .iter()
+                .map(|p| (*p).into())
+                .collect(),
             __buffa_unknown_fields: Default::default(),
         }
     }
@@ -136,7 +159,11 @@ impl LoginManager {
             LoginID::DiscordID(did) => cfg.db().await.get_db_user_by_discord_id(did).await,
         }?;
 
-        let small_data = self.small_data_from_user(&user);
+        let mut small_data = self.small_data_from_user(&user);
+        small_data.expiration =
+            Timestamp::from_unix_secs((chrono::Utc::now() + cfg.JWT_TOKEN_VALIDITY).timestamp())
+                .into();
+
         let opts = JWTSignerOptions::default();
         let (token, claims) = self
             .signer

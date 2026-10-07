@@ -57,6 +57,14 @@ body {
         text-align: center;
     }
 
+    .logout-button {
+        @include linkButton();
+        @include backgroundColorButton($bccent-color);
+        @include buttonIcon(0.5rem);
+        font-size: 1.25rem;
+        text-align: center;
+    }
+
     .login-option-choice-container {
         display: flex;
         flex-direction: column;
@@ -144,6 +152,23 @@ body {
             @include buttonIcon(0.5rem);
             font-size: 1.25rem;
             text-align: center;
+        }
+    }
+
+    .logged-in-container {
+        text-align: center;
+        margin: 10px 0;
+        margin-bottom: 20px;
+        font-weight: bold;
+        max-width: 350px;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        min-width: 250px;
+
+        display: none;
+        &.visible {
+            display: flex;
         }
     }
 

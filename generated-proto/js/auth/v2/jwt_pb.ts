@@ -4,6 +4,9 @@
 
 import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import type { Timestamp } from "@bufbuild/protobuf/wkt";
+import { file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
+import type { Permission } from "./permissions_pb";
 import { file_auth_v2_permissions } from "./permissions_pb";
 import type { Message } from "@bufbuild/protobuf";
 
@@ -11,7 +14,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file auth/v2/jwt.proto.
  */
 export const file_auth_v2_jwt: GenFile = /*@__PURE__*/
-  fileDesc("ChFhdXRoL3YyL2p3dC5wcm90bxIHYXV0aC52MiKQAQoJU21hbGxEYXRhEg8KB3VzZXJfaWQYASABKAMSEAoIdXNlcm5hbWUYAiABKAkSEgoKZmlyc3RfbmFtZRgDIAEoCRIWCglsYXN0X25hbWUYBCABKAlIAIgBARITCgtwZXJtaXNzaW9ucxgFIAEoAxIRCglwcm9tb3Rpb24YBiABKAVCDAoKX2xhc3RfbmFtZSLdAQoJSnd0Q2xhaW1zEgsKA2lzcxgBIAEoCRILCgNzdWIYAiABKAkSCwoDYXVkGAMgASgJEgsKA2V4cBgEIAEoAxILCgNuYmYYBSABKAMSCwoDaWF0GAYgASgDEgsKA2p0aRgHIAEoCRIRCgl0ZW1wb3JhcnkYCCABKAgSJAoXdGVtcG9yYXJ5X3JlY2hlY2tfYWZ0ZXIYCSABKANIAIgBARIgCgRkYXRhGAogASgLMhIuYXV0aC52Mi5TbWFsbERhdGFCGgoYX3RlbXBvcmFyeV9yZWNoZWNrX2FmdGVyIhUKE0dldENTUkZUb2tlblJlcXVlc3QiFgoUR2V0Q1NSRlRva2VuUmVzcG9uc2ViBnByb3RvMw", [file_auth_v2_permissions]);
+  fileDesc("ChFhdXRoL3YyL2p3dC5wcm90bxIHYXV0aC52MiL4AQoJU21hbGxEYXRhEg8KB3VzZXJfaWQYASABKAMSEAoIdXNlcm5hbWUYAiABKAkSEgoKZmlyc3RfbmFtZRgDIAEoCRIWCglsYXN0X25hbWUYBCABKAlIAIgBARITCgtwZXJtaXNzaW9ucxgFIAEoAxIRCglwcm9tb3Rpb24YBiABKAUSMwoKZXhwaXJhdGlvbhgHIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBIAYgBARIiCgVyb2xlcxgIIAMoDjITLmF1dGgudjIuUGVybWlzc2lvbkIMCgpfbGFzdF9uYW1lQg0KC19leHBpcmF0aW9uIt0BCglKd3RDbGFpbXMSCwoDaXNzGAEgASgJEgsKA3N1YhgCIAEoCRILCgNhdWQYAyABKAkSCwoDZXhwGAQgASgDEgsKA25iZhgFIAEoAxILCgNpYXQYBiABKAMSCwoDanRpGAcgASgJEhEKCXRlbXBvcmFyeRgIIAEoCBIkChd0ZW1wb3JhcnlfcmVjaGVja19hZnRlchgJIAEoA0gAiAEBEiAKBGRhdGEYCiABKAsyEi5hdXRoLnYyLlNtYWxsRGF0YUIaChhfdGVtcG9yYXJ5X3JlY2hlY2tfYWZ0ZXIiFQoTR2V0Q1NSRlRva2VuUmVxdWVzdCIWChRHZXRDU1JGVG9rZW5SZXNwb25zZWIGcHJvdG8z", [file_google_protobuf_timestamp, file_auth_v2_permissions]);
 
 /**
  * @generated from message auth.v2.SmallData
@@ -46,6 +49,16 @@ export type SmallData = Message<"auth.v2.SmallData"> & {
    * @generated from field: int32 promotion = 6;
    */
   promotion: number;
+
+  /**
+   * @generated from field: optional google.protobuf.Timestamp expiration = 7;
+   */
+  expiration?: Timestamp | undefined;
+
+  /**
+   * @generated from field: repeated auth.v2.Permission roles = 8;
+   */
+  roles: Permission[];
 };
 
 /**

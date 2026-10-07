@@ -246,5 +246,14 @@
       "is_frontend": false,
       "frontend_static_file": null
     }
+  },
+  "roles": {
+    "PERMISSION_ADMIN": 1,
+    "PERMISSION_ANY_AUTHENTICATED": 6,
+    "PERMISSION_API_JWT": 4,
+    "PERMISSION_API_LIST_USERS": 5,
+    "PERMISSION_PERMISSION_UNSPECIFIED": 0,
+    "PERMISSION_STUDENT": 2,
+    "PERMISSION_TEACHER": 3
   }
 }
