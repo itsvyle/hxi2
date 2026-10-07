@@ -42,16 +42,18 @@ impl LoginResponse {
         let cfg = AppConfiguration::INSTANCE();
 
         // JWT Cookie: must be alive at least as long as refresh token, to provide adequate refreshing
-        let mut jwt_cookie = Cookie::build((cfg.COOKIE_JWT_TOKEN_NAME, self.token.to_owned()))
+        let mut jwt_cookie = Cookie::build((&cfg.COOKIE_JWT_TOKEN_NAME, self.token.to_owned()))
             .max_age(time::Duration::seconds(self.refresh_token_max_age))
             .build();
         LoginManager::apply_secure_cookie_options(&mut jwt_cookie);
 
         // Refresh Token Cookie
-        let mut refresh_token_cookie =
-            Cookie::build((cfg.COOKIE_REFRESH_TOKEN_NAME, self.refresh_token.to_owned()))
-                .max_age(time::Duration::seconds(self.refresh_token_max_age))
-                .build();
+        let mut refresh_token_cookie = Cookie::build((
+            &cfg.COOKIE_REFRESH_TOKEN_NAME,
+            self.refresh_token.to_owned(),
+        ))
+        .max_age(time::Duration::seconds(self.refresh_token_max_age))
+        .build();
         LoginManager::apply_secure_cookie_options(&mut refresh_token_cookie);
 
         // Small Data Cookie
@@ -65,7 +67,7 @@ impl LoginResponse {
         let small_data_b64 =
             base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(small_data_json);
 
-        let mut small_data_cookie = Cookie::build((cfg.COOKIE_SMALL_DATA_NAME, small_data_b64))
+        let mut small_data_cookie = Cookie::build((&cfg.COOKIE_SMALL_DATA_NAME, small_data_b64))
             .max_age(time::Duration::seconds(self.refresh_token_max_age))
             .build();
         LoginManager::apply_secure_cookie_options(&mut small_data_cookie);
@@ -217,7 +219,7 @@ impl LoginManager {
     ) -> Result<impl IntoResponse, (StatusCode, &'static str)> {
         let cfg = AppConfiguration::INSTANCE();
         let refresh_token_cookie = jar
-            .get(cfg.COOKIE_REFRESH_TOKEN_NAME)
+            .get(&cfg.COOKIE_REFRESH_TOKEN_NAME)
             .ok_or((StatusCode::BAD_REQUEST, "No refresh token cookie found"))?;
         let refresh_token = refresh_token_cookie.value();
 
@@ -227,17 +229,17 @@ impl LoginManager {
         }
 
         // Remove cookies
-        let mut jwt_cookie = Cookie::build((cfg.COOKIE_JWT_TOKEN_NAME, ""))
+        let mut jwt_cookie = Cookie::build((&cfg.COOKIE_JWT_TOKEN_NAME, ""))
             .max_age(time::Duration::seconds(0))
             .build();
         Self::apply_secure_cookie_options(&mut jwt_cookie);
 
-        let mut refresh_token_cookie = Cookie::build((cfg.COOKIE_REFRESH_TOKEN_NAME, ""))
+        let mut refresh_token_cookie = Cookie::build((&cfg.COOKIE_REFRESH_TOKEN_NAME, ""))
             .max_age(time::Duration::seconds(0))
             .build();
         Self::apply_secure_cookie_options(&mut refresh_token_cookie);
 
-        let mut small_data_cookie = Cookie::build((cfg.COOKIE_SMALL_DATA_NAME, ""))
+        let mut small_data_cookie = Cookie::build((&cfg.COOKIE_SMALL_DATA_NAME, ""))
             .max_age(time::Duration::seconds(0))
             .build();
         Self::apply_secure_cookie_options(&mut small_data_cookie);

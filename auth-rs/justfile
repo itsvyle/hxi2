@@ -12,17 +12,9 @@ create-jwt-private-key:
 
 
 CONFIG_DB_PATH := "test_db.sqlite3"
-test_private_key := "-----BEGIN PRIVATE KEY-----
-MC4CAQAwBQYDK2VwBCIEIGSBlJqHrMz/gSJ0QgiEZVVgOmFzSNDT38RS6FPcXgXg
------END PRIVATE KEY-----"
-export HXI2_TLD := "hxi2.fr"
-export LOCAL_DEBUG_INSTANCE := "1"
-export HXI2_COOKIES_DOMAIN := "localhost"
-export CONFIG_CSRF_SIGNING_KEY := "PAFXpBAmnyWvpeYK0FoaCSe3QrOp4OZygusAquc4Zho="
 PORT := "8080"
 export CONFIG_RUNNING_PORT := PORT
 
-export CONFIG_ENVIRONMENT := "development"
 export RUST_LOG := "auth_rs=trace"
 
 jwt_token_payload := '{"user_id": "42", "roles": [
@@ -46,7 +38,7 @@ dev:
         echo "{{ style("error") }}Instead, you should run "just frontend-dev" and "just test-run" in separate terminals{{ NORMAL }}"
     fi
 
-run $HXI2_AUTH_URL="http://localhost:8080" $HXI2_AUTH_ENDPOINT="http://localhost:8080" $CONFIG_JWT_PRIVATE_KEY=test_private_key $CONFIG_DB_PATH=CONFIG_DB_PATH:
+run:
     cargo run .
 
 get_jwt:

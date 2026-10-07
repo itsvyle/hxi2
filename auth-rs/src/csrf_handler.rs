@@ -27,9 +27,9 @@ pub struct CsrfProtection {
 #[allow(dead_code)]
 impl CsrfProtection {
     pub fn from_env() -> Self {
-        let config_key = std::env::var("CONFIG_CSRF_SIGNING_KEY")
-            .expect("CONFIG_CSRF_SIGNING_KEY environment variable not set");
-        Self::new(&config_key)
+        let cfg = crate::app_config::AppConfiguration::INSTANCE();
+        let config_key = &cfg.csrf_private_key;
+        Self::new(config_key)
     }
 
     pub fn new(config_key: &str) -> Self {

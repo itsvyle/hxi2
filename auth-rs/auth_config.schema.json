@@ -7,6 +7,7 @@
         "auth_endpoint",
         "auth_url",
         "cookie_domain",
+        "csrf_private_key",
         "discord_application_id",
         "discord_client_id",
         "discord_client_secret",
@@ -47,6 +48,10 @@
                     "$ref": "#/definitions/CookiesConfig"
                 }
             ]
+        },
+        "csrf_private_key": {
+            "description": "Your private key to sign CSRF tokens with. You can generate one with: openssl rand -base64 32",
+            "type": "string"
         },
         "db_path": {
             "description": "Path to the database file",

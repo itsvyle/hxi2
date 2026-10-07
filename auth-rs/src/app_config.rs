@@ -7,8 +7,6 @@ use ed25519_dalek::pkcs8::EncodePublicKey;
 use once_cell::sync::Lazy;
 use sqlx::AssertSqlSafe;
 use tokio::sync::OnceCell;
-use tracing::trace;
-use utils::cfg_from_env_or;
 
 use crate::{database::DatabaseManager, jwt_verifier::JWTVerifier};
 
@@ -44,6 +42,8 @@ pub struct AppConfiguration {
     pub running_port: u16,
     #[doc = "Private key for the JWT token"]
     pub jwt_private_key: String,
+    #[doc = "Private key for the CSRF token signing"]
+    pub csrf_private_key: String,
     #[doc = "Path to the sqlite database file"]
     pub db_path: String,
     #[doc = "Discord application id"]
@@ -58,16 +58,15 @@ pub struct AppConfiguration {
     #[derivative(Default(value = "Environnement::Production"))]
     pub environment: Environnement,
 
-    // INTERNAL NON CHANGEABLE CONFIGURATION
-    #[derivative(Default(value = r#""HXI2_TOKEN""#))]
-    pub COOKIE_JWT_TOKEN_NAME: &'static str,
-    #[derivative(Default(value = r#""HXI2_REFRESH_TOKEN""#))]
-    pub COOKIE_REFRESH_TOKEN_NAME: &'static str,
-    #[derivative(Default(value = r#""HXI2_SMALL_DATA""#))]
-    pub COOKIE_SMALL_DATA_NAME: &'static str,
-    #[derivative(Default(value = "Duration::days(30)"))]
+    #[doc = "Name of the cookie for the JWT token"]
+    pub COOKIE_JWT_TOKEN_NAME: String,
+    #[doc = "Name of the cookie for the refresh token"]
+    pub COOKIE_REFRESH_TOKEN_NAME: String,
+    #[doc = "Name of the cookie for the small data"]
+    pub COOKIE_SMALL_DATA_NAME: String,
+    #[doc = "Validity of the refresh token"]
     pub JWT_REFRESH_TOKEN_VALIDITY: Duration,
-    #[derivative(Default(value = "Duration::seconds(15 * 60)"))]
+    #[doc = "Validity of the JWT token"]
     pub JWT_TOKEN_VALIDITY: Duration,
 
     #[derivative(Debug = "ignore")]
@@ -91,44 +90,42 @@ impl AppConfiguration {
             "Failed to read config file at {}. Please make sure the file exists and is readable.",
             config_path
         ))?;
-        let _config: AuthConfig = serde_json::from_str(&raw_config).context(format!(
+        let config: AuthConfig = serde_json::from_str(&raw_config).context(format!(
             "Failed to parse config file at {}. Please make sure the file is valid JSON.",
             config_path
         ))?;
-        trace!("Loaded config from {}: {:?}", config_path, _config);
+
+        if config.environment == Environnement::Production && config_path.contains("devconfig.json")
+        {
+            panic!(
+                "You are running in development mode with the default devconfig.json.
+                Please create a copy of devconfig.json, rename it to config.json, and set the environment variable CONFIG_PATH to point to your new config file.
+                This is to prevent accidentally running in development mode in production."
+            );
+        }
 
         Ok(Self {
-            auth_url: cfg_from_env_or("HXI2_AUTH_URL", None)?,
-            auth_endpoint: cfg_from_env_or("HXI2_AUTH_ENDPOINT", None)?,
-            cookies_domain: cfg_from_env_or("HXI2_COOKIES_DOMAIN", None)?,
-            tld: cfg_from_env_or("HXI2_TLD", None)?,
-            default_redirect_url: cfg_from_env_or(
-                "CONFIG_DEFAULT_REDIRECT_URL",
-                Some("/".to_string()),
-            )?,
-            running_port: cfg_from_env_or("CONFIG_RUNNING_PORT", Some(8080))?,
-            jwt_private_key: cfg_from_env_or("CONFIG_JWT_PRIVATE_KEY", None)?,
-            db_path: cfg_from_env_or("CONFIG_DB_PATH", Some("./auth.db".to_string()))?,
-            discord_application_id: cfg_from_env_or("CONFIG_DISCORD_APPLICATION_ID", None)?,
-            discord_client_id: cfg_from_env_or("CONFIG_DISCORD_CLIENT_ID", None)?,
-            discord_client_secret: cfg_from_env_or("CONFIG_DISCORD_CLIENT_SECRET", None)?,
-            environment: match cfg_from_env_or(
-                "CONFIG_ENVIRONMENT",
-                Some("production".to_string()),
-            )?
-            .as_str()
-            {
-                "development" => Environnement::Development,
-                "production" => Environnement::Production,
-                other => {
-                    return Err(anyhow::anyhow!(
-                        "Invalid CONFIG_ENVIRONMENT value: {}. Must be 'development' or 'production'",
-                        other
-                    ));
-                }
-            },
+            auth_url: config.auth_url,
+            auth_endpoint: config.auth_endpoint,
+            cookies_domain: config.cookie_domain,
+            tld: config.tld,
+            default_redirect_url: config.default_redirect_url,
+            running_port: config.running_port as u16,
+            jwt_private_key: config.jwt_private_key,
+            db_path: config.db_path,
+            discord_application_id: config.discord_application_id,
+            discord_client_id: config.discord_client_id,
+            discord_client_secret: config.discord_client_secret,
+            environment: config.environment,
             db_manager: OnceCell::new(),
-            ..Default::default()
+            csrf_private_key: config.csrf_private_key,
+            COOKIE_JWT_TOKEN_NAME: config.cookies.jwt_token_cookie_name,
+            COOKIE_REFRESH_TOKEN_NAME: config.cookies.refresh_token_cookie_name,
+            COOKIE_SMALL_DATA_NAME: config.cookies.small_data_cookie_name,
+            JWT_REFRESH_TOKEN_VALIDITY: Duration::seconds(
+                config.cookies.refresh_token_validity_seconds,
+            ),
+            JWT_TOKEN_VALIDITY: Duration::seconds(config.cookies.jwt_token_validity_seconds),
         })
     }
 
@@ -304,7 +301,7 @@ mod config_parsing {
     #[cfg_attr(feature = "schema-gen", derive(schemars::JsonSchema))]
     #[serde(deny_unknown_fields)]
     /// Represents the configuration for the authentication service.
-    /// You can use `env:VAR_NAME` to load a value from an environment variable, or `file:PATH` to load a value from a file.
+    /// You can use `env:VAR_NAME:<default_value>` to load a value from an environment variable, or `file:PATH` to load a value from a file.
     pub struct AuthConfig {
         /// Path or URL to the JSON Schema for validation and auto-completion
         #[serde(rename = "$schema", default, skip_serializing_if = "Option::is_none")]
@@ -352,6 +349,11 @@ mod config_parsing {
         /// You can generate one with: openssl genpkey -algorithm Ed25519 -out jwt_private_key.pem
         #[serde(deserialize_with = "deserialize_required_resolved_string")]
         pub jwt_private_key: String,
+
+        /// Your private key to sign CSRF tokens with.
+        /// You can generate one with: openssl rand -base64 32
+        #[serde(deserialize_with = "deserialize_required_resolved_string")]
+        pub csrf_private_key: String,
 
         /// Discord application id
         #[serde(deserialize_with = "deserialize_required_resolved_string")]
@@ -460,13 +462,20 @@ mod config_parsing {
         }
     }
 
-    /// Resolves `env:VAR_NAME` or `file:PATH` prefixes.
+    /// Resolves `env:VAR_NAME:<default_value>` or `file:PATH` prefixes.
     /// Returns raw string if no prefix matches.
     pub fn resolve_value(raw: &str) -> Result<String, String> {
         let trimmed = raw.trim();
         if let Some(var_name) = trimmed.strip_prefix("env:") {
+            let parts: Vec<&str> = var_name.split(':').collect();
+            if parts.len() != 2 {
+                return Err("Invalid env: format. Expected env:VAR_NAME:DEFAULT_VALUE".into());
+            }
+            let var_name = parts[0];
+            let default_value = parts[1];
             env::var(var_name)
                 .map_err(|_| format!("Environment variable '{}' is not set", var_name))
+                .or_else(|_| Ok(default_value.into()))
         } else if let Some(file_path) = trimmed.strip_prefix("file:") {
             fs::read_to_string(file_path)
                 .map(|content| content.trim().to_string())

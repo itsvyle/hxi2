@@ -1,9 +1,15 @@
 {
     "$schema": "./auth_config.schema.json",
+    "environment": "DEVELOPMENT",
     "auth_url": "http://localhost:8080",
     "auth_endpoint": "http://localhost:8080",
     "cookie_domain": "localhost",
     "tld": "hxi2.fr",
     "default_redirect_url": "/",
-    "running_port": "env:PORT"
+    "jwt_private_key": "-----BEGIN PRIVATE KEY-----\nMC4CAQAwBQYDK2VwBCIEIGSBlJqHrMz/gSJ0QgiEZVVgOmFzSNDT38RS6FPcXgXg\n-----END PRIVATE KEY-----",
+    "csrf_private_key": "PAFXpBAmnyWvpeYK0FoaCSe3QrOp4OZygusAquc4Zho=",
+    "discord_application_id": "env:CONFIG_DISCORD_APPLICATION_ID:1234567890",
+    "discord_client_id": "env:CONFIG_DISCORD_CLIENT_ID:1234567890",
+    "discord_client_secret": "env:CONFIG_DISCORD_CLIENT_SECRET:1234567890",
+    "db_path": "test_db.sqlite3"
 }
