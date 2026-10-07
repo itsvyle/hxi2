@@ -8,7 +8,7 @@ use argon2::{
 use tracing::{instrument, trace};
 use zeroize::Zeroizing;
 
-use crate::login_manager::LoginManager;
+use crate::{database::DbUserIdentifier, login_manager::LoginManager};
 
 #[derive(Clone)]
 pub struct PasswordLoginManager {
@@ -21,7 +21,11 @@ impl PasswordLoginManager {
     }
 
     #[cfg_attr(debug_assertions, instrument(skip(self), level = "trace", ret))]
-    pub async fn add_password(&self, user_id: i64, password: &str) -> anyhow::Result<()> {
+    pub async fn add_password(
+        &self,
+        user_identifier: &DbUserIdentifier,
+        password: &str,
+    ) -> anyhow::Result<()> {
         let password = Zeroizing::new(password.to_string());
 
         let hash = tokio::task::spawn_blocking(move || {
@@ -35,16 +39,16 @@ impl PasswordLoginManager {
         .map_err(|e| anyhow!("Join error: {e}"))??;
 
         let db = crate::app_config::AppConfiguration::INSTANCE().db().await;
-        db.add_user_password(user_id, &hash).await?;
+        db.add_user_password(user_identifier, &hash).await?;
 
         Ok(())
     }
 
     #[cfg_attr(debug_assertions, instrument(skip(self), level = "trace", ret))]
-    pub async fn remove_password(&self, user_id: i64) -> anyhow::Result<()> {
+    pub async fn remove_password(&self, user_identifier: &DbUserIdentifier) -> anyhow::Result<()> {
         let db = crate::app_config::AppConfiguration::INSTANCE().db().await;
 
-        db.remove_user_password(user_id)
+        db.remove_user_password(user_identifier)
             .await
             .map_err(|e| anyhow!("Failed to remove password: {e}"))
     }

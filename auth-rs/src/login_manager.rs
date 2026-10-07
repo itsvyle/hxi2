@@ -19,7 +19,7 @@ use tracing::{error, instrument, trace};
 
 use crate::{
     app_config::AppConfiguration,
-    database::{DbError, DbUser},
+    database::{DbError, DbUser, DbUserIdentifier},
     jwt_signer::JWTSignerOptions,
 };
 
@@ -82,12 +82,6 @@ impl LoginResponse {
     }
 }
 
-#[derive(Debug, Clone)]
-pub enum LoginID {
-    UserID(i64),
-    DiscordID(String),
-}
-
 impl LoginManager {
     pub fn new(
         signer: &'static crate::jwt_signer::JWTSigner,
@@ -125,6 +119,7 @@ impl LoginManager {
                 .iter()
                 .map(|p| (*p).into())
                 .collect(),
+            is_api_token: user.is_api,
             __buffa_unknown_fields: Default::default(),
         }
     }
@@ -152,12 +147,14 @@ impl LoginManager {
     // This creates a token for the user
     // Authorization to login as such a user must have been checked PRIOR
     #[cfg_attr(debug_assertions, instrument(skip(self), level = "trace", ret))]
-    pub async fn login_as(&self, user_id: &LoginID) -> anyhow::Result<LoginResponse> {
+    pub async fn login_as(&self, identifier: &DbUserIdentifier) -> anyhow::Result<LoginResponse> {
         let cfg = crate::app_config::AppConfiguration::INSTANCE();
-        let user = match user_id {
-            LoginID::UserID(uid) => cfg.db().await.get_db_user_by_id(uid).await,
-            LoginID::DiscordID(did) => cfg.db().await.get_db_user_by_discord_id(did).await,
-        }?;
+        let user = cfg
+            .db()
+            .await
+            .get_db_user(identifier)
+            .await
+            .context("getting user from database")?;
 
         let mut small_data = self.small_data_from_user(&user);
         small_data.expiration =
@@ -213,7 +210,7 @@ impl LoginManager {
             error!(error = ?e, "Failed to delete old refresh token");
         }
 
-        let l = self.login_as(&LoginID::UserID(uid)).await?;
+        let l = self.login_as(&DbUserIdentifier::Id(uid)).await?;
         Ok(l)
     }
 

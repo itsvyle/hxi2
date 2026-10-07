@@ -13,6 +13,7 @@ message SmallData {
     int32 promotion = 6;
     optional google.protobuf.Timestamp expiration = 7;
     repeated Permission roles = 8;
+    bool is_api_token = 9;
 }
 
 message JwtClaims {

@@ -70,6 +70,18 @@ pub type OwnedPasswordLoginRequestView = ::buffa::view::OwnedView<
 pub type OwnedPasswordLoginResponseView = ::buffa::view::OwnedView<
     crate::proto::auth::v2::__buffa::view::PasswordLoginResponseView<'static>,
 >;
+///Shorthand for `OwnedView<AddApiUserRequestView<'static>>`.
+pub type OwnedAddApiUserRequestView = ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::AddAPIUserRequestView<'static>,
+>;
+///Shorthand for `OwnedView<AddApiUserResponseView<'static>>`.
+pub type OwnedAddApiUserResponseView = ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::AddAPIUserResponseView<'static>,
+>;
+///Shorthand for `OwnedView<RemoveApiUserRequestView<'static>>`.
+pub type OwnedRemoveApiUserRequestView = ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::RemoveAPIUserRequestView<'static>,
+>;
 impl ::connectrpc::Encodable<crate::proto::auth::v2::GetJWTPublicKeyResponse>
 for crate::proto::auth::v2::__buffa::view::GetJWTPublicKeyResponseView<'_> {
     fn encode(
@@ -342,6 +354,40 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::auth::v2::AddAPIUserResponse>
+for crate::proto::auth::v2::__buffa::view::AddAPIUserResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::auth::v2::AddAPIUserResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::AddAPIUserResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const AUTH_SERVICE_SERVICE_NAME: &str = "auth.v2.AuthService";
 /// Static [`Spec`](::connectrpc::Spec) for the `GetJWTPublicKey` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -407,6 +453,18 @@ pub const AUTH_SERVICE_REMOVE_PASSWORD_SPEC: ::connectrpc::Spec = ::connectrpc::
 /// Static [`Spec`](::connectrpc::Spec) for the `PasswordLogin` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_PASSWORD_LOGIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/PasswordLogin",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `AddAPIUser` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_ADD_API_USER_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/auth.v2.AuthService/AddAPIUser",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `RemoveAPIUser` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_REMOVE_API_USER_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/auth.v2.AuthService/RemoveAPIUser",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
@@ -719,6 +777,52 @@ pub trait AuthService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::auth::v2::PasswordLoginResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// Handle the AddAPIUser RPC.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn add_api_user<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::auth::v2::AddAPIUserRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::auth::v2::AddAPIUserResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// Handle the RemoveAPIUser RPC.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn remove_api_user<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::auth::v2::RemoveAPIUserRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                ::buffa_types::google::protobuf::Empty,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1101,6 +1205,62 @@ impl<S: AuthService> AuthServiceExt for S {
             .with_spec(AUTH_SERVICE_PASSWORD_LOGIN_SPEC)
             .route_view(
                 AUTH_SERVICE_SERVICE_NAME,
+                "AddAPIUser",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::auth::v2::__buffa::view::AddAPIUserRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::auth::v2::AddAPIUserRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.add_api_user(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::auth::v2::AddAPIUserResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_ADD_API_USER_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
+                "RemoveAPIUser",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::auth::v2::__buffa::view::RemoveAPIUserRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::auth::v2::RemoveAPIUserRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.remove_api_user(ctx, sreq)
+                                .await?
+                                .encode::<::buffa_types::google::protobuf::Empty>(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_REMOVE_API_USER_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
                 "FrontendIndex",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -1271,6 +1431,18 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(AUTH_SERVICE_PASSWORD_LOGIN_SPEC),
+                )
+            }
+            "AddAPIUser" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_ADD_API_USER_SPEC),
+                )
+            }
+            "RemoveAPIUser" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_REMOVE_API_USER_SPEC),
                 )
             }
             "FrontendIndex" => {
@@ -1518,6 +1690,46 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                     svc.password_login(ctx, req)
                         .await?
                         .encode::<crate::proto::auth::v2::PasswordLoginResponse>(format)
+                })
+            }
+            "AddAPIUser" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::auth::v2::AddAPIUserRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::auth::v2::__buffa::view::AddAPIUserRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::auth::v2::AddAPIUserRequest,
+                    >::from_parts(&req, &body);
+                    svc.add_api_user(ctx, req)
+                        .await?
+                        .encode::<crate::proto::auth::v2::AddAPIUserResponse>(format)
+                })
+            }
+            "RemoveAPIUser" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::auth::v2::RemoveAPIUserRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::auth::v2::__buffa::view::RemoveAPIUserRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::auth::v2::RemoveAPIUserRequest,
+                    >::from_parts(&req, &body);
+                    svc.remove_api_user(ctx, req)
+                        .await?
+                        .encode::<::buffa_types::google::protobuf::Empty>(format)
                 })
             }
             "FrontendIndex" => {
@@ -2137,6 +2349,88 @@ where
                 &self.transport,
                 &self.config,
                 AUTH_SERVICE_PASSWORD_LOGIN_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the AddAPIUser RPC. Sends a request to /auth.v2.AuthService/AddAPIUser.
+    pub async fn add_api_user(
+        &self,
+        request: crate::proto::auth::v2::AddAPIUserRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::auth::v2::__buffa::view::AddAPIUserResponseView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.add_api_user_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the AddAPIUser RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn add_api_user_with_options(
+        &self,
+        request: crate::proto::auth::v2::AddAPIUserRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::auth::v2::__buffa::view::AddAPIUserResponseView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_ADD_API_USER_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the RemoveAPIUser RPC. Sends a request to /auth.v2.AuthService/RemoveAPIUser.
+    pub async fn remove_api_user(
+        &self,
+        request: crate::proto::auth::v2::RemoveAPIUserRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                ::buffa_types::google::protobuf::__buffa::view::EmptyView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.remove_api_user_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the RemoveAPIUser RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn remove_api_user_with_options(
+        &self,
+        request: crate::proto::auth::v2::RemoveAPIUserRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                ::buffa_types::google::protobuf::__buffa::view::EmptyView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_REMOVE_API_USER_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

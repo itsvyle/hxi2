@@ -16,4 +16,5 @@ message DBUser {
     google.protobuf.Timestamp account_modified_date = 7;
     int32 promotion = 8;
     int64 permissions = 9;
+    bool is_api = 10;
 }

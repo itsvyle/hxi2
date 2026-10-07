@@ -65,6 +65,14 @@ pub struct SmallData {
         skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_vec"
     )]
     pub roles: ::buffa::alloc::vec::Vec<::buffa::EnumValue<Permission>>,
+    /// Field 9: `is_api_token`
+    #[serde(
+        rename = "isApiToken",
+        alias = "is_api_token",
+        with = "::buffa::json_helpers::proto_bool",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_false"
+    )]
+    pub is_api_token: bool,
     #[serde(skip)]
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
@@ -80,6 +88,7 @@ impl ::core::fmt::Debug for SmallData {
             .field("promotion", &self.promotion)
             .field("expiration", &self.expiration)
             .field("roles", &self.roles)
+            .field("is_api_token", &self.is_api_token)
             .finish()
     }
 }
@@ -137,6 +146,7 @@ impl ::buffa_descriptor::reflect::ReflectMessage for SmallData {
                 )
             }
             8u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.roles),
+            9u32 => ::buffa_descriptor::reflect::ValueRef::Bool(self.is_api_token),
             _ => {
                 ::core::debug_assert!(
                     false,
@@ -157,6 +167,7 @@ impl ::buffa_descriptor::reflect::ReflectMessage for SmallData {
             6u32 => self.promotion != 0,
             7u32 => self.expiration.is_set(),
             8u32 => !self.roles.is_empty(),
+            9u32 => self.is_api_token,
             _ => false,
         }
     }
@@ -268,6 +279,9 @@ impl ::buffa::Message for SmallData {
                 .sum::<u64>();
             size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
         }
+        if self.is_api_token {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -314,6 +328,9 @@ impl ::buffa::Message for SmallData {
             for v in &self.roles {
                 ::buffa::types::encode_int32(v.to_i32(), buf);
             }
+        }
+        if self.is_api_token {
+            ::buffa::types::put_bool_field(9u32, self.is_api_token, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -424,6 +441,13 @@ impl ::buffa::Message for SmallData {
                     );
                 }
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.is_api_token = ::buffa::types::decode_bool(buf)?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -440,6 +464,7 @@ impl ::buffa::Message for SmallData {
         self.promotion = 0i32;
         self.expiration = ::buffa::MessageField::none();
         self.roles.clear();
+        self.is_api_token = false;
         self.__buffa_unknown_fields.clear();
     }
 }

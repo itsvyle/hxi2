@@ -17,6 +17,7 @@ pub enum DbError {
     NotFound,
     Expired,
     Internal(String),
+    Duplicate(String),
 }
 
 // This standard library trait makes the "?" operator work on your SQLx queries!
@@ -24,6 +25,9 @@ impl From<sqlx::Error> for DbError {
     fn from(err: sqlx::Error) -> Self {
         if matches!(err, sqlx::Error::RowNotFound) {
             DbError::NotFound
+        } else if matches!(err, sqlx::Error::Database(ref db_err) if db_err.code().map(|c| c == "2067").unwrap_or(false))
+        {
+            DbError::Duplicate(format!("Duplicate entry: {}", err))
         } else {
             DbError::Sqlx(err)
         }
@@ -39,6 +43,7 @@ impl std::fmt::Display for DbError {
             DbError::NotFound => write!(f, "Not found or expired"),
             DbError::Expired => write!(f, "Expired"),
             DbError::Internal(s) => write!(f, "Internal error: {}", s),
+            DbError::Duplicate(s) => write!(f, "Duplicate entry: {}", s),
         }
     }
 }
@@ -101,6 +106,23 @@ pub struct DbUser {
     pub account_modified_date: DateTime<Utc>,
     pub promotion: i32,
     pub permissions: i64,
+    pub is_api: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum DbUserIdentifier {
+    Id(i64),
+    Username(String),
+    DiscordId(String),
+}
+
+impl DbUserIdentifier {
+    pub async fn to_user_id(&self, db: &DatabaseManager) -> Result<i64, DbError> {
+        match self {
+            DbUserIdentifier::Id(id) => Ok(*id),
+            _ => db.resolve_user_identifier(self).await,
+        }
+    }
 }
 
 impl DbUser {
@@ -136,6 +158,7 @@ impl From<DbUser> for hxi2_proto::proto::auth::v2::DBUser {
             .into(),
             promotion: user.promotion,
             permissions: user.permissions,
+            is_api: user.is_api,
             __buffa_unknown_fields: Default::default(),
         }
     }
@@ -161,6 +184,7 @@ impl From<hxi2_proto::proto::auth::v2::DBUser> for DbUser {
                 .unwrap_or_default(),
             promotion: proto_user.promotion,
             permissions: proto_user.permissions,
+            is_api: proto_user.is_api,
         }
     }
 }
@@ -179,8 +203,8 @@ impl DatabaseManager {
 
         sqlx::query(
             r#"
-            INSERT INTO users (ID, username, first_name, last_name, discord_id, account_created_date, account_modified_date, promotion, permissions)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO users (ID, username, first_name, last_name, discord_id, account_created_date, account_modified_date, promotion, permissions, is_api)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             "#,
         )
         .bind(user.id)
@@ -192,6 +216,7 @@ impl DatabaseManager {
         .bind(user.account_modified_date)
         .bind(user.promotion)
         .bind(user.permissions)
+        .bind(user.is_api)
         .execute(&self.pool)
         .await?;
 
@@ -200,7 +225,7 @@ impl DatabaseManager {
 
     #[instrument(skip(self), err)]
     pub async fn list_users(&self) -> Result<Vec<DbUser>, DbError> {
-        let users = sqlx::query_as::<_, DbUser>("SELECT * FROM USERS")
+        let users = sqlx::query_as::<_, DbUser>("SELECT * FROM USERS WHERE is_api = 0")
             .fetch_all(&self.pool)
             .await?;
         Ok(users)
@@ -217,7 +242,7 @@ impl DatabaseManager {
         sqlx::query(
             r#"
             UPDATE users
-            SET first_name = ?, last_name = ?, discord_id = ?, account_modified_date = ?, promotion = ?, permissions = ?, username = ?
+            SET first_name = ?, last_name = ?, discord_id = ?, account_modified_date = ?, promotion = ?, permissions = ?, username = ?, is_api = ?
             WHERE ID = ?
             "#,
         )
@@ -229,30 +254,56 @@ impl DatabaseManager {
         .bind(user.permissions)
         .bind(&user.username)
         .bind(user.id)
+        .bind(user.is_api)
         .execute(&self.pool)
         .await?;
 
         Ok(())
     }
 
-    pub async fn get_db_user_by_discord_id(&self, discord_id: &str) -> Result<DbUser, DbError> {
-        let user = sqlx::query_as::<_, DbUser>("SELECT * FROM users WHERE discord_id = ?")
-            .bind(discord_id)
-            .fetch_one(&self.pool)
-            .await
-            .map_err(|e| {
-                if matches!(e, sqlx::Error::RowNotFound) {
-                    DbError::NotFound
-                } else {
-                    DbError::Sqlx(e)
-                }
-            })?;
+    pub async fn get_db_user(&self, identifier: &DbUserIdentifier) -> Result<DbUser, DbError> {
+        let query = match identifier {
+            DbUserIdentifier::Id(_) => "SELECT * FROM users WHERE ID = ?",
+            DbUserIdentifier::Username(_) => "SELECT * FROM users WHERE username = ?",
+            DbUserIdentifier::DiscordId(_) => "SELECT * FROM users WHERE discord_id = ?",
+        };
+
+        let user = sqlx::query_as::<_, DbUser>(query);
+        let user = match identifier {
+            DbUserIdentifier::Id(id) => user.bind(id),
+            DbUserIdentifier::Username(username) => user.bind(username),
+            DbUserIdentifier::DiscordId(discord_id) => user.bind(discord_id),
+        };
+        let user = user.fetch_one(&self.pool).await.map_err(|e| {
+            if matches!(e, sqlx::Error::RowNotFound) {
+                DbError::NotFound
+            } else {
+                DbError::Sqlx(e)
+            }
+        })?;
         Ok(user)
     }
 
-    pub async fn get_db_user_by_id(&self, user_id: &i64) -> Result<DbUser, DbError> {
-        let user = sqlx::query_as::<_, DbUser>("SELECT * FROM users WHERE ID = ?")
-            .bind(user_id)
+    pub async fn resolve_user_identifier(
+        &self,
+        identifier: &DbUserIdentifier,
+    ) -> Result<i64, DbError> {
+        match identifier {
+            DbUserIdentifier::Id(id) => return Ok(*id),
+            _ => {}
+        };
+        let query = match identifier {
+            DbUserIdentifier::Username(_) => "SELECT ID FROM users WHERE username = ?",
+            DbUserIdentifier::DiscordId(_) => "SELECT ID FROM users WHERE discord_id = ?",
+            _ => unreachable!(),
+        };
+
+        let user_id = sqlx::query_scalar::<_, i64>(query)
+            .bind(match identifier {
+                DbUserIdentifier::Username(username) => username,
+                DbUserIdentifier::DiscordId(discord_id) => discord_id,
+                _ => unreachable!(),
+            })
             .fetch_one(&self.pool)
             .await
             .map_err(|e| {
@@ -262,7 +313,7 @@ impl DatabaseManager {
                     DbError::Sqlx(e)
                 }
             })?;
-        Ok(user)
+        Ok(user_id)
     }
 }
 
@@ -364,28 +415,42 @@ impl DatabaseManager {
 // API Users
 // -----------------------------------------------------------------------------
 #[derive(Debug, FromRow, Serialize)]
-pub struct DbApiUser {
+pub struct DbApiToken {
     pub id: i64,
-    pub username: String,
-    pub token: String,
-    pub permissions: i32,
+    pub user_id: i64,
+    pub token_hash: String,
     pub created_at: DateTime<Utc>,
     pub expires_at: DateTime<Utc>,
 }
 
-impl DbApiUser {
-    pub fn has_permission(&self, permission: i32) -> bool {
-        (self.permissions & permission) == permission
-    }
-}
-
 impl DatabaseManager {
-    pub async fn list_api_users(&self) -> Result<Vec<DbApiUser>, DbError> {
-        let users = sqlx::query_as::<_, DbApiUser>("SELECT * FROM API_TOKENS")
+    pub async fn list_api_tokens(&self) -> Result<Vec<DbApiToken>, DbError> {
+        let users = sqlx::query_as::<_, DbApiToken>("SELECT * FROM API_TOKENS")
             .fetch_all(&self.pool)
             .await
             .map_err(DbError::Sqlx)?;
         Ok(users)
+    }
+
+    pub async fn insert_update_api_token(
+        &self,
+        user_identifier: &DbUserIdentifier,
+        token_hash: &str,
+        expires_at: DateTime<Utc>,
+    ) -> Result<(), DbError> {
+        let user_id = user_identifier.to_user_id(self).await?;
+        sqlx::query(
+            "INSERT INTO API_TOKENS (user_id, token_hash, expires_at) VALUES (?, ?, ?, ?)
+             ON CONFLICT(token_hash) DO UPDATE SET user_id = excluded.user_id, expires_at = excluded.expires_at"
+        )
+        .bind(user_id)
+        .bind(token_hash)
+        .bind(expires_at)
+        .execute(&self.pool)
+        .await
+        .map_err(DbError::Sqlx)?;
+
+        Ok(())
     }
 }
 
@@ -564,9 +629,11 @@ impl DatabaseManager {
     #[cfg_attr(debug_assertions, instrument(skip(self), level = "trace", ret))]
     pub async fn add_user_password(
         &self,
-        user_id: i64,
+        user_identifier: &DbUserIdentifier,
         password_hash: &str,
     ) -> Result<(), DbError> {
+        let user_id = user_identifier.to_user_id(self).await?;
+
         if user_id <= 0 {
             return Err(DbError::Validation("invalid user ID".into()));
         }
@@ -587,7 +654,12 @@ impl DatabaseManager {
         Ok(())
     }
 
-    pub async fn remove_user_password(&self, user_id: i64) -> Result<(), DbError> {
+    pub async fn remove_user_password(
+        &self,
+        user_identifier: &DbUserIdentifier,
+    ) -> Result<(), DbError> {
+        let user_id = user_identifier.to_user_id(self).await?;
+
         if user_id <= 0 {
             return Err(DbError::Validation("invalid user ID".into()));
         }

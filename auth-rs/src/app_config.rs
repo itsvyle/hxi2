@@ -1,5 +1,3 @@
-use std::fs;
-
 use anyhow::{Context, Result};
 use chrono::Duration;
 use derivative::Derivative;
@@ -68,6 +66,8 @@ pub struct AppConfiguration {
     pub JWT_REFRESH_TOKEN_VALIDITY: Duration,
     #[doc = "Validity of the JWT token"]
     pub JWT_TOKEN_VALIDITY: Duration,
+    #[doc = "Validity of a API token"]
+    pub API_TOKEN_VALIDITY: Duration,
 
     #[derivative(Debug = "ignore")]
     db_manager: OnceCell<DatabaseManager>,
@@ -126,6 +126,7 @@ impl AppConfiguration {
                 config.cookies.refresh_token_validity_seconds,
             ),
             JWT_TOKEN_VALIDITY: Duration::seconds(config.cookies.jwt_token_validity_seconds),
+            API_TOKEN_VALIDITY: Duration::weeks(520), // 10 years
         })
     }
 
@@ -164,9 +165,7 @@ impl AppConfiguration {
                     .await
                     .expect("Failed to connect to SQLite database");
 
-                let schema = fs::read_to_string("schema.sql")
-                    .context("reading schema.sql")
-                    .expect("Failed to read schema.sql");
+                let schema = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/schema.sql"));
 
                 sqlx::query(AssertSqlSafe(schema))
                     .execute(&pool)

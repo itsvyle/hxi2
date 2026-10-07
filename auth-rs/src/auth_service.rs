@@ -11,10 +11,11 @@ use connectrpc::{
 use http::header::SET_COOKIE;
 pub use hxi2_proto::connect::auth::v2::AuthServiceExt;
 use hxi2_proto::proto::auth::v2::{
-    AddPasswordRequest, CreateUserRequest, CreateUserResponse, DBUser, GetCSRFTokenRequest,
-    GetCSRFTokenResponse, GetJWTPublicKeyRequest, GetJWTPublicKeyResponse, ListUsersRequest,
-    ListUsersResponse, PasswordLoginRequest, PasswordLoginResponse, Permission,
-    RemovePasswordRequest, RenewJWTRequest, RenewJWTResponse, SmallData,
+    AddAPIUserRequest, AddAPIUserResponse, AddPasswordRequest, CreateUserRequest,
+    CreateUserResponse, DBUser, GetCSRFTokenRequest, GetCSRFTokenResponse, GetJWTPublicKeyRequest,
+    GetJWTPublicKeyResponse, ListUsersRequest, ListUsersResponse, PasswordLoginRequest,
+    PasswordLoginResponse, Permission, RemoveAPIUserRequest, RemovePasswordRequest,
+    RenewJWTRequest, RenewJWTResponse, SmallData,
 };
 use hxi2_proto::{
     connect::auth::v2::AuthService,
@@ -22,9 +23,11 @@ use hxi2_proto::{
 };
 use tracing::{error, trace, warn};
 
+use crate::api_login::APILoginManager;
 use crate::app_config::AppConfiguration;
 use crate::auth_middleware::ReqAuthState;
 use crate::connect_result::ToConnectError;
+use crate::database::DbUserIdentifier;
 use crate::login_manager::LoginManager;
 use crate::password_login::PasswordLoginManager;
 use crate::permissions_checking;
@@ -36,6 +39,7 @@ pub struct AuthServiceImpl {
     pub verifier: &'static crate::jwt_verifier::JWTVerifier,
     pub login_manager: Arc<LoginManager>,
     pub password_login_manager: Arc<PasswordLoginManager>,
+    pub api_login_manager: Arc<APILoginManager>,
 }
 
 #[allow(unused)]
@@ -218,6 +222,7 @@ impl AuthService for AuthServiceImpl {
         Response::ok(ListUsersResponse {
             users: users
                 .into_iter()
+                .filter(|user| !user.is_api)
                 .map(hxi2_proto::proto::auth::v2::DBUser::from)
                 .collect(),
             ..Default::default()
@@ -295,18 +300,25 @@ impl AuthService for AuthServiceImpl {
             .as_ref()
             .ok_or_else(|| ConnectError::permission_denied("Claims not found in ReqAuthState"))?
             .data;
-        let user_id = if (current_user.permissions & (1 << Permission::PERMISSION_ADMIN as i64)
-            != 0)
-            && let Some(target_user_id) = req.user_id
-        {
-            target_user_id
-        } else if req.user_id.is_some() {
-            return Err(ConnectError::permission_denied(
-                "You do not have permission to add a password for another user",
-            ));
-        } else {
-            current_user.user_id
-        };
+
+        let user_identifier =
+            if (current_user.permissions & (1 << Permission::PERMISSION_ADMIN as i64) != 0)
+                && let Some(target_user_identifier) = req.user_identifier.as_ref()
+            {
+                use hxi2_proto::proto::auth::v2::add_password_request::UserIdentifierView;
+                match target_user_identifier {
+                    UserIdentifierView::UserId(user_id) => DbUserIdentifier::Id(*user_id),
+                    UserIdentifierView::Username(username) => {
+                        DbUserIdentifier::Username(username.to_string())
+                    }
+                }
+            } else if req.user_identifier.is_some() {
+                return Err(ConnectError::permission_denied(
+                    "You do not have permission to add a password for another user",
+                ));
+            } else {
+                DbUserIdentifier::Id(current_user.user_id)
+            };
 
         let req = req.to_owned_message();
 
@@ -317,7 +329,7 @@ impl AuthService for AuthServiceImpl {
         }
 
         self.password_login_manager
-            .add_password(user_id, &req.password)
+            .add_password(&user_identifier, &req.password)
             .await
             .obfuscate()
             .to_connect_internal()?;
@@ -341,21 +353,28 @@ impl AuthService for AuthServiceImpl {
             .as_ref()
             .ok_or_else(|| ConnectError::permission_denied("Claims not found in ReqAuthState"))?
             .data;
-        let user_id = if (current_user.permissions & (1 << Permission::PERMISSION_ADMIN as i64)
-            != 0)
-            && let Some(target_user_id) = req.user_id
-        {
-            target_user_id
-        } else if req.user_id.is_some() {
-            return Err(ConnectError::permission_denied(
-                "You do not have permission to remove a password for another user",
-            ));
-        } else {
-            current_user.user_id
-        };
+
+        let user_identifier =
+            if (current_user.permissions & (1 << Permission::PERMISSION_ADMIN as i64) != 0)
+                && let Some(target_user_identifier) = req.user_identifier.as_ref()
+            {
+                use hxi2_proto::proto::auth::v2::remove_password_request::UserIdentifierView;
+                match target_user_identifier {
+                    UserIdentifierView::UserId(user_id) => DbUserIdentifier::Id(*user_id),
+                    UserIdentifierView::Username(username) => {
+                        DbUserIdentifier::Username(username.to_string())
+                    }
+                }
+            } else if req.user_identifier.is_some() {
+                return Err(ConnectError::permission_denied(
+                    "You do not have permission to remove a password for another user",
+                ));
+            } else {
+                DbUserIdentifier::Id(current_user.user_id)
+            };
 
         self.password_login_manager
-            .remove_password(user_id)
+            .remove_password(&user_identifier)
             .await
             .obfuscate()
             .to_connect_internal()?;
@@ -380,7 +399,7 @@ impl AuthService for AuthServiceImpl {
 
         let login_response = self
             .login_manager
-            .login_as(&crate::login_manager::LoginID::UserID(user_id))
+            .login_as(&DbUserIdentifier::Id(user_id))
             .await
             .map_err(|err| {
                 if matches!(
@@ -453,6 +472,9 @@ impl AuthService for AuthServiceImpl {
 
         Ok(res)
     }
+
+    impl_unimplemented_rpc!(add_api_user, AddAPIUserRequest, AddAPIUserResponse);
+    impl_unimplemented_rpc!(remove_api_user, RemoveAPIUserRequest, Empty);
 
     impl_otherplace_rpc!(logout, Empty, Empty);
     impl_otherplace_rpc!(frontend_index, Empty, Empty);

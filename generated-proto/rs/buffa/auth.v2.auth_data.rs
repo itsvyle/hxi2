@@ -76,6 +76,14 @@ pub struct DBUser {
         skip_serializing_if = "::buffa::json_helpers::skip_if::is_zero_i64"
     )]
     pub permissions: i64,
+    /// Field 10: `is_api`
+    #[serde(
+        rename = "isApi",
+        alias = "is_api",
+        with = "::buffa::json_helpers::proto_bool",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_false"
+    )]
+    pub is_api: bool,
     #[serde(skip)]
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
@@ -92,6 +100,7 @@ impl ::core::fmt::Debug for DBUser {
             .field("account_modified_date", &self.account_modified_date)
             .field("promotion", &self.promotion)
             .field("permissions", &self.permissions)
+            .field("is_api", &self.is_api)
             .finish()
     }
 }
@@ -158,6 +167,7 @@ impl ::buffa_descriptor::reflect::ReflectMessage for DBUser {
             }
             8u32 => ::buffa_descriptor::reflect::ValueRef::I32(self.promotion),
             9u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.permissions),
+            10u32 => ::buffa_descriptor::reflect::ValueRef::Bool(self.is_api),
             _ => {
                 ::core::debug_assert!(
                     false,
@@ -179,6 +189,7 @@ impl ::buffa_descriptor::reflect::ReflectMessage for DBUser {
             7u32 => self.account_modified_date.is_set(),
             8u32 => self.promotion != 0,
             9u32 => self.permissions != 0,
+            10u32 => self.is_api,
             _ => false,
         }
     }
@@ -293,6 +304,9 @@ impl ::buffa::Message for DBUser {
         if self.permissions != 0i64 {
             size += 1u64 + ::buffa::types::int64_encoded_len(self.permissions) as u64;
         }
+        if self.is_api {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -339,6 +353,9 @@ impl ::buffa::Message for DBUser {
         }
         if self.permissions != 0i64 {
             ::buffa::types::put_int64_field(9u32, self.permissions, buf);
+        }
+        if self.is_api {
+            ::buffa::types::put_bool_field(10u32, self.is_api, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -429,6 +446,13 @@ impl ::buffa::Message for DBUser {
                 )?;
                 self.permissions = ::buffa::types::decode_int64(buf)?;
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.is_api = ::buffa::types::decode_bool(buf)?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -446,6 +470,7 @@ impl ::buffa::Message for DBUser {
         self.account_modified_date = ::buffa::MessageField::none();
         self.promotion = 0i32;
         self.permissions = 0i64;
+        self.is_api = false;
         self.__buffa_unknown_fields.clear();
     }
 }

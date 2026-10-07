@@ -2487,7 +2487,7 @@ pub const __CREATE_USER_RESPONSE_JSON_ANY: ::buffa::type_registry::JsonAnyEntry 
     is_wkt: false,
 };
 #[derive(Clone, PartialEq, Default)]
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+#[derive(::serde::Serialize)]
 #[serde(default)]
 pub struct AddPasswordRequest {
     /// Field 1: `password`
@@ -2497,16 +2497,10 @@ pub struct AddPasswordRequest {
         skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_str"
     )]
     pub password: ::buffa::alloc::string::String,
-    /// This user_id can be provided by a user with the PERMISSION_ADMIN role, to change someone else's password. If not provided, the password will be set for the currently authenticated user.
-    ///
-    /// Field 2: `user_id`
-    #[serde(
-        rename = "userId",
-        alias = "user_id",
-        with = "::buffa::json_helpers::opt_int64",
-        skip_serializing_if = "::core::option::Option::is_none"
-    )]
-    pub user_id: ::core::option::Option<i64>,
+    #[serde(flatten)]
+    pub user_identifier: ::core::option::Option<
+        __buffa::oneof::add_password_request::UserIdentifier,
+    >,
     #[serde(skip)]
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
@@ -2515,7 +2509,7 @@ impl ::core::fmt::Debug for AddPasswordRequest {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         f.debug_struct("AddPasswordRequest")
             .field("password", &self.password)
-            .field("user_id", &self.user_id)
+            .field("user_identifier", &self.user_identifier)
             .finish()
     }
 }
@@ -2525,15 +2519,6 @@ impl AddPasswordRequest {
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
     pub const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.AddPasswordRequest";
-}
-impl AddPasswordRequest {
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::user_id`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_user_id(mut self, value: i64) -> Self {
-        self.user_id = Some(value);
-        self
-    }
 }
 ::buffa::impl_default_instance!(AddPasswordRequest);
 impl ::buffa_descriptor::reflect::ReflectMessage for AddPasswordRequest {
@@ -2555,7 +2540,22 @@ impl ::buffa_descriptor::reflect::ReflectMessage for AddPasswordRequest {
         use ::buffa::Enumeration as _;
         match field.number() {
             1u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.password),
-            2u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.user_id.unwrap_or(0)),
+            2u32 => {
+                match &self.user_identifier {
+                    ::core::option::Option::Some(
+                        __buffa::oneof::add_password_request::UserIdentifier::UserId(v),
+                    ) => ::buffa_descriptor::reflect::ValueRef::I64(*v),
+                    _ => ::buffa_descriptor::reflect::ValueRef::I64(0),
+                }
+            }
+            3u32 => {
+                match &self.user_identifier {
+                    ::core::option::Option::Some(
+                        __buffa::oneof::add_password_request::UserIdentifier::Username(v),
+                    ) => ::buffa_descriptor::reflect::ValueRef::String(v),
+                    _ => ::buffa_descriptor::reflect::ValueRef::String(""),
+                }
+            }
             _ => {
                 ::core::debug_assert!(
                     false,
@@ -2569,7 +2569,18 @@ impl ::buffa_descriptor::reflect::ReflectMessage for AddPasswordRequest {
     fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
         match field.number() {
             1u32 => !self.password.is_empty(),
-            2u32 => self.user_id.is_some(),
+            2u32 => {
+                ::core::matches!(
+                    & self.user_identifier,
+                    ::core::option::Option::Some(__buffa::oneof::add_password_request::UserIdentifier::UserId(_))
+                )
+            }
+            3u32 => {
+                ::core::matches!(
+                    & self.user_identifier,
+                    ::core::option::Option::Some(__buffa::oneof::add_password_request::UserIdentifier::Username(_))
+                )
+            }
             _ => false,
         }
     }
@@ -2650,8 +2661,15 @@ impl ::buffa::Message for AddPasswordRequest {
         if !self.password.is_empty() {
             size += 1u64 + ::buffa::types::string_encoded_len(&self.password) as u64;
         }
-        if let Some(v) = self.user_id {
-            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        if let ::core::option::Option::Some(ref v) = self.user_identifier {
+            match v {
+                __buffa::oneof::add_password_request::UserIdentifier::UserId(v) => {
+                    size += 1u64 + ::buffa::types::int64_encoded_len(*v) as u64;
+                }
+                __buffa::oneof::add_password_request::UserIdentifier::Username(x) => {
+                    size += 1u64 + ::buffa::types::string_encoded_len(x) as u64;
+                }
+            }
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -2666,8 +2684,15 @@ impl ::buffa::Message for AddPasswordRequest {
         if !self.password.is_empty() {
             ::buffa::types::put_string_field(1u32, &self.password, buf);
         }
-        if let Some(v) = self.user_id {
-            ::buffa::types::put_int64_field(2u32, v, buf);
+        if let ::core::option::Option::Some(ref v) = self.user_identifier {
+            match v {
+                __buffa::oneof::add_password_request::UserIdentifier::UserId(x) => {
+                    ::buffa::types::put_int64_field(2u32, *x, buf);
+                }
+                __buffa::oneof::add_password_request::UserIdentifier::Username(x) => {
+                    ::buffa::types::put_string_field(3u32, x, buf);
+                }
+            }
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2694,8 +2719,21 @@ impl ::buffa::Message for AddPasswordRequest {
                     tag,
                     ::buffa::encoding::WireType::Varint,
                 )?;
-                self.user_id = ::core::option::Option::Some(
-                    ::buffa::types::decode_int64(buf)?,
+                self.user_identifier = ::core::option::Option::Some(
+                    __buffa::oneof::add_password_request::UserIdentifier::UserId(
+                        ::buffa::types::decode_int64(buf)?,
+                    ),
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                self.user_identifier = ::core::option::Option::Some(
+                    __buffa::oneof::add_password_request::UserIdentifier::Username(
+                        ::buffa::types::decode_string(buf)?,
+                    ),
                 );
             }
             _ => {
@@ -2707,7 +2745,7 @@ impl ::buffa::Message for AddPasswordRequest {
     }
     fn clear(&mut self) {
         self.password.clear();
-        self.user_id = ::core::option::Option::None;
+        self.user_identifier = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -2718,6 +2756,122 @@ impl ::buffa::ExtensionSet for AddPasswordRequest {
     }
     fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
         &mut self.__buffa_unknown_fields
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for AddPasswordRequest {
+    fn deserialize<D: ::serde::Deserializer<'de>>(
+        d: D,
+    ) -> ::core::result::Result<Self, D::Error> {
+        struct _V;
+        impl<'de> ::serde::de::Visitor<'de> for _V {
+            type Value = AddPasswordRequest;
+            fn expecting(
+                &self,
+                f: &mut ::core::fmt::Formatter<'_>,
+            ) -> ::core::fmt::Result {
+                f.write_str("struct AddPasswordRequest")
+            }
+            #[allow(clippy::field_reassign_with_default)]
+            fn visit_map<A: ::serde::de::MapAccess<'de>>(
+                self,
+                mut map: A,
+            ) -> ::core::result::Result<AddPasswordRequest, A::Error> {
+                let mut __f_password: ::core::option::Option<
+                    ::buffa::alloc::string::String,
+                > = None;
+                let mut __oneof_user_identifier: ::core::option::Option<
+                    __buffa::oneof::add_password_request::UserIdentifier,
+                > = None;
+                while let Some(key) = map.next_key::<::buffa::alloc::string::String>()? {
+                    match key.as_str() {
+                        "password" => {
+                            __f_password = Some({
+                                struct _S;
+                                impl<'de> ::serde::de::DeserializeSeed<'de> for _S {
+                                    type Value = ::buffa::alloc::string::String;
+                                    fn deserialize<D: ::serde::Deserializer<'de>>(
+                                        self,
+                                        d: D,
+                                    ) -> ::core::result::Result<
+                                        ::buffa::alloc::string::String,
+                                        D::Error,
+                                    > {
+                                        ::buffa::json_helpers::proto_string::deserialize(d)
+                                    }
+                                }
+                                map.next_value_seed(_S)?
+                            });
+                        }
+                        "userId" | "user_id" => {
+                            struct _DeserSeed;
+                            impl<'de> ::serde::de::DeserializeSeed<'de> for _DeserSeed {
+                                type Value = i64;
+                                fn deserialize<D: ::serde::Deserializer<'de>>(
+                                    self,
+                                    d: D,
+                                ) -> ::core::result::Result<i64, D::Error> {
+                                    ::buffa::json_helpers::int64::deserialize(d)
+                                }
+                            }
+                            let v: ::core::option::Option<i64> = map
+                                .next_value_seed(
+                                    ::buffa::json_helpers::NullableDeserializeSeed(_DeserSeed),
+                                )?;
+                            if let Some(v) = v {
+                                if __oneof_user_identifier.is_some() {
+                                    return Err(
+                                        ::serde::de::Error::custom(
+                                            "multiple oneof fields set for 'user_identifier'",
+                                        ),
+                                    );
+                                }
+                                __oneof_user_identifier = Some(
+                                    __buffa::oneof::add_password_request::UserIdentifier::UserId(
+                                        v,
+                                    ),
+                                );
+                            }
+                        }
+                        "username" => {
+                            let v: ::core::option::Option<
+                                ::buffa::alloc::string::String,
+                            > = map
+                                .next_value_seed(
+                                    ::buffa::json_helpers::NullableDeserializeSeed(
+                                        ::buffa::json_helpers::DefaultDeserializeSeed::<
+                                            ::buffa::alloc::string::String,
+                                        >::new(),
+                                    ),
+                                )?;
+                            if let Some(v) = v {
+                                if __oneof_user_identifier.is_some() {
+                                    return Err(
+                                        ::serde::de::Error::custom(
+                                            "multiple oneof fields set for 'user_identifier'",
+                                        ),
+                                    );
+                                }
+                                __oneof_user_identifier = Some(
+                                    __buffa::oneof::add_password_request::UserIdentifier::Username(
+                                        v,
+                                    ),
+                                );
+                            }
+                        }
+                        _ => {
+                            map.next_value::<::serde::de::IgnoredAny>()?;
+                        }
+                    }
+                }
+                let mut __r = <AddPasswordRequest as ::core::default::Default>::default();
+                if let ::core::option::Option::Some(v) = __f_password {
+                    __r.password = v;
+                }
+                __r.user_identifier = __oneof_user_identifier;
+                Ok(__r)
+            }
+        }
+        d.deserialize_map(_V)
     }
 }
 impl ::buffa::json_helpers::ProtoElemJson for AddPasswordRequest {
@@ -2740,27 +2894,31 @@ pub const __ADD_PASSWORD_REQUEST_JSON_ANY: ::buffa::type_registry::JsonAnyEntry 
     from_json: ::buffa::type_registry::any_from_json::<AddPasswordRequest>,
     is_wkt: false,
 };
+pub mod add_password_request {
+    #[allow(unused_imports)]
+    use super::*;
+    #[doc(inline)]
+    pub use super::__buffa::oneof::add_password_request::UserIdentifier;
+    #[doc(inline)]
+    pub use super::__buffa::view::oneof::add_password_request::UserIdentifier as UserIdentifierView;
+}
 #[derive(Clone, PartialEq, Default)]
-#[derive(::serde::Serialize, ::serde::Deserialize)]
+#[derive(::serde::Serialize)]
 #[serde(default)]
 pub struct RemovePasswordRequest {
-    /// This user_id can be provided by a user with the PERMISSION_ADMIN role, to remove someone else's password. If not provided, the password will be removed for the currently authenticated user.
-    ///
-    /// Field 1: `user_id`
-    #[serde(
-        rename = "userId",
-        alias = "user_id",
-        with = "::buffa::json_helpers::opt_int64",
-        skip_serializing_if = "::core::option::Option::is_none"
-    )]
-    pub user_id: ::core::option::Option<i64>,
+    #[serde(flatten)]
+    pub user_identifier: ::core::option::Option<
+        __buffa::oneof::remove_password_request::UserIdentifier,
+    >,
     #[serde(skip)]
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
 impl ::core::fmt::Debug for RemovePasswordRequest {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("RemovePasswordRequest").field("user_id", &self.user_id).finish()
+        f.debug_struct("RemovePasswordRequest")
+            .field("user_identifier", &self.user_identifier)
+            .finish()
     }
 }
 impl RemovePasswordRequest {
@@ -2769,15 +2927,6 @@ impl RemovePasswordRequest {
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
     pub const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.RemovePasswordRequest";
-}
-impl RemovePasswordRequest {
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::user_id`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_user_id(mut self, value: i64) -> Self {
-        self.user_id = Some(value);
-        self
-    }
 }
 ::buffa::impl_default_instance!(RemovePasswordRequest);
 impl ::buffa_descriptor::reflect::ReflectMessage for RemovePasswordRequest {
@@ -2798,7 +2947,26 @@ impl ::buffa_descriptor::reflect::ReflectMessage for RemovePasswordRequest {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         match field.number() {
-            1u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.user_id.unwrap_or(0)),
+            1u32 => {
+                match &self.user_identifier {
+                    ::core::option::Option::Some(
+                        __buffa::oneof::remove_password_request::UserIdentifier::UserId(
+                            v,
+                        ),
+                    ) => ::buffa_descriptor::reflect::ValueRef::I64(*v),
+                    _ => ::buffa_descriptor::reflect::ValueRef::I64(0),
+                }
+            }
+            2u32 => {
+                match &self.user_identifier {
+                    ::core::option::Option::Some(
+                        __buffa::oneof::remove_password_request::UserIdentifier::Username(
+                            v,
+                        ),
+                    ) => ::buffa_descriptor::reflect::ValueRef::String(v),
+                    _ => ::buffa_descriptor::reflect::ValueRef::String(""),
+                }
+            }
             _ => {
                 ::core::debug_assert!(
                     false,
@@ -2811,7 +2979,18 @@ impl ::buffa_descriptor::reflect::ReflectMessage for RemovePasswordRequest {
     }
     fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
         match field.number() {
-            1u32 => self.user_id.is_some(),
+            1u32 => {
+                ::core::matches!(
+                    & self.user_identifier,
+                    ::core::option::Option::Some(__buffa::oneof::remove_password_request::UserIdentifier::UserId(_))
+                )
+            }
+            2u32 => {
+                ::core::matches!(
+                    & self.user_identifier,
+                    ::core::option::Option::Some(__buffa::oneof::remove_password_request::UserIdentifier::Username(_))
+                )
+            }
             _ => false,
         }
     }
@@ -2889,8 +3068,15 @@ impl ::buffa::Message for RemovePasswordRequest {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if let Some(v) = self.user_id {
-            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        if let ::core::option::Option::Some(ref v) = self.user_identifier {
+            match v {
+                __buffa::oneof::remove_password_request::UserIdentifier::UserId(v) => {
+                    size += 1u64 + ::buffa::types::int64_encoded_len(*v) as u64;
+                }
+                __buffa::oneof::remove_password_request::UserIdentifier::Username(x) => {
+                    size += 1u64 + ::buffa::types::string_encoded_len(x) as u64;
+                }
+            }
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -2902,8 +3088,15 @@ impl ::buffa::Message for RemovePasswordRequest {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if let Some(v) = self.user_id {
-            ::buffa::types::put_int64_field(1u32, v, buf);
+        if let ::core::option::Option::Some(ref v) = self.user_identifier {
+            match v {
+                __buffa::oneof::remove_password_request::UserIdentifier::UserId(x) => {
+                    ::buffa::types::put_int64_field(1u32, *x, buf);
+                }
+                __buffa::oneof::remove_password_request::UserIdentifier::Username(x) => {
+                    ::buffa::types::put_string_field(2u32, x, buf);
+                }
+            }
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2923,8 +3116,21 @@ impl ::buffa::Message for RemovePasswordRequest {
                     tag,
                     ::buffa::encoding::WireType::Varint,
                 )?;
-                self.user_id = ::core::option::Option::Some(
-                    ::buffa::types::decode_int64(buf)?,
+                self.user_identifier = ::core::option::Option::Some(
+                    __buffa::oneof::remove_password_request::UserIdentifier::UserId(
+                        ::buffa::types::decode_int64(buf)?,
+                    ),
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                self.user_identifier = ::core::option::Option::Some(
+                    __buffa::oneof::remove_password_request::UserIdentifier::Username(
+                        ::buffa::types::decode_string(buf)?,
+                    ),
                 );
             }
             _ => {
@@ -2935,7 +3141,7 @@ impl ::buffa::Message for RemovePasswordRequest {
         ::core::result::Result::Ok(())
     }
     fn clear(&mut self) {
-        self.user_id = ::core::option::Option::None;
+        self.user_identifier = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -2946,6 +3152,98 @@ impl ::buffa::ExtensionSet for RemovePasswordRequest {
     }
     fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
         &mut self.__buffa_unknown_fields
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for RemovePasswordRequest {
+    fn deserialize<D: ::serde::Deserializer<'de>>(
+        d: D,
+    ) -> ::core::result::Result<Self, D::Error> {
+        struct _V;
+        impl<'de> ::serde::de::Visitor<'de> for _V {
+            type Value = RemovePasswordRequest;
+            fn expecting(
+                &self,
+                f: &mut ::core::fmt::Formatter<'_>,
+            ) -> ::core::fmt::Result {
+                f.write_str("struct RemovePasswordRequest")
+            }
+            #[allow(clippy::field_reassign_with_default)]
+            fn visit_map<A: ::serde::de::MapAccess<'de>>(
+                self,
+                mut map: A,
+            ) -> ::core::result::Result<RemovePasswordRequest, A::Error> {
+                let mut __oneof_user_identifier: ::core::option::Option<
+                    __buffa::oneof::remove_password_request::UserIdentifier,
+                > = None;
+                while let Some(key) = map.next_key::<::buffa::alloc::string::String>()? {
+                    match key.as_str() {
+                        "userId" | "user_id" => {
+                            struct _DeserSeed;
+                            impl<'de> ::serde::de::DeserializeSeed<'de> for _DeserSeed {
+                                type Value = i64;
+                                fn deserialize<D: ::serde::Deserializer<'de>>(
+                                    self,
+                                    d: D,
+                                ) -> ::core::result::Result<i64, D::Error> {
+                                    ::buffa::json_helpers::int64::deserialize(d)
+                                }
+                            }
+                            let v: ::core::option::Option<i64> = map
+                                .next_value_seed(
+                                    ::buffa::json_helpers::NullableDeserializeSeed(_DeserSeed),
+                                )?;
+                            if let Some(v) = v {
+                                if __oneof_user_identifier.is_some() {
+                                    return Err(
+                                        ::serde::de::Error::custom(
+                                            "multiple oneof fields set for 'user_identifier'",
+                                        ),
+                                    );
+                                }
+                                __oneof_user_identifier = Some(
+                                    __buffa::oneof::remove_password_request::UserIdentifier::UserId(
+                                        v,
+                                    ),
+                                );
+                            }
+                        }
+                        "username" => {
+                            let v: ::core::option::Option<
+                                ::buffa::alloc::string::String,
+                            > = map
+                                .next_value_seed(
+                                    ::buffa::json_helpers::NullableDeserializeSeed(
+                                        ::buffa::json_helpers::DefaultDeserializeSeed::<
+                                            ::buffa::alloc::string::String,
+                                        >::new(),
+                                    ),
+                                )?;
+                            if let Some(v) = v {
+                                if __oneof_user_identifier.is_some() {
+                                    return Err(
+                                        ::serde::de::Error::custom(
+                                            "multiple oneof fields set for 'user_identifier'",
+                                        ),
+                                    );
+                                }
+                                __oneof_user_identifier = Some(
+                                    __buffa::oneof::remove_password_request::UserIdentifier::Username(
+                                        v,
+                                    ),
+                                );
+                            }
+                        }
+                        _ => {
+                            map.next_value::<::serde::de::IgnoredAny>()?;
+                        }
+                    }
+                }
+                let mut __r = <RemovePasswordRequest as ::core::default::Default>::default();
+                __r.user_identifier = __oneof_user_identifier;
+                Ok(__r)
+            }
+        }
+        d.deserialize_map(_V)
     }
 }
 impl ::buffa::json_helpers::ProtoElemJson for RemovePasswordRequest {
@@ -2968,6 +3266,14 @@ pub const __REMOVE_PASSWORD_REQUEST_JSON_ANY: ::buffa::type_registry::JsonAnyEnt
     from_json: ::buffa::type_registry::any_from_json::<RemovePasswordRequest>,
     is_wkt: false,
 };
+pub mod remove_password_request {
+    #[allow(unused_imports)]
+    use super::*;
+    #[doc(inline)]
+    pub use super::__buffa::oneof::remove_password_request::UserIdentifier;
+    #[doc(inline)]
+    pub use super::__buffa::view::oneof::remove_password_request::UserIdentifier as UserIdentifierView;
+}
 #[derive(Clone, PartialEq, Default)]
 #[derive(::serde::Serialize, ::serde::Deserialize)]
 #[serde(default)]
@@ -3507,3 +3813,901 @@ pub const __PASSWORD_LOGIN_RESPONSE_JSON_ANY: ::buffa::type_registry::JsonAnyEnt
     from_json: ::buffa::type_registry::any_from_json::<PasswordLoginResponse>,
     is_wkt: false,
 };
+#[derive(Clone, PartialEq, Default)]
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+#[serde(default)]
+pub struct AddAPIUserRequest {
+    /// Field 1: `username`
+    #[serde(
+        rename = "username",
+        with = "::buffa::json_helpers::proto_string",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_str"
+    )]
+    pub username: ::buffa::alloc::string::String,
+    /// Field 3: `roles`
+    #[serde(
+        rename = "roles",
+        with = "::buffa::json_helpers::repeated_enum",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_vec"
+    )]
+    pub roles: ::buffa::alloc::vec::Vec<::buffa::EnumValue<Permission>>,
+    #[serde(skip)]
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for AddAPIUserRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("AddAPIUserRequest")
+            .field("username", &self.username)
+            .field("roles", &self.roles)
+            .finish()
+    }
+}
+impl AddAPIUserRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.AddAPIUserRequest";
+}
+::buffa::impl_default_instance!(AddAPIUserRequest);
+impl ::buffa_descriptor::reflect::ReflectMessage for AddAPIUserRequest {
+    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+        __buffa::reflect::descriptor_pool()
+            .message(Self::__buffa_reflect_message_index())
+    }
+    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+        __buffa::reflect::descriptor_pool()
+    }
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn get(
+        &self,
+        field: &::buffa_descriptor::FieldDescriptor,
+    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match field.number() {
+            1u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.username),
+            3u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.roles),
+            _ => {
+                ::core::debug_assert!(
+                    false,
+                    "field number {} is not a member of this message's reflect get()",
+                    field.number(),
+                );
+                ::buffa_descriptor::reflect::ValueRef::Bool(false)
+            }
+        }
+    }
+    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+        match field.number() {
+            1u32 => !self.username.is_empty(),
+            3u32 => !self.roles.is_empty(),
+            _ => false,
+        }
+    }
+    fn for_each_set(
+        &self,
+        f: &mut dyn ::core::ops::FnMut(
+            &::buffa_descriptor::FieldDescriptor,
+            ::buffa_descriptor::reflect::ValueRef<'_>,
+        ),
+    ) {
+        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
+        for fd in md.fields() {
+            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+            }
+        }
+    }
+    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+        ::buffa_descriptor::reflect::DynamicMessage::from_message(
+            self,
+            ::buffa::alloc::sync::Arc::clone(__buffa::reflect::descriptor_pool()),
+            Self::__buffa_reflect_message_index(),
+        )
+    }
+}
+impl ::buffa_descriptor::reflect::ReflectElement for AddAPIUserRequest {
+    #[inline]
+    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        ::buffa_descriptor::reflect::ValueRef::Message(
+            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+        )
+    }
+}
+impl AddAPIUserRequest {
+    /// Memoized `MessageIndex` for this message type, resolved once
+    /// against the package's embedded descriptor pool.
+    #[doc(hidden)]
+    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+        *IDX
+            .get_or_init(|| {
+                __buffa::reflect::descriptor_pool()
+                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                    .expect(
+                        "generated message is registered in the embedded descriptor pool",
+                    )
+            })
+    }
+}
+impl ::buffa_descriptor::reflect::Reflectable for AddAPIUserRequest {
+    /// Vtable-mode reflective handle: borrows `self` directly. No
+    /// encode/decode round-trip and no allocation — the reflective
+    /// accessors read this message's fields in place.
+    #[inline]
+    fn reflect(&self) -> ::buffa_descriptor::reflect::ReflectCow<'_> {
+        ::buffa_descriptor::reflect::ReflectCow::Borrowed(self)
+    }
+}
+impl ::buffa::MessageName for AddAPIUserRequest {
+    const PACKAGE: &'static str = "auth.v2";
+    const NAME: &'static str = "AddAPIUserRequest";
+    const FULL_NAME: &'static str = "auth.v2.AddAPIUserRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.AddAPIUserRequest";
+}
+impl ::buffa::Message for AddAPIUserRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if !self.username.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.username) as u64;
+        }
+        if !self.roles.is_empty() {
+            let payload: u64 = self
+                .roles
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if !self.username.is_empty() {
+            ::buffa::types::put_string_field(1u32, &self.username, buf);
+        }
+        if !self.roles.is_empty() {
+            let payload: u64 = self
+                .roles
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            ::buffa::types::put_len_delimited_header(3u32, payload, buf);
+            for v in &self.roles {
+                ::buffa::types::encode_int32(v.to_i32(), buf);
+            }
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(&mut self.username, buf)?;
+            }
+            3u32 => {
+                if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
+                    let len = ::buffa::encoding::decode_varint(buf)?;
+                    let len = usize::try_from(len)
+                        .map_err(|_| ::buffa::DecodeError::MessageTooLarge)?;
+                    if buf.remaining() < len {
+                        return ::core::result::Result::Err(
+                            ::buffa::DecodeError::UnexpectedEof,
+                        );
+                    }
+                    self.roles.reserve(len);
+                    let mut limited = buf.take(len);
+                    while limited.has_remaining() {
+                        self.roles
+                            .push(
+                                ::buffa::EnumValue::from(
+                                    ::buffa::types::decode_int32_packed(&mut limited)?,
+                                ),
+                            );
+                    }
+                    let leftover = limited.remaining();
+                    if leftover > 0 {
+                        limited.advance(leftover);
+                    }
+                } else if tag.wire_type() == ::buffa::encoding::WireType::Varint {
+                    self.roles
+                        .push(
+                            ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                        );
+                } else {
+                    return ::core::result::Result::Err(
+                        ::buffa::encoding::wire_type_mismatch(
+                            tag,
+                            ::buffa::encoding::WireType::LengthDelimited,
+                        ),
+                    );
+                }
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.username.clear();
+        self.roles.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for AddAPIUserRequest {
+    const PROTO_FQN: &'static str = "auth.v2.AddAPIUserRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+impl ::buffa::json_helpers::ProtoElemJson for AddAPIUserRequest {
+    fn serialize_proto_json<S: ::serde::Serializer>(
+        v: &Self,
+        s: S,
+    ) -> ::core::result::Result<S::Ok, S::Error> {
+        ::serde::Serialize::serialize(v, s)
+    }
+    fn deserialize_proto_json<'de, D: ::serde::Deserializer<'de>>(
+        d: D,
+    ) -> ::core::result::Result<Self, D::Error> {
+        <Self as ::serde::Deserialize>::deserialize(d)
+    }
+}
+#[doc(hidden)]
+pub const __ADD_API_USER_REQUEST_JSON_ANY: ::buffa::type_registry::JsonAnyEntry = ::buffa::type_registry::JsonAnyEntry {
+    type_url: "type.googleapis.com/auth.v2.AddAPIUserRequest",
+    to_json: ::buffa::type_registry::any_to_json::<AddAPIUserRequest>,
+    from_json: ::buffa::type_registry::any_from_json::<AddAPIUserRequest>,
+    is_wkt: false,
+};
+#[derive(Clone, PartialEq, Default)]
+#[derive(::serde::Serialize, ::serde::Deserialize)]
+#[serde(default)]
+pub struct AddAPIUserResponse {
+    /// Field 1: `user_id`
+    #[serde(
+        rename = "userId",
+        alias = "user_id",
+        with = "::buffa::json_helpers::int64",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_zero_i64"
+    )]
+    pub user_id: i64,
+    /// Field 2: `api_token`
+    #[serde(
+        rename = "apiToken",
+        alias = "api_token",
+        with = "::buffa::json_helpers::proto_string",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_str"
+    )]
+    pub api_token: ::buffa::alloc::string::String,
+    #[serde(skip)]
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for AddAPIUserResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("AddAPIUserResponse")
+            .field("user_id", &self.user_id)
+            .field("api_token", &self.api_token)
+            .finish()
+    }
+}
+impl AddAPIUserResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.AddAPIUserResponse";
+}
+::buffa::impl_default_instance!(AddAPIUserResponse);
+impl ::buffa_descriptor::reflect::ReflectMessage for AddAPIUserResponse {
+    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+        __buffa::reflect::descriptor_pool()
+            .message(Self::__buffa_reflect_message_index())
+    }
+    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+        __buffa::reflect::descriptor_pool()
+    }
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn get(
+        &self,
+        field: &::buffa_descriptor::FieldDescriptor,
+    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match field.number() {
+            1u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.user_id),
+            2u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.api_token),
+            _ => {
+                ::core::debug_assert!(
+                    false,
+                    "field number {} is not a member of this message's reflect get()",
+                    field.number(),
+                );
+                ::buffa_descriptor::reflect::ValueRef::Bool(false)
+            }
+        }
+    }
+    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+        match field.number() {
+            1u32 => self.user_id != 0,
+            2u32 => !self.api_token.is_empty(),
+            _ => false,
+        }
+    }
+    fn for_each_set(
+        &self,
+        f: &mut dyn ::core::ops::FnMut(
+            &::buffa_descriptor::FieldDescriptor,
+            ::buffa_descriptor::reflect::ValueRef<'_>,
+        ),
+    ) {
+        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
+        for fd in md.fields() {
+            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+            }
+        }
+    }
+    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+        ::buffa_descriptor::reflect::DynamicMessage::from_message(
+            self,
+            ::buffa::alloc::sync::Arc::clone(__buffa::reflect::descriptor_pool()),
+            Self::__buffa_reflect_message_index(),
+        )
+    }
+}
+impl ::buffa_descriptor::reflect::ReflectElement for AddAPIUserResponse {
+    #[inline]
+    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        ::buffa_descriptor::reflect::ValueRef::Message(
+            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+        )
+    }
+}
+impl AddAPIUserResponse {
+    /// Memoized `MessageIndex` for this message type, resolved once
+    /// against the package's embedded descriptor pool.
+    #[doc(hidden)]
+    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+        *IDX
+            .get_or_init(|| {
+                __buffa::reflect::descriptor_pool()
+                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                    .expect(
+                        "generated message is registered in the embedded descriptor pool",
+                    )
+            })
+    }
+}
+impl ::buffa_descriptor::reflect::Reflectable for AddAPIUserResponse {
+    /// Vtable-mode reflective handle: borrows `self` directly. No
+    /// encode/decode round-trip and no allocation — the reflective
+    /// accessors read this message's fields in place.
+    #[inline]
+    fn reflect(&self) -> ::buffa_descriptor::reflect::ReflectCow<'_> {
+        ::buffa_descriptor::reflect::ReflectCow::Borrowed(self)
+    }
+}
+impl ::buffa::MessageName for AddAPIUserResponse {
+    const PACKAGE: &'static str = "auth.v2";
+    const NAME: &'static str = "AddAPIUserResponse";
+    const FULL_NAME: &'static str = "auth.v2.AddAPIUserResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.AddAPIUserResponse";
+}
+impl ::buffa::Message for AddAPIUserResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.user_id != 0i64 {
+            size += 1u64 + ::buffa::types::int64_encoded_len(self.user_id) as u64;
+        }
+        if !self.api_token.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.api_token) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.user_id != 0i64 {
+            ::buffa::types::put_int64_field(1u32, self.user_id, buf);
+        }
+        if !self.api_token.is_empty() {
+            ::buffa::types::put_string_field(2u32, &self.api_token, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.user_id = ::buffa::types::decode_int64(buf)?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(&mut self.api_token, buf)?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.user_id = 0i64;
+        self.api_token.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for AddAPIUserResponse {
+    const PROTO_FQN: &'static str = "auth.v2.AddAPIUserResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+impl ::buffa::json_helpers::ProtoElemJson for AddAPIUserResponse {
+    fn serialize_proto_json<S: ::serde::Serializer>(
+        v: &Self,
+        s: S,
+    ) -> ::core::result::Result<S::Ok, S::Error> {
+        ::serde::Serialize::serialize(v, s)
+    }
+    fn deserialize_proto_json<'de, D: ::serde::Deserializer<'de>>(
+        d: D,
+    ) -> ::core::result::Result<Self, D::Error> {
+        <Self as ::serde::Deserialize>::deserialize(d)
+    }
+}
+#[doc(hidden)]
+pub const __ADD_API_USER_RESPONSE_JSON_ANY: ::buffa::type_registry::JsonAnyEntry = ::buffa::type_registry::JsonAnyEntry {
+    type_url: "type.googleapis.com/auth.v2.AddAPIUserResponse",
+    to_json: ::buffa::type_registry::any_to_json::<AddAPIUserResponse>,
+    from_json: ::buffa::type_registry::any_from_json::<AddAPIUserResponse>,
+    is_wkt: false,
+};
+#[derive(Clone, PartialEq, Default)]
+#[derive(::serde::Serialize)]
+#[serde(default)]
+pub struct RemoveAPIUserRequest {
+    #[serde(flatten)]
+    pub user_identifier: ::core::option::Option<
+        __buffa::oneof::remove_api_user_request::UserIdentifier,
+    >,
+    #[serde(skip)]
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for RemoveAPIUserRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("RemoveAPIUserRequest")
+            .field("user_identifier", &self.user_identifier)
+            .finish()
+    }
+}
+impl RemoveAPIUserRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.RemoveAPIUserRequest";
+}
+::buffa::impl_default_instance!(RemoveAPIUserRequest);
+impl ::buffa_descriptor::reflect::ReflectMessage for RemoveAPIUserRequest {
+    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+        __buffa::reflect::descriptor_pool()
+            .message(Self::__buffa_reflect_message_index())
+    }
+    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+        __buffa::reflect::descriptor_pool()
+    }
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn get(
+        &self,
+        field: &::buffa_descriptor::FieldDescriptor,
+    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match field.number() {
+            1u32 => {
+                match &self.user_identifier {
+                    ::core::option::Option::Some(
+                        __buffa::oneof::remove_api_user_request::UserIdentifier::UserId(
+                            v,
+                        ),
+                    ) => ::buffa_descriptor::reflect::ValueRef::I64(*v),
+                    _ => ::buffa_descriptor::reflect::ValueRef::I64(0),
+                }
+            }
+            2u32 => {
+                match &self.user_identifier {
+                    ::core::option::Option::Some(
+                        __buffa::oneof::remove_api_user_request::UserIdentifier::Username(
+                            v,
+                        ),
+                    ) => ::buffa_descriptor::reflect::ValueRef::String(v),
+                    _ => ::buffa_descriptor::reflect::ValueRef::String(""),
+                }
+            }
+            _ => {
+                ::core::debug_assert!(
+                    false,
+                    "field number {} is not a member of this message's reflect get()",
+                    field.number(),
+                );
+                ::buffa_descriptor::reflect::ValueRef::Bool(false)
+            }
+        }
+    }
+    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+        match field.number() {
+            1u32 => {
+                ::core::matches!(
+                    & self.user_identifier,
+                    ::core::option::Option::Some(__buffa::oneof::remove_api_user_request::UserIdentifier::UserId(_))
+                )
+            }
+            2u32 => {
+                ::core::matches!(
+                    & self.user_identifier,
+                    ::core::option::Option::Some(__buffa::oneof::remove_api_user_request::UserIdentifier::Username(_))
+                )
+            }
+            _ => false,
+        }
+    }
+    fn for_each_set(
+        &self,
+        f: &mut dyn ::core::ops::FnMut(
+            &::buffa_descriptor::FieldDescriptor,
+            ::buffa_descriptor::reflect::ValueRef<'_>,
+        ),
+    ) {
+        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
+        for fd in md.fields() {
+            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+            }
+        }
+    }
+    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+        ::buffa_descriptor::reflect::DynamicMessage::from_message(
+            self,
+            ::buffa::alloc::sync::Arc::clone(__buffa::reflect::descriptor_pool()),
+            Self::__buffa_reflect_message_index(),
+        )
+    }
+}
+impl ::buffa_descriptor::reflect::ReflectElement for RemoveAPIUserRequest {
+    #[inline]
+    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        ::buffa_descriptor::reflect::ValueRef::Message(
+            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+        )
+    }
+}
+impl RemoveAPIUserRequest {
+    /// Memoized `MessageIndex` for this message type, resolved once
+    /// against the package's embedded descriptor pool.
+    #[doc(hidden)]
+    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+        *IDX
+            .get_or_init(|| {
+                __buffa::reflect::descriptor_pool()
+                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                    .expect(
+                        "generated message is registered in the embedded descriptor pool",
+                    )
+            })
+    }
+}
+impl ::buffa_descriptor::reflect::Reflectable for RemoveAPIUserRequest {
+    /// Vtable-mode reflective handle: borrows `self` directly. No
+    /// encode/decode round-trip and no allocation — the reflective
+    /// accessors read this message's fields in place.
+    #[inline]
+    fn reflect(&self) -> ::buffa_descriptor::reflect::ReflectCow<'_> {
+        ::buffa_descriptor::reflect::ReflectCow::Borrowed(self)
+    }
+}
+impl ::buffa::MessageName for RemoveAPIUserRequest {
+    const PACKAGE: &'static str = "auth.v2";
+    const NAME: &'static str = "RemoveAPIUserRequest";
+    const FULL_NAME: &'static str = "auth.v2.RemoveAPIUserRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.RemoveAPIUserRequest";
+}
+impl ::buffa::Message for RemoveAPIUserRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let ::core::option::Option::Some(ref v) = self.user_identifier {
+            match v {
+                __buffa::oneof::remove_api_user_request::UserIdentifier::UserId(v) => {
+                    size += 1u64 + ::buffa::types::int64_encoded_len(*v) as u64;
+                }
+                __buffa::oneof::remove_api_user_request::UserIdentifier::Username(x) => {
+                    size += 1u64 + ::buffa::types::string_encoded_len(x) as u64;
+                }
+            }
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let ::core::option::Option::Some(ref v) = self.user_identifier {
+            match v {
+                __buffa::oneof::remove_api_user_request::UserIdentifier::UserId(x) => {
+                    ::buffa::types::put_int64_field(1u32, *x, buf);
+                }
+                __buffa::oneof::remove_api_user_request::UserIdentifier::Username(x) => {
+                    ::buffa::types::put_string_field(2u32, x, buf);
+                }
+            }
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.user_identifier = ::core::option::Option::Some(
+                    __buffa::oneof::remove_api_user_request::UserIdentifier::UserId(
+                        ::buffa::types::decode_int64(buf)?,
+                    ),
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                self.user_identifier = ::core::option::Option::Some(
+                    __buffa::oneof::remove_api_user_request::UserIdentifier::Username(
+                        ::buffa::types::decode_string(buf)?,
+                    ),
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.user_identifier = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for RemoveAPIUserRequest {
+    const PROTO_FQN: &'static str = "auth.v2.RemoveAPIUserRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+impl<'de> ::serde::Deserialize<'de> for RemoveAPIUserRequest {
+    fn deserialize<D: ::serde::Deserializer<'de>>(
+        d: D,
+    ) -> ::core::result::Result<Self, D::Error> {
+        struct _V;
+        impl<'de> ::serde::de::Visitor<'de> for _V {
+            type Value = RemoveAPIUserRequest;
+            fn expecting(
+                &self,
+                f: &mut ::core::fmt::Formatter<'_>,
+            ) -> ::core::fmt::Result {
+                f.write_str("struct RemoveAPIUserRequest")
+            }
+            #[allow(clippy::field_reassign_with_default)]
+            fn visit_map<A: ::serde::de::MapAccess<'de>>(
+                self,
+                mut map: A,
+            ) -> ::core::result::Result<RemoveAPIUserRequest, A::Error> {
+                let mut __oneof_user_identifier: ::core::option::Option<
+                    __buffa::oneof::remove_api_user_request::UserIdentifier,
+                > = None;
+                while let Some(key) = map.next_key::<::buffa::alloc::string::String>()? {
+                    match key.as_str() {
+                        "userId" | "user_id" => {
+                            struct _DeserSeed;
+                            impl<'de> ::serde::de::DeserializeSeed<'de> for _DeserSeed {
+                                type Value = i64;
+                                fn deserialize<D: ::serde::Deserializer<'de>>(
+                                    self,
+                                    d: D,
+                                ) -> ::core::result::Result<i64, D::Error> {
+                                    ::buffa::json_helpers::int64::deserialize(d)
+                                }
+                            }
+                            let v: ::core::option::Option<i64> = map
+                                .next_value_seed(
+                                    ::buffa::json_helpers::NullableDeserializeSeed(_DeserSeed),
+                                )?;
+                            if let Some(v) = v {
+                                if __oneof_user_identifier.is_some() {
+                                    return Err(
+                                        ::serde::de::Error::custom(
+                                            "multiple oneof fields set for 'user_identifier'",
+                                        ),
+                                    );
+                                }
+                                __oneof_user_identifier = Some(
+                                    __buffa::oneof::remove_api_user_request::UserIdentifier::UserId(
+                                        v,
+                                    ),
+                                );
+                            }
+                        }
+                        "username" => {
+                            let v: ::core::option::Option<
+                                ::buffa::alloc::string::String,
+                            > = map
+                                .next_value_seed(
+                                    ::buffa::json_helpers::NullableDeserializeSeed(
+                                        ::buffa::json_helpers::DefaultDeserializeSeed::<
+                                            ::buffa::alloc::string::String,
+                                        >::new(),
+                                    ),
+                                )?;
+                            if let Some(v) = v {
+                                if __oneof_user_identifier.is_some() {
+                                    return Err(
+                                        ::serde::de::Error::custom(
+                                            "multiple oneof fields set for 'user_identifier'",
+                                        ),
+                                    );
+                                }
+                                __oneof_user_identifier = Some(
+                                    __buffa::oneof::remove_api_user_request::UserIdentifier::Username(
+                                        v,
+                                    ),
+                                );
+                            }
+                        }
+                        _ => {
+                            map.next_value::<::serde::de::IgnoredAny>()?;
+                        }
+                    }
+                }
+                let mut __r = <RemoveAPIUserRequest as ::core::default::Default>::default();
+                __r.user_identifier = __oneof_user_identifier;
+                Ok(__r)
+            }
+        }
+        d.deserialize_map(_V)
+    }
+}
+impl ::buffa::json_helpers::ProtoElemJson for RemoveAPIUserRequest {
+    fn serialize_proto_json<S: ::serde::Serializer>(
+        v: &Self,
+        s: S,
+    ) -> ::core::result::Result<S::Ok, S::Error> {
+        ::serde::Serialize::serialize(v, s)
+    }
+    fn deserialize_proto_json<'de, D: ::serde::Deserializer<'de>>(
+        d: D,
+    ) -> ::core::result::Result<Self, D::Error> {
+        <Self as ::serde::Deserialize>::deserialize(d)
+    }
+}
+#[doc(hidden)]
+pub const __REMOVE_API_USER_REQUEST_JSON_ANY: ::buffa::type_registry::JsonAnyEntry = ::buffa::type_registry::JsonAnyEntry {
+    type_url: "type.googleapis.com/auth.v2.RemoveAPIUserRequest",
+    to_json: ::buffa::type_registry::any_to_json::<RemoveAPIUserRequest>,
+    from_json: ::buffa::type_registry::any_from_json::<RemoveAPIUserRequest>,
+    is_wkt: false,
+};
+pub mod remove_api_user_request {
+    #[allow(unused_imports)]
+    use super::*;
+    #[doc(inline)]
+    pub use super::__buffa::oneof::remove_api_user_request::UserIdentifier;
+    #[doc(inline)]
+    pub use super::__buffa::view::oneof::remove_api_user_request::UserIdentifier as UserIdentifierView;
+}

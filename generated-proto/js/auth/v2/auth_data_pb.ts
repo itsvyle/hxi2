@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file auth/v2/auth_data.proto.
  */
 export const file_auth_v2_auth_data: GenFile = /*@__PURE__*/
-  fileDesc("ChdhdXRoL3YyL2F1dGhfZGF0YS5wcm90bxIHYXV0aC52MiKRAgoGREJVc2VyEgoKAmlkGAEgASgDEhAKCHVzZXJuYW1lGAIgASgJEhIKCmZpcnN0X25hbWUYAyABKAkSFgoJbGFzdF9uYW1lGAQgASgJSACIAQESEgoKZGlzY29yZF9pZBgFIAEoCRI4ChRhY2NvdW50X2NyZWF0ZWRfZGF0ZRgGIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASOQoVYWNjb3VudF9tb2RpZmllZF9kYXRlGAcgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIRCglwcm9tb3Rpb24YCCABKAUSEwoLcGVybWlzc2lvbnMYCSABKANCDAoKX2xhc3RfbmFtZWIGcHJvdG8z", [file_google_protobuf_timestamp]);
+  fileDesc("ChdhdXRoL3YyL2F1dGhfZGF0YS5wcm90bxIHYXV0aC52MiKhAgoGREJVc2VyEgoKAmlkGAEgASgDEhAKCHVzZXJuYW1lGAIgASgJEhIKCmZpcnN0X25hbWUYAyABKAkSFgoJbGFzdF9uYW1lGAQgASgJSACIAQESEgoKZGlzY29yZF9pZBgFIAEoCRI4ChRhY2NvdW50X2NyZWF0ZWRfZGF0ZRgGIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASOQoVYWNjb3VudF9tb2RpZmllZF9kYXRlGAcgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIRCglwcm9tb3Rpb24YCCABKAUSEwoLcGVybWlzc2lvbnMYCSABKAMSDgoGaXNfYXBpGAogASgIQgwKCl9sYXN0X25hbWViBnByb3RvMw", [file_google_protobuf_timestamp]);
 
 /**
  * @generated from message auth.v2.DBUser
@@ -62,6 +62,11 @@ export type DBUser = Message<"auth.v2.DBUser"> & {
    * @generated from field: int64 permissions = 9;
    */
   permissions: bigint;
+
+  /**
+   * @generated from field: bool is_api = 10;
+   */
+  isApi: boolean;
 };
 
 /**

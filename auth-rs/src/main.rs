@@ -1,3 +1,4 @@
+mod api_login;
 mod app_config;
 mod auth_middleware;
 mod auth_service;
@@ -59,6 +60,8 @@ async fn main() -> Result<()> {
 
     let discord_manager = DiscordLoginManager::new(login_manager.clone())?;
 
+    let api_login_manager = Arc::new(api_login::APILoginManager::new(login_manager.clone()));
+
     let mut app = axum::Router::new()
         .merge(discord_manager.router())
         .merge(login_manager.router());
@@ -67,7 +70,8 @@ async fn main() -> Result<()> {
         signer: &GLOBAL_JWT_SIGNER,
         verifier: &GLOBAL_JWT_VERIFIER,
         login_manager: login_manager.clone(),
-        password_login_manager,
+        password_login_manager: password_login_manager.clone(),
+        api_login_manager: api_login_manager.clone(),
     });
     let connect = service.register(ConnectRouter::new());
 
