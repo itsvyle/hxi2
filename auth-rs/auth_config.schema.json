@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "AuthConfig",
-    "description": "Represents the configuration for the authentication service. You can use `env:VAR_NAME` to load a value from an environment variable, or `file:PATH` to load a value from a file.",
+    "description": "Represents the configuration for the authentication service. You can use `env:VAR_NAME:<optional default_value>` to load a value from an environment variable, or `file:PATH:<optional default_value>` to load a value from a file.",
     "type": "object",
     "required": [
         "auth_endpoint",
@@ -151,7 +151,7 @@
             ]
         },
         "StringOrNumber_int32": {
-            "description": "Can be specified either directly as a number (e.g. 8080) or as a string reference ('env:PORT', 'file:/path')",
+            "description": "Can be specified either directly as a number (e.g. 8080) or as a string reference ('env:PORT:<optional default_value>', 'file:/path:<optional default_value>')",
             "anyOf": [
                 {
                     "type": "integer",

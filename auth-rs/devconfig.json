@@ -11,5 +11,6 @@
     "discord_application_id": "env:CONFIG_DISCORD_APPLICATION_ID:1234567890",
     "discord_client_id": "env:CONFIG_DISCORD_CLIENT_ID:1234567890",
     "discord_client_secret": "env:CONFIG_DISCORD_CLIENT_SECRET:1234567890",
-    "db_path": "test_db.sqlite3"
+    "db_path": "test_db.sqlite3",
+    "running_port": "env:CONFIG_RUNNING_PORT:8080"
 }

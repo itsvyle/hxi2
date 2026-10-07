@@ -224,6 +224,7 @@ mod config_parsing {
     use serde::{Deserialize, Serialize};
     use std::env;
     use std::fs;
+    use tracing::{error, trace};
 
     use anyhow::Result;
 
@@ -280,7 +281,7 @@ mod config_parsing {
 
             let mut schema_obj = schemars::schema::SchemaObject::default();
             schema_obj.metadata().description = Some(
-                "Can be specified either directly as a number (e.g. 8080) or as a string reference ('env:PORT', 'file:/path')".to_string()
+                "Can be specified either directly as a number (e.g. 8080) or as a string reference ('env:PORT:<optional default_value>', 'file:/path:<optional default_value>')".to_string()
             );
             schema_obj.subschemas().any_of = Some(vec![number_schema, string_schema]);
             schemars::schema::Schema::Object(schema_obj)
@@ -301,7 +302,7 @@ mod config_parsing {
     #[cfg_attr(feature = "schema-gen", derive(schemars::JsonSchema))]
     #[serde(deny_unknown_fields)]
     /// Represents the configuration for the authentication service.
-    /// You can use `env:VAR_NAME:<default_value>` to load a value from an environment variable, or `file:PATH` to load a value from a file.
+    /// You can use `env:VAR_NAME:<optional default_value>` to load a value from an environment variable, or `file:PATH:<optional default_value>` to load a value from a file.
     pub struct AuthConfig {
         /// Path or URL to the JSON Schema for validation and auto-completion
         #[serde(rename = "$schema", default, skip_serializing_if = "Option::is_none")]
@@ -462,14 +463,15 @@ mod config_parsing {
         }
     }
 
-    /// Resolves `env:VAR_NAME:<default_value>` or `file:PATH` prefixes.
+    /// Resolves `env:VAR_NAME:?<default_value>` or `file:PATH:?<default_value>` prefixes.
     /// Returns raw string if no prefix matches.
     pub fn resolve_value(raw: &str) -> Result<String, String> {
         let trimmed = raw.trim();
         if let Some(var_name) = trimmed.strip_prefix("env:") {
             let parts: Vec<&str> = var_name.split(':').collect();
-            if parts.len() != 2 {
-                return Err("Invalid env: format. Expected env:VAR_NAME:DEFAULT_VALUE".into());
+            if parts.len() < 2 {
+                return env::var(parts[0])
+                    .map_err(|_| format!("Environment variable '{}' is not set", var_name));
             }
             let var_name = parts[0];
             let default_value = parts[1];
@@ -477,9 +479,24 @@ mod config_parsing {
                 .map_err(|_| format!("Environment variable '{}' is not set", var_name))
                 .or_else(|_| Ok(default_value.into()))
         } else if let Some(file_path) = trimmed.strip_prefix("file:") {
-            fs::read_to_string(file_path)
-                .map(|content| content.trim().to_string())
-                .map_err(|err| format!("Failed to read file at '{}': {}", file_path, err))
+            let parts: Vec<&str> = file_path.split(':').collect();
+            let fcontent = fs::read_to_string(parts[0]).map(|content| content.trim().to_string());
+            if parts.len() < 2 {
+                fcontent.map_err(|_| format!("File '{}' is not readable", file_path))
+            } else {
+                let default_value = parts[1];
+                fcontent
+                    .map_err(|e| {
+                        if let Ok(true) = fs::exists(parts[0]) {
+                            error!(
+                                "Reading configuration: File '{}' exits but is not readable: {}",
+                                parts[0], e
+                            )
+                        };
+                        e
+                    })
+                    .or_else(|_| Ok(default_value.into()))
+            }
         } else {
             Ok(trimmed.to_string())
         }
