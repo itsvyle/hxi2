@@ -224,7 +224,7 @@ mod config_parsing {
     use serde::{Deserialize, Serialize};
     use std::env;
     use std::fs;
-    use tracing::{error, trace};
+    use tracing::error;
 
     use anyhow::Result;
 
