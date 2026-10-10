@@ -1,9 +1,14 @@
 #![allow(dead_code)]
+use buffa_types::Timestamp;
 use chrono::{DateTime, Duration, Utc};
+use hxi2_proto::{
+    proto::auth::v2::{Attribute, Permission, list_api_users_response},
+    utils::retrieve_active_bitfields,
+};
 use rand::RngExt;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use sqlx::{FromRow, sqlite::SqlitePool};
+use sqlx::{FromRow, Row, Sqlite, sqlite::SqlitePool};
 use tracing::{error, instrument};
 
 use crate::app_config;
@@ -99,7 +104,7 @@ pub struct DbUser {
     pub username: String,
     pub first_name: String,
     pub last_name: Option<String>, // Replaces sql.NullString
-    pub discord_id: String,
+    pub discord_id: Option<String>,
     #[serde(skip)]
     pub account_created_date: DateTime<Utc>,
     #[serde(skip)]
@@ -134,9 +139,6 @@ impl DbUser {
         if self.first_name.is_empty() {
             return Err(DbError::Validation("first_name is missing".into()));
         }
-        if self.discord_id.is_empty() {
-            return Err(DbError::Validation("discord_id is missing".into()));
-        }
         // Note: DateTime<Utc> in Rust cannot inherently be "zero" like time.IsZero() in Go.
         Ok(())
     }
@@ -150,7 +152,7 @@ impl From<DbUser> for hxi2_proto::proto::auth::v2::DBUser {
             username: user.username,
             first_name: user.first_name,
             last_name: user.last_name.clone(),
-            discord_id: user.discord_id,
+            discord_id: user.discord_id.clone(),
             account_created_date: Timestamp::from_unix_secs(user.account_created_date.timestamp())
                 .into(),
             account_modified_date: Timestamp::from_unix_secs(
@@ -293,9 +295,8 @@ impl DatabaseManager {
         &self,
         identifier: &DbUserIdentifier,
     ) -> Result<i64, DbError> {
-        match identifier {
-            DbUserIdentifier::Id(id) => return Ok(*id),
-            _ => {}
+        if let DbUserIdentifier::Id(id) = identifier {
+            return Ok(*id);
         };
         let query = match identifier {
             DbUserIdentifier::Username(_) => "SELECT ID FROM users WHERE username = ?",
@@ -444,18 +445,99 @@ impl DatabaseManager {
         expires_at: DateTime<Utc>,
     ) -> Result<(), DbError> {
         let user_id = user_identifier.to_user_id(self).await?;
-        sqlx::query(
-            "INSERT INTO API_TOKENS (user_id, token_hash, expires_at) VALUES (?, ?, ?, ?)
-             ON CONFLICT(token_hash) DO UPDATE SET user_id = excluded.user_id, expires_at = excluded.expires_at"
+        sqlx::query("REPLACE INTO API_TOKENS (user_id, token_hash, expires_at) VALUES (?, ?, ?)")
+            .bind(user_id)
+            .bind(token_hash)
+            .bind(expires_at)
+            .execute(&self.pool)
+            .await
+            .map_err(DbError::Sqlx)?;
+
+        Ok(())
+    }
+
+    pub async fn get_potential_api_token(
+        &self,
+        user_identifier: &DbUserIdentifier,
+    ) -> Result<Option<DbApiToken>, DbError> {
+        let user_id = user_identifier.to_user_id(self).await?;
+        let token = sqlx::query_as::<_, DbApiToken>("SELECT * FROM API_TOKENS WHERE user_id = ?")
+            .bind(user_id)
+            .fetch_one(&self.pool)
+            .await
+            .map(Some)
+            .or_else(|e| {
+                if matches!(e, sqlx::Error::RowNotFound) {
+                    Ok(None)
+                } else {
+                    Err(DbError::Sqlx(e))
+                }
+            })?;
+        Ok(token)
+    }
+
+    pub async fn delete_api_token_by_hash(&self, token_hash: &str) -> Result<(), DbError> {
+        sqlx::query("DELETE FROM API_TOKENS WHERE token_hash = ?")
+            .bind(token_hash)
+            .execute(&self.pool)
+            .await
+            .map_err(DbError::Sqlx)?;
+
+        Ok(())
+    }
+
+    pub async fn delete_api_token_by_user(
+        &self,
+        user_identifier: &DbUserIdentifier,
+    ) -> Result<(), DbError> {
+        let user_id = user_identifier.to_user_id(self).await?;
+        sqlx::query("DELETE FROM API_TOKENS WHERE user_id = ?")
+            .bind(user_id)
+            .execute(&self.pool)
+            .await
+            .map_err(DbError::Sqlx)?;
+
+        Ok(())
+    }
+
+    #[instrument(skip(self), err)]
+    pub async fn list_api_users(&self) -> Result<Vec<list_api_users_response::APIUser>, DbError> {
+        let api_users = sqlx::query::<Sqlite>(
+            "SELECT 
+        u.id, u.username, u.permissions, u.attributes,
+        t.id as token_id, 
+        t.created_at as token_created_at,
+        t.expires_at as token_expires_at
+     FROM users u
+     LEFT JOIN API_TOKENS t ON u.id = t.user_id
+     WHERE u.is_api = 1",
         )
-        .bind(user_id)
-        .bind(token_hash)
-        .bind(expires_at)
-        .execute(&self.pool)
+        .map(|row| list_api_users_response::APIUser {
+            username: row.get("username"),
+            user_id: row.get("ID"),
+            roles: retrieve_active_bitfields::<Permission>(row.get::<i64, _>("permissions"))
+                .map(Into::into)
+                .collect(),
+            attributes: retrieve_active_bitfields::<Attribute>(row.get::<i64, _>("attributes"))
+                .map(Into::into)
+                .collect(),
+            token_created_at: row
+                .get::<Option<DateTime<Utc>>, _>("token_created_at")
+                .map(|dt| Timestamp::from_unix_secs(dt.timestamp()))
+                .into(),
+            token_expires_at: row
+                .get::<Option<DateTime<Utc>>, _>("token_expires_at")
+                .map(|dt| Timestamp::from_unix_secs(dt.timestamp()))
+                .into(),
+            has_api_token: row.get::<Option<i64>, _>("token_id").is_some(),
+            token_id: row.get::<Option<i64>, _>("token_id"),
+            __buffa_unknown_fields: Default::default(),
+        })
+        .fetch_all(&self.pool)
         .await
         .map_err(DbError::Sqlx)?;
 
-        Ok(())
+        Ok(api_users)
     }
 }
 

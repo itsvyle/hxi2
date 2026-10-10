@@ -16,7 +16,11 @@ message SmallData {
     repeated Permission roles = 8;
     int64 attributes = 10;
     repeated Attribute attribute_list = 11;
-    bool is_api_token = 9;
+
+    message APITokenData {
+        int64 token_id = 1;
+    }
+    optional APITokenData api_token_data = 9;
 }
 
 message JwtClaims {

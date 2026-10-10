@@ -8,17 +8,17 @@ import type { Permission } from "./permissions_pb";
 import { file_auth_v2_permissions } from "./permissions_pb";
 import type { GetCSRFTokenRequestSchema, GetCSRFTokenResponseSchema, SmallData } from "./jwt_pb";
 import { file_auth_v2_jwt } from "./jwt_pb";
-import type { DBUser, DBUserSchema } from "./auth_data_pb";
+import type { Attribute, DBUser, DBUserSchema } from "./auth_data_pb";
 import { file_auth_v2_auth_data } from "./auth_data_pb";
-import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
-import { file_google_protobuf_empty, file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
+import type { Duration, EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
+import { file_google_protobuf_any, file_google_protobuf_duration, file_google_protobuf_empty, file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file auth/v2/auth.proto.
  */
 export const file_auth_v2_auth: GenFile = /*@__PURE__*/
-  fileDesc("ChJhdXRoL3YyL2F1dGgucHJvdG8SB2F1dGgudjIiGAoWR2V0SldUUHVibGljS2V5UmVxdWVzdCItChdHZXRKV1RQdWJsaWNLZXlSZXNwb25zZRISCgpwdWJsaWNfa2V5GAEgASgJIjUKD1JlbmV3SldUUmVxdWVzdBILCgNqd3QYASABKAkSFQoNcmVmcmVzaF90b2tlbhgCIAEoCSKmAQoQUmVuZXdKV1RSZXNwb25zZRILCgNqd3QYASABKAkSFQoNcmVmcmVzaF90b2tlbhgCIAEoCRIdChVyZWZyZXNoX3Rva2VuX21heF9hZ2UYAyABKAMSEwoLand0X21heF9hZ2UYBSABKAMSKwoKc21hbGxfZGF0YRgEIAEoCzISLmF1dGgudjIuU21hbGxEYXRhSACIAQFCDQoLX3NtYWxsX2RhdGEiEgoQTGlzdFVzZXJzUmVxdWVzdCIzChFMaXN0VXNlcnNSZXNwb25zZRIeCgV1c2VycxgBIAMoCzIPLmF1dGgudjIuREJVc2VyIn0KEkdldERldlRva2VuUmVxdWVzdBIPCgd1c2VyX2lkGAEgASgJEiIKBXJvbGVzGAIgAygOMhMuYXV0aC52Mi5QZXJtaXNzaW9uEh0KEHZhbGlkaXR5X3NlY29uZHMYAyABKANIAIgBAUITChFfdmFsaWRpdHlfc2Vjb25kcyJzChNHZXREZXZUb2tlblJlc3BvbnNlEgsKA2p3dBgBIAEoCRIVCg1yZWZyZXNoX3Rva2VuGAIgASgJEjgKFHJlZnJlc2hfdG9rZW5fZXhwaXJ5GAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCIyChFDcmVhdGVVc2VyUmVxdWVzdBIdCgR1c2VyGAEgASgLMg8uYXV0aC52Mi5EQlVzZXIiMwoSQ3JlYXRlVXNlclJlc3BvbnNlEh0KBHVzZXIYASABKAsyDy5hdXRoLnYyLkRCVXNlciJgChJBZGRQYXNzd29yZFJlcXVlc3QSEAoIcGFzc3dvcmQYASABKAkSEQoHdXNlcl9pZBgCIAEoA0gAEhIKCHVzZXJuYW1lGAMgASgJSABCEQoPdXNlcl9pZGVudGlmaWVyIlEKFVJlbW92ZVBhc3N3b3JkUmVxdWVzdBIRCgd1c2VyX2lkGAEgASgDSAASEgoIdXNlcm5hbWUYAiABKAlIAEIRCg91c2VyX2lkZW50aWZpZXIijgEKFFBhc3N3b3JkTG9naW5SZXF1ZXN0EhAKCHVzZXJuYW1lGAEgASgJEhAKCHBhc3N3b3JkGAIgASgJEhgKC3JlbWVtYmVyX21lGAMgASgISACIAQESGAoLcmVkaXJlY3RfdG8YBCABKAlIAYgBAUIOCgxfcmVtZW1iZXJfbWVCDgoMX3JlZGlyZWN0X3RvIiwKFVBhc3N3b3JkTG9naW5SZXNwb25zZRITCgtyZWRpcmVjdF90bxgBIAEoCSJJChFBZGRBUElVc2VyUmVxdWVzdBIQCgh1c2VybmFtZRgBIAEoCRIiCgVyb2xlcxgDIAMoDjITLmF1dGgudjIuUGVybWlzc2lvbiI4ChJBZGRBUElVc2VyUmVzcG9uc2USDwoHdXNlcl9pZBgBIAEoAxIRCglhcGlfdG9rZW4YAiABKAkiUAoUUmVtb3ZlQVBJVXNlclJlcXVlc3QSEQoHdXNlcl9pZBgBIAEoA0gAEhIKCHVzZXJuYW1lGAIgASgJSABCEQoPdXNlcl9pZGVudGlmaWVyMpMLCgtBdXRoU2VydmljZRJgCg9HZXRKV1RQdWJsaWNLZXkSHy5hdXRoLnYyLkdldEpXVFB1YmxpY0tleVJlcXVlc3QaIC5hdXRoLnYyLkdldEpXVFB1YmxpY0tleVJlc3BvbnNlIgqQAgGK5xgDCgEEEkgKCFJlbmV3SldUEhguYXV0aC52Mi5SZW5ld0pXVFJlcXVlc3QaGS5hdXRoLnYyLlJlbmV3SldUUmVzcG9uc2UiB4rnGAMKAQQSSwoJTGlzdFVzZXJzEhkuYXV0aC52Mi5MaXN0VXNlcnNSZXF1ZXN0GhouYXV0aC52Mi5MaXN0VXNlcnNSZXNwb25zZSIHiucYAwoBBRJQCgtHZXREZXZUb2tlbhIbLmF1dGgudjIuR2V0RGV2VG9rZW5SZXF1ZXN0GhwuYXV0aC52Mi5HZXREZXZUb2tlblJlc3BvbnNlIgaK5xgCEAESTgoKQ3JlYXRlVXNlchIaLmF1dGgudjIuQ3JlYXRlVXNlclJlcXVlc3QaGy5hdXRoLnYyLkNyZWF0ZVVzZXJSZXNwb25zZSIHiucYAwoBARI3CgpVcGRhdGVVc2VyEg8uYXV0aC52Mi5EQlVzZXIaDy5hdXRoLnYyLkRCVXNlciIHiucYAwoBARJTCgxHZXRDU1JGVG9rZW4SHC5hdXRoLnYyLkdldENTUkZUb2tlblJlcXVlc3QaHS5hdXRoLnYyLkdldENTUkZUb2tlblJlc3BvbnNlIgaK5xgCEAESawoMRGlzY29yZExvZ2luEhYuZ29vZ2xlLnByb3RvYnVmLkVtcHR5GhYuZ29vZ2xlLnByb3RvYnVmLkVtcHR5IiuK5xgnEAEaCi9hcGkvbG9naW5SFxoVL2FwaS9kaXNjb3JkX2NhbGxiYWNrEk0KC0FkZFBhc3N3b3JkEhsuYXV0aC52Mi5BZGRQYXNzd29yZFJlcXVlc3QaFi5nb29nbGUucHJvdG9idWYuRW1wdHkiCYrnGAUKAQYQABJTCg5SZW1vdmVQYXNzd29yZBIeLmF1dGgudjIuUmVtb3ZlUGFzc3dvcmRSZXF1ZXN0GhYuZ29vZ2xlLnByb3RvYnVmLkVtcHR5IgmK5xgFCgEGEAASWAoNUGFzc3dvcmRMb2dpbhIdLmF1dGgudjIuUGFzc3dvcmRMb2dpblJlcXVlc3QaHi5hdXRoLnYyLlBhc3N3b3JkTG9naW5SZXNwb25zZSIIiucYBBABOAESTgoKQWRkQVBJVXNlchIaLmF1dGgudjIuQWRkQVBJVXNlclJlcXVlc3QaGy5hdXRoLnYyLkFkZEFQSVVzZXJSZXNwb25zZSIHiucYAwoBARJPCg1SZW1vdmVBUElVc2VyEh0uYXV0aC52Mi5SZW1vdmVBUElVc2VyUmVxdWVzdBoWLmdvb2dsZS5wcm90b2J1Zi5FbXB0eSIHiucYAwoBARLeAQoNRnJvbnRlbmRJbmRleBIWLmdvb2dsZS5wcm90b2J1Zi5FbXB0eRoWLmdvb2dsZS5wcm90b2J1Zi5FbXB0eSKcAYrnGJcBEAEaAS8aBi9sb2dpbhoLL2luZGV4Lmh0bWxAAUoRZGlzdC9sb2dpbnYyLmh0bWxSMxoYL2Rpc3QvbG9naW52Mi5idW5kbGUuY3NzShdkaXN0L2xvZ2ludjIuYnVuZGxlLmNzc1IxGhcvZGlzdC9sb2dpbnYyLmJ1bmRsZS5qc0oWZGlzdC9sb2dpbnYyLmJ1bmRsZS5qcxJLCgZMb2dvdXQSFi5nb29nbGUucHJvdG9idWYuRW1wdHkaFi5nb29nbGUucHJvdG9idWYuRW1wdHkiEYrnGA0QARoHL2xvZ291dEABGiGS5xgdCgEBIgxYLUNTUkYtVG9rZW4qCmNzcmZfdG9rZW5iBnByb3RvMw", [file_auth_v2_permissions, file_auth_v2_jwt, file_auth_v2_auth_data, file_google_protobuf_timestamp, file_google_protobuf_empty]);
+  fileDesc("ChJhdXRoL3YyL2F1dGgucHJvdG8SB2F1dGgudjIiGAoWR2V0SldUUHVibGljS2V5UmVxdWVzdCItChdHZXRKV1RQdWJsaWNLZXlSZXNwb25zZRISCgpwdWJsaWNfa2V5GAEgASgJIjUKD1JlbmV3SldUUmVxdWVzdBILCgNqd3QYASABKAkSFQoNcmVmcmVzaF90b2tlbhgCIAEoCSKmAQoQUmVuZXdKV1RSZXNwb25zZRILCgNqd3QYASABKAkSFQoNcmVmcmVzaF90b2tlbhgCIAEoCRIdChVyZWZyZXNoX3Rva2VuX21heF9hZ2UYAyABKAMSEwoLand0X21heF9hZ2UYBSABKAMSKwoKc21hbGxfZGF0YRgEIAEoCzISLmF1dGgudjIuU21hbGxEYXRhSACIAQFCDQoLX3NtYWxsX2RhdGEiEgoQTGlzdFVzZXJzUmVxdWVzdCIzChFMaXN0VXNlcnNSZXNwb25zZRIeCgV1c2VycxgBIAMoCzIPLmF1dGgudjIuREJVc2VyIqUBChJHZXREZXZUb2tlblJlcXVlc3QSDwoHdXNlcl9pZBgBIAEoCRIiCgVyb2xlcxgCIAMoDjITLmF1dGgudjIuUGVybWlzc2lvbhIdChB2YWxpZGl0eV9zZWNvbmRzGAMgASgDSACIAQESJgoKYXR0cmlidXRlcxgEIAMoDjISLmF1dGgudjIuQXR0cmlidXRlQhMKEV92YWxpZGl0eV9zZWNvbmRzInMKE0dldERldlRva2VuUmVzcG9uc2USCwoDand0GAEgASgJEhUKDXJlZnJlc2hfdG9rZW4YAiABKAkSOAoUcmVmcmVzaF90b2tlbl9leHBpcnkYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIjIKEUNyZWF0ZVVzZXJSZXF1ZXN0Eh0KBHVzZXIYASABKAsyDy5hdXRoLnYyLkRCVXNlciIzChJDcmVhdGVVc2VyUmVzcG9uc2USHQoEdXNlchgBIAEoCzIPLmF1dGgudjIuREJVc2VyImAKEkFkZFBhc3N3b3JkUmVxdWVzdBIQCghwYXNzd29yZBgBIAEoCRIRCgd1c2VyX2lkGAIgASgDSAASEgoIdXNlcm5hbWUYAyABKAlIAEIRCg91c2VyX2lkZW50aWZpZXIiUQoVUmVtb3ZlUGFzc3dvcmRSZXF1ZXN0EhEKB3VzZXJfaWQYASABKANIABISCgh1c2VybmFtZRgCIAEoCUgAQhEKD3VzZXJfaWRlbnRpZmllciKOAQoUUGFzc3dvcmRMb2dpblJlcXVlc3QSEAoIdXNlcm5hbWUYASABKAkSEAoIcGFzc3dvcmQYAiABKAkSGAoLcmVtZW1iZXJfbWUYAyABKAhIAIgBARIYCgtyZWRpcmVjdF90bxgEIAEoCUgBiAEBQg4KDF9yZW1lbWJlcl9tZUIOCgxfcmVkaXJlY3RfdG8iLAoVUGFzc3dvcmRMb2dpblJlc3BvbnNlEhMKC3JlZGlyZWN0X3RvGAEgASgJInEKEUFkZEFQSVVzZXJSZXF1ZXN0EhAKCHVzZXJuYW1lGAEgASgJEiIKBXJvbGVzGAMgAygOMhMuYXV0aC52Mi5QZXJtaXNzaW9uEiYKCmF0dHJpYnV0ZXMYBCADKA4yEi5hdXRoLnYyLkF0dHJpYnV0ZSI4ChJBZGRBUElVc2VyUmVzcG9uc2USDwoHdXNlcl9pZBgBIAEoAxIRCglhcGlfdG9rZW4YAiABKAkiUAoUUmVtb3ZlQVBJVXNlclJlcXVlc3QSEQoHdXNlcl9pZBgBIAEoA0gAEhIKCHVzZXJuYW1lGAIgASgJSABCEQoPdXNlcl9pZGVudGlmaWVyIlQKGFJlbmV3QVBJVXNlclRva2VuUmVxdWVzdBIRCgd1c2VyX2lkGAEgASgDSAASEgoIdXNlcm5hbWUYAiABKAlIAEIRCg91c2VyX2lkZW50aWZpZXIiLgoZUmVuZXdBUElVc2VyVG9rZW5SZXNwb25zZRIRCglhcGlfdG9rZW4YASABKAkiogMKFExpc3RBUElVc2Vyc1Jlc3BvbnNlEjQKBXVzZXJzGAEgAygLMiUuYXV0aC52Mi5MaXN0QVBJVXNlcnNSZXNwb25zZS5BUElVc2VyGtMCCgdBUElVc2VyEg8KB3VzZXJfaWQYASABKAMSEAoIdXNlcm5hbWUYAiABKAkSIgoFcm9sZXMYAyADKA4yEy5hdXRoLnYyLlBlcm1pc3Npb24SJgoKYXR0cmlidXRlcxgEIAMoDjISLmF1dGgudjIuQXR0cmlidXRlEhUKDWhhc19hcGlfdG9rZW4YBSABKAgSOQoQdG9rZW5fY3JlYXRlZF9hdBgGIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBIAIgBARI5ChB0b2tlbl9leHBpcmVzX2F0GAcgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEgBiAEBEhUKCHRva2VuX2lkGAggASgDSAKIAQFCEwoRX3Rva2VuX2NyZWF0ZWRfYXRCEwoRX3Rva2VuX2V4cGlyZXNfYXRCCwoJX3Rva2VuX2lkIl4KD0FQSUxvZ2luUmVxdWVzdBIRCgd1c2VyX2lkGAEgASgDSAASEgoIdXNlcm5hbWUYAiABKAlIABIRCglhcGlfdG9rZW4YAyABKAlCEQoPdXNlcl9pZGVudGlmaWVyIk8KEEFQSUxvZ2luUmVzcG9uc2USCwoDand0GAEgASgJEi4KC2p3dF9tYXhfYWdlGAIgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uMpENCgtBdXRoU2VydmljZRJgCg9HZXRKV1RQdWJsaWNLZXkSHy5hdXRoLnYyLkdldEpXVFB1YmxpY0tleVJlcXVlc3QaIC5hdXRoLnYyLkdldEpXVFB1YmxpY0tleVJlc3BvbnNlIgqQAgGK5xgDCgEEEkgKCFJlbmV3SldUEhguYXV0aC52Mi5SZW5ld0pXVFJlcXVlc3QaGS5hdXRoLnYyLlJlbmV3SldUUmVzcG9uc2UiB4rnGAMKAQQSSwoJTGlzdFVzZXJzEhkuYXV0aC52Mi5MaXN0VXNlcnNSZXF1ZXN0GhouYXV0aC52Mi5MaXN0VXNlcnNSZXNwb25zZSIHiucYAwoBBRJQCgtHZXREZXZUb2tlbhIbLmF1dGgudjIuR2V0RGV2VG9rZW5SZXF1ZXN0GhwuYXV0aC52Mi5HZXREZXZUb2tlblJlc3BvbnNlIgaK5xgCEAESTgoKQ3JlYXRlVXNlchIaLmF1dGgudjIuQ3JlYXRlVXNlclJlcXVlc3QaGy5hdXRoLnYyLkNyZWF0ZVVzZXJSZXNwb25zZSIHiucYAwoBARI3CgpVcGRhdGVVc2VyEg8uYXV0aC52Mi5EQlVzZXIaDy5hdXRoLnYyLkRCVXNlciIHiucYAwoBARJTCgxHZXRDU1JGVG9rZW4SHC5hdXRoLnYyLkdldENTUkZUb2tlblJlcXVlc3QaHS5hdXRoLnYyLkdldENTUkZUb2tlblJlc3BvbnNlIgaK5xgCEAESawoMRGlzY29yZExvZ2luEhYuZ29vZ2xlLnByb3RvYnVmLkVtcHR5GhYuZ29vZ2xlLnByb3RvYnVmLkVtcHR5IiuK5xgnEAEaCi9hcGkvbG9naW5SFxoVL2FwaS9kaXNjb3JkX2NhbGxiYWNrEk0KC0FkZFBhc3N3b3JkEhsuYXV0aC52Mi5BZGRQYXNzd29yZFJlcXVlc3QaFi5nb29nbGUucHJvdG9idWYuRW1wdHkiCYrnGAUKAQYQABJTCg5SZW1vdmVQYXNzd29yZBIeLmF1dGgudjIuUmVtb3ZlUGFzc3dvcmRSZXF1ZXN0GhYuZ29vZ2xlLnByb3RvYnVmLkVtcHR5IgmK5xgFCgEGEAASWAoNUGFzc3dvcmRMb2dpbhIdLmF1dGgudjIuUGFzc3dvcmRMb2dpblJlcXVlc3QaHi5hdXRoLnYyLlBhc3N3b3JkTG9naW5SZXNwb25zZSIIiucYBBABOAESTgoKQWRkQVBJVXNlchIaLmF1dGgudjIuQWRkQVBJVXNlclJlcXVlc3QaGy5hdXRoLnYyLkFkZEFQSVVzZXJSZXNwb25zZSIHiucYAwoBARJPCg1SZW1vdmVBUElVc2VyEh0uYXV0aC52Mi5SZW1vdmVBUElVc2VyUmVxdWVzdBoWLmdvb2dsZS5wcm90b2J1Zi5FbXB0eSIHiucYAwoBARJjChFSZW5ld0FQSVVzZXJUb2tlbhIhLmF1dGgudjIuUmVuZXdBUElVc2VyVG9rZW5SZXF1ZXN0GiIuYXV0aC52Mi5SZW5ld0FQSVVzZXJUb2tlblJlc3BvbnNlIgeK5xgDCgEBEk4KDExpc3RBUElVc2VycxIWLmdvb2dsZS5wcm90b2J1Zi5FbXB0eRodLmF1dGgudjIuTGlzdEFQSVVzZXJzUmVzcG9uc2UiB4rnGAMKAQESRwoIQVBJTG9naW4SGC5hdXRoLnYyLkFQSUxvZ2luUmVxdWVzdBoZLmF1dGgudjIuQVBJTG9naW5SZXNwb25zZSIGiucYAhABEt4BCg1Gcm9udGVuZEluZGV4EhYuZ29vZ2xlLnByb3RvYnVmLkVtcHR5GhYuZ29vZ2xlLnByb3RvYnVmLkVtcHR5IpwBiucYlwEQARoBLxoGL2xvZ2luGgsvaW5kZXguaHRtbEABShFkaXN0L2xvZ2ludjIuaHRtbFIzGhgvZGlzdC9sb2dpbnYyLmJ1bmRsZS5jc3NKF2Rpc3QvbG9naW52Mi5idW5kbGUuY3NzUjEaFy9kaXN0L2xvZ2ludjIuYnVuZGxlLmpzShZkaXN0L2xvZ2ludjIuYnVuZGxlLmpzEksKBkxvZ291dBIWLmdvb2dsZS5wcm90b2J1Zi5FbXB0eRoWLmdvb2dsZS5wcm90b2J1Zi5FbXB0eSIRiucYDRABGgcvbG9nb3V0QAEaIZLnGB0KAQEiDFgtQ1NSRi1Ub2tlbioKY3NyZl90b2tlbmIGcHJvdG8z", [file_auth_v2_permissions, file_auth_v2_jwt, file_auth_v2_auth_data, file_google_protobuf_timestamp, file_google_protobuf_empty, file_google_protobuf_any, file_google_protobuf_duration]);
 
 /**
  * @generated from message auth.v2.GetJWTPublicKeyRequest
@@ -157,6 +157,11 @@ export type GetDevTokenRequest = Message<"auth.v2.GetDevTokenRequest"> & {
    * @generated from field: optional int64 validity_seconds = 3;
    */
   validitySeconds?: bigint | undefined;
+
+  /**
+   * @generated from field: repeated auth.v2.Attribute attributes = 4;
+   */
+  attributes: Attribute[];
 };
 
 /**
@@ -356,6 +361,11 @@ export type AddAPIUserRequest = Message<"auth.v2.AddAPIUserRequest"> & {
    * @generated from field: repeated auth.v2.Permission roles = 3;
    */
   roles: Permission[];
+
+  /**
+   * @generated from field: repeated auth.v2.Attribute attributes = 4;
+   */
+  attributes: Attribute[];
 };
 
 /**
@@ -415,6 +425,177 @@ export type RemoveAPIUserRequest = Message<"auth.v2.RemoveAPIUserRequest"> & {
  */
 export const RemoveAPIUserRequestSchema: GenMessage<RemoveAPIUserRequest> = /*@__PURE__*/
   messageDesc(file_auth_v2_auth, 16);
+
+/**
+ * @generated from message auth.v2.RenewAPIUserTokenRequest
+ */
+export type RenewAPIUserTokenRequest = Message<"auth.v2.RenewAPIUserTokenRequest"> & {
+  /**
+   * @generated from oneof auth.v2.RenewAPIUserTokenRequest.user_identifier
+   */
+  userIdentifier: {
+    /**
+     * @generated from field: int64 user_id = 1;
+     */
+    value: bigint;
+    case: "userId";
+  } | {
+    /**
+     * @generated from field: string username = 2;
+     */
+    value: string;
+    case: "username";
+  } | { case: undefined; value?: undefined };
+};
+
+/**
+ * Describes the message auth.v2.RenewAPIUserTokenRequest.
+ * Use `create(RenewAPIUserTokenRequestSchema)` to create a new message.
+ */
+export const RenewAPIUserTokenRequestSchema: GenMessage<RenewAPIUserTokenRequest> = /*@__PURE__*/
+  messageDesc(file_auth_v2_auth, 17);
+
+/**
+ * @generated from message auth.v2.RenewAPIUserTokenResponse
+ */
+export type RenewAPIUserTokenResponse = Message<"auth.v2.RenewAPIUserTokenResponse"> & {
+  /**
+   * @generated from field: string api_token = 1;
+   */
+  apiToken: string;
+};
+
+/**
+ * Describes the message auth.v2.RenewAPIUserTokenResponse.
+ * Use `create(RenewAPIUserTokenResponseSchema)` to create a new message.
+ */
+export const RenewAPIUserTokenResponseSchema: GenMessage<RenewAPIUserTokenResponse> = /*@__PURE__*/
+  messageDesc(file_auth_v2_auth, 18);
+
+/**
+ * @generated from message auth.v2.ListAPIUsersResponse
+ */
+export type ListAPIUsersResponse = Message<"auth.v2.ListAPIUsersResponse"> & {
+  /**
+   * @generated from field: repeated auth.v2.ListAPIUsersResponse.APIUser users = 1;
+   */
+  users: ListAPIUsersResponse_APIUser[];
+};
+
+/**
+ * Describes the message auth.v2.ListAPIUsersResponse.
+ * Use `create(ListAPIUsersResponseSchema)` to create a new message.
+ */
+export const ListAPIUsersResponseSchema: GenMessage<ListAPIUsersResponse> = /*@__PURE__*/
+  messageDesc(file_auth_v2_auth, 19);
+
+/**
+ * @generated from message auth.v2.ListAPIUsersResponse.APIUser
+ */
+export type ListAPIUsersResponse_APIUser = Message<"auth.v2.ListAPIUsersResponse.APIUser"> & {
+  /**
+   * @generated from field: int64 user_id = 1;
+   */
+  userId: bigint;
+
+  /**
+   * @generated from field: string username = 2;
+   */
+  username: string;
+
+  /**
+   * @generated from field: repeated auth.v2.Permission roles = 3;
+   */
+  roles: Permission[];
+
+  /**
+   * @generated from field: repeated auth.v2.Attribute attributes = 4;
+   */
+  attributes: Attribute[];
+
+  /**
+   * @generated from field: bool has_api_token = 5;
+   */
+  hasApiToken: boolean;
+
+  /**
+   * @generated from field: optional google.protobuf.Timestamp token_created_at = 6;
+   */
+  tokenCreatedAt?: Timestamp | undefined;
+
+  /**
+   * @generated from field: optional google.protobuf.Timestamp token_expires_at = 7;
+   */
+  tokenExpiresAt?: Timestamp | undefined;
+
+  /**
+   * @generated from field: optional int64 token_id = 8;
+   */
+  tokenId?: bigint | undefined;
+};
+
+/**
+ * Describes the message auth.v2.ListAPIUsersResponse.APIUser.
+ * Use `create(ListAPIUsersResponse_APIUserSchema)` to create a new message.
+ */
+export const ListAPIUsersResponse_APIUserSchema: GenMessage<ListAPIUsersResponse_APIUser> = /*@__PURE__*/
+  messageDesc(file_auth_v2_auth, 19, 0);
+
+/**
+ * @generated from message auth.v2.APILoginRequest
+ */
+export type APILoginRequest = Message<"auth.v2.APILoginRequest"> & {
+  /**
+   * @generated from oneof auth.v2.APILoginRequest.user_identifier
+   */
+  userIdentifier: {
+    /**
+     * @generated from field: int64 user_id = 1;
+     */
+    value: bigint;
+    case: "userId";
+  } | {
+    /**
+     * @generated from field: string username = 2;
+     */
+    value: string;
+    case: "username";
+  } | { case: undefined; value?: undefined };
+
+  /**
+   * @generated from field: string api_token = 3;
+   */
+  apiToken: string;
+};
+
+/**
+ * Describes the message auth.v2.APILoginRequest.
+ * Use `create(APILoginRequestSchema)` to create a new message.
+ */
+export const APILoginRequestSchema: GenMessage<APILoginRequest> = /*@__PURE__*/
+  messageDesc(file_auth_v2_auth, 20);
+
+/**
+ * @generated from message auth.v2.APILoginResponse
+ */
+export type APILoginResponse = Message<"auth.v2.APILoginResponse"> & {
+  /**
+   * @generated from field: string jwt = 1;
+   */
+  jwt: string;
+
+  /**
+   * @generated from field: google.protobuf.Duration jwt_max_age = 2;
+   */
+  jwtMaxAge?: Duration | undefined;
+};
+
+/**
+ * Describes the message auth.v2.APILoginResponse.
+ * Use `create(APILoginResponseSchema)` to create a new message.
+ */
+export const APILoginResponseSchema: GenMessage<APILoginResponse> = /*@__PURE__*/
+  messageDesc(file_auth_v2_auth, 21);
 
 /**
  * @generated from service auth.v2.AuthService
@@ -527,6 +708,30 @@ export const AuthService: GenService<{
     methodKind: "unary";
     input: typeof RemoveAPIUserRequestSchema;
     output: typeof EmptySchema;
+  },
+  /**
+   * @generated from rpc auth.v2.AuthService.RenewAPIUserToken
+   */
+  renewAPIUserToken: {
+    methodKind: "unary";
+    input: typeof RenewAPIUserTokenRequestSchema;
+    output: typeof RenewAPIUserTokenResponseSchema;
+  },
+  /**
+   * @generated from rpc auth.v2.AuthService.ListAPIUsers
+   */
+  listAPIUsers: {
+    methodKind: "unary";
+    input: typeof EmptySchema;
+    output: typeof ListAPIUsersResponseSchema;
+  },
+  /**
+   * @generated from rpc auth.v2.AuthService.APILogin
+   */
+  aPILogin: {
+    methodKind: "unary";
+    input: typeof APILoginRequestSchema;
+    output: typeof APILoginResponseSchema;
   },
   /**
    * FRONTEND PAGES

@@ -80,14 +80,16 @@ pub struct SmallData {
         skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_vec"
     )]
     pub attribute_list: ::buffa::alloc::vec::Vec<::buffa::EnumValue<Attribute>>,
-    /// Field 9: `is_api_token`
+    /// Field 9: `api_token_data`
     #[serde(
-        rename = "isApiToken",
-        alias = "is_api_token",
-        with = "::buffa::json_helpers::proto_bool",
-        skip_serializing_if = "::buffa::json_helpers::skip_if::is_false"
+        rename = "apiTokenData",
+        alias = "api_token_data",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_unset_message_field"
     )]
-    pub is_api_token: bool,
+    pub api_token_data: ::buffa::MessageField<
+        small_data::APITokenData,
+        ::buffa::Inline<small_data::APITokenData>,
+    >,
     #[serde(skip)]
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
@@ -105,7 +107,7 @@ impl ::core::fmt::Debug for SmallData {
             .field("roles", &self.roles)
             .field("attributes", &self.attributes)
             .field("attribute_list", &self.attribute_list)
-            .field("is_api_token", &self.is_api_token)
+            .field("api_token_data", &self.api_token_data)
             .finish()
     }
 }
@@ -165,7 +167,13 @@ impl ::buffa_descriptor::reflect::ReflectMessage for SmallData {
             8u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.roles),
             10u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.attributes),
             11u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.attribute_list),
-            9u32 => ::buffa_descriptor::reflect::ValueRef::Bool(self.is_api_token),
+            9u32 => {
+                ::buffa_descriptor::reflect::ValueRef::Message(
+                    ::buffa_descriptor::reflect::Reflectable::reflect(
+                        &*self.api_token_data,
+                    ),
+                )
+            }
             _ => {
                 ::core::debug_assert!(
                     false,
@@ -188,7 +196,7 @@ impl ::buffa_descriptor::reflect::ReflectMessage for SmallData {
             8u32 => !self.roles.is_empty(),
             10u32 => self.attributes != 0,
             11u32 => !self.attribute_list.is_empty(),
-            9u32 => self.is_api_token,
+            9u32 => self.api_token_data.is_set(),
             _ => false,
         }
     }
@@ -300,8 +308,13 @@ impl ::buffa::Message for SmallData {
                 .sum::<u64>();
             size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
         }
-        if self.is_api_token {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        if self.api_token_data.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.api_token_data.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
         if self.attributes != 0i64 {
             size += 1u64 + ::buffa::types::int64_encoded_len(self.attributes) as u64;
@@ -361,8 +374,13 @@ impl ::buffa::Message for SmallData {
                 ::buffa::types::encode_int32(v.to_i32(), buf);
             }
         }
-        if self.is_api_token {
-            ::buffa::types::put_bool_field(9u32, self.is_api_token, buf);
+        if self.api_token_data.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                9u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.api_token_data.write_to(__cache, buf);
         }
         if self.attributes != 0i64 {
             ::buffa::types::put_int64_field(10u32, self.attributes, buf);
@@ -490,9 +508,13 @@ impl ::buffa::Message for SmallData {
             9u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::Varint,
+                    ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                self.is_api_token = ::buffa::types::decode_bool(buf)?;
+                ::buffa::Message::merge_length_delimited(
+                    self.api_token_data.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
             }
             10u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -555,7 +577,7 @@ impl ::buffa::Message for SmallData {
         self.promotion = 0i32;
         self.expiration = ::buffa::MessageField::none();
         self.roles.clear();
-        self.is_api_token = false;
+        self.api_token_data = ::buffa::MessageField::none();
         self.attributes = 0i64;
         self.attribute_list.clear();
         self.__buffa_unknown_fields.clear();
@@ -590,6 +612,233 @@ pub const __SMALL_DATA_JSON_ANY: ::buffa::type_registry::JsonAnyEntry = ::buffa:
     from_json: ::buffa::type_registry::any_from_json::<SmallData>,
     is_wkt: false,
 };
+pub mod small_data {
+    #[allow(unused_imports)]
+    use super::*;
+    #[derive(Clone, PartialEq, Default)]
+    #[derive(::serde::Serialize, ::serde::Deserialize)]
+    #[serde(default)]
+    pub struct APITokenData {
+        /// Field 1: `token_id`
+        #[serde(
+            rename = "tokenId",
+            alias = "token_id",
+            with = "::buffa::json_helpers::int64",
+            skip_serializing_if = "::buffa::json_helpers::skip_if::is_zero_i64"
+        )]
+        pub token_id: i64,
+        #[serde(skip)]
+        #[doc(hidden)]
+        pub __buffa_unknown_fields: ::buffa::UnknownFields,
+    }
+    impl ::core::fmt::Debug for APITokenData {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+            f.debug_struct("APITokenData").field("token_id", &self.token_id).finish()
+        }
+    }
+    impl APITokenData {
+        /// Protobuf type URL for this message, for use with `Any::pack` and
+        /// `Any::unpack_if`.
+        ///
+        /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+        pub const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.SmallData.APITokenData";
+    }
+    ::buffa::impl_default_instance!(APITokenData);
+    impl ::buffa_descriptor::reflect::ReflectMessage for APITokenData {
+        fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+            __buffa::reflect::descriptor_pool()
+                .message(Self::__buffa_reflect_message_index())
+        }
+        fn pool(
+            &self,
+        ) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+            __buffa::reflect::descriptor_pool()
+        }
+        fn unknown_fields(&self) -> &::buffa::UnknownFields {
+            &self.__buffa_unknown_fields
+        }
+        fn get(
+            &self,
+            field: &::buffa_descriptor::FieldDescriptor,
+        ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+            #[allow(unused_imports)]
+            use ::buffa::Enumeration as _;
+            match field.number() {
+                1u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.token_id),
+                _ => {
+                    ::core::debug_assert!(
+                        false,
+                        "field number {} is not a member of this message's reflect get()",
+                        field.number(),
+                    );
+                    ::buffa_descriptor::reflect::ValueRef::Bool(false)
+                }
+            }
+        }
+        fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+            match field.number() {
+                1u32 => self.token_id != 0,
+                _ => false,
+            }
+        }
+        fn for_each_set(
+            &self,
+            f: &mut dyn ::core::ops::FnMut(
+                &::buffa_descriptor::FieldDescriptor,
+                ::buffa_descriptor::reflect::ValueRef<'_>,
+            ),
+        ) {
+            let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(
+                self,
+            );
+            for fd in md.fields() {
+                if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                    f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+                }
+            }
+        }
+        fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+            ::buffa_descriptor::reflect::DynamicMessage::from_message(
+                self,
+                ::buffa::alloc::sync::Arc::clone(__buffa::reflect::descriptor_pool()),
+                Self::__buffa_reflect_message_index(),
+            )
+        }
+    }
+    impl ::buffa_descriptor::reflect::ReflectElement for APITokenData {
+        #[inline]
+        fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+            ::buffa_descriptor::reflect::ValueRef::Message(
+                ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+            )
+        }
+    }
+    impl APITokenData {
+        /// Memoized `MessageIndex` for this message type, resolved once
+        /// against the package's embedded descriptor pool.
+        #[doc(hidden)]
+        fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+            static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+            *IDX
+                .get_or_init(|| {
+                    __buffa::reflect::descriptor_pool()
+                        .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                        .expect(
+                            "generated message is registered in the embedded descriptor pool",
+                        )
+                })
+        }
+    }
+    impl ::buffa_descriptor::reflect::Reflectable for APITokenData {
+        /// Vtable-mode reflective handle: borrows `self` directly. No
+        /// encode/decode round-trip and no allocation — the reflective
+        /// accessors read this message's fields in place.
+        #[inline]
+        fn reflect(&self) -> ::buffa_descriptor::reflect::ReflectCow<'_> {
+            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self)
+        }
+    }
+    impl ::buffa::MessageName for APITokenData {
+        const PACKAGE: &'static str = "auth.v2";
+        const NAME: &'static str = "SmallData.APITokenData";
+        const FULL_NAME: &'static str = "auth.v2.SmallData.APITokenData";
+        const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.SmallData.APITokenData";
+    }
+    impl ::buffa::Message for APITokenData {
+        /// Returns the total encoded size in bytes.
+        ///
+        /// Accumulates in `u64` (which cannot overflow for in-memory
+        /// data) and saturates to `u32` at return, so a message whose
+        /// encoded size exceeds the 2 GiB protobuf limit yields a value
+        /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+        /// points reject, never a silently wrapped size.
+        #[allow(clippy::let_and_return)]
+        fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+            #[allow(unused_imports)]
+            use ::buffa::Enumeration as _;
+            let mut size = 0u64;
+            if self.token_id != 0i64 {
+                size += 1u64 + ::buffa::types::int64_encoded_len(self.token_id) as u64;
+            }
+            size += self.__buffa_unknown_fields.encoded_len() as u64;
+            ::buffa::saturate_size(size)
+        }
+        fn write_to(
+            &self,
+            _cache: &mut ::buffa::SizeCache,
+            buf: &mut impl ::buffa::EncodeSink,
+        ) {
+            #[allow(unused_imports)]
+            use ::buffa::Enumeration as _;
+            if self.token_id != 0i64 {
+                ::buffa::types::put_int64_field(1u32, self.token_id, buf);
+            }
+            self.__buffa_unknown_fields.write_to(buf);
+        }
+        fn merge_field(
+            &mut self,
+            tag: ::buffa::encoding::Tag,
+            buf: &mut impl ::buffa::bytes::Buf,
+            ctx: ::buffa::DecodeContext<'_>,
+        ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+            #[allow(unused_imports)]
+            use ::buffa::bytes::Buf as _;
+            #[allow(unused_imports)]
+            use ::buffa::Enumeration as _;
+            match tag.field_number() {
+                1u32 => {
+                    ::buffa::encoding::check_wire_type(
+                        tag,
+                        ::buffa::encoding::WireType::Varint,
+                    )?;
+                    self.token_id = ::buffa::types::decode_int64(buf)?;
+                }
+                _ => {
+                    self.__buffa_unknown_fields
+                        .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+                }
+            }
+            ::core::result::Result::Ok(())
+        }
+        fn clear(&mut self) {
+            self.token_id = 0i64;
+            self.__buffa_unknown_fields.clear();
+        }
+    }
+    impl ::buffa::ExtensionSet for APITokenData {
+        const PROTO_FQN: &'static str = "auth.v2.SmallData.APITokenData";
+        fn unknown_fields(&self) -> &::buffa::UnknownFields {
+            &self.__buffa_unknown_fields
+        }
+        fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+            &mut self.__buffa_unknown_fields
+        }
+    }
+    impl ::buffa::json_helpers::ProtoElemJson for APITokenData {
+        fn serialize_proto_json<S: ::serde::Serializer>(
+            v: &Self,
+            s: S,
+        ) -> ::core::result::Result<S::Ok, S::Error> {
+            ::serde::Serialize::serialize(v, s)
+        }
+        fn deserialize_proto_json<'de, D: ::serde::Deserializer<'de>>(
+            d: D,
+        ) -> ::core::result::Result<Self, D::Error> {
+            <Self as ::serde::Deserialize>::deserialize(d)
+        }
+    }
+    #[doc(hidden)]
+    pub const __API_TOKEN_DATA_JSON_ANY: ::buffa::type_registry::JsonAnyEntry = ::buffa::type_registry::JsonAnyEntry {
+        type_url: "type.googleapis.com/auth.v2.SmallData.APITokenData",
+        to_json: ::buffa::type_registry::any_to_json::<APITokenData>,
+        from_json: ::buffa::type_registry::any_from_json::<APITokenData>,
+        is_wkt: false,
+    };
+    #[doc(inline)]
+    pub use super::__buffa::view::small_data::APITokenDataView;
+    #[doc(inline)]
+    pub use super::__buffa::view::small_data::APITokenDataOwnedView;
+}
 #[derive(Clone, PartialEq, Default)]
 #[derive(::serde::Serialize, ::serde::Deserialize)]
 #[serde(default)]

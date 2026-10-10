@@ -2,3 +2,5 @@
 pub mod connect;
 #[path = "../buffa/mod.rs"]
 pub mod proto;
+
+pub mod utils;

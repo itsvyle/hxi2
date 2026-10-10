@@ -2237,6 +2237,11 @@ pub struct GetDevTokenRequestView<'a> {
     pub roles: ::buffa::RepeatedView<'a, ::buffa::EnumValue<super::super::Permission>>,
     /// Field 3: `validity_seconds`
     pub validity_seconds: ::core::option::Option<i64>,
+    /// Field 4: `attributes`
+    pub attributes: ::buffa::RepeatedView<
+        'a,
+        ::buffa::EnumValue<super::super::Attribute>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for GetDevTokenRequestView<'a> {
@@ -2312,6 +2317,35 @@ impl<'a> ::buffa::MessageView<'a> for GetDevTokenRequestView<'a> {
                     );
                 }
             }
+            4u32 => {
+                if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
+                    let payload = ::buffa::types::borrow_bytes(&mut cur)?;
+                    view.attributes.reserve(::buffa::encoding::count_varints(payload));
+                    let mut pcur: &[u8] = payload;
+                    while !pcur.is_empty() {
+                        view.attributes
+                            .push(
+                                ::buffa::EnumValue::from(
+                                    ::buffa::types::decode_int32_packed(&mut pcur)?,
+                                ),
+                            );
+                    }
+                } else if tag.wire_type() == ::buffa::encoding::WireType::Varint {
+                    view.attributes
+                        .push(
+                            ::buffa::EnumValue::from(
+                                ::buffa::types::decode_int32(&mut cur)?,
+                            ),
+                        );
+                } else {
+                    return Err(
+                        ::buffa::encoding::wire_type_mismatch(
+                            tag,
+                            ::buffa::encoding::WireType::LengthDelimited,
+                        ),
+                    );
+                }
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -2337,6 +2371,7 @@ impl<'a> ::buffa::MessageView<'a> for GetDevTokenRequestView<'a> {
             user_id: self.user_id.to_string(),
             roles: self.roles.to_vec(),
             validity_seconds: self.validity_seconds,
+            attributes: self.attributes.to_vec(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -2361,6 +2396,14 @@ impl<'a> ::buffa::ViewEncode<'a> for GetDevTokenRequestView<'a> {
         }
         if let Some(v) = self.validity_seconds {
             size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if !self.attributes.is_empty() {
+            let payload: u64 = self
+                .attributes
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -2389,6 +2432,17 @@ impl<'a> ::buffa::ViewEncode<'a> for GetDevTokenRequestView<'a> {
         }
         if let Some(v) = self.validity_seconds {
             ::buffa::types::put_int64_field(3u32, v, buf);
+        }
+        if !self.attributes.is_empty() {
+            let payload: u64 = self
+                .attributes
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            ::buffa::types::put_len_delimited_header(4u32, payload, buf);
+            for v in &self.attributes {
+                ::buffa::types::encode_int32(v.to_i32(), buf);
+            }
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2426,6 +2480,13 @@ impl<'__a> ::serde::Serialize for GetDevTokenRequestView<'__a> {
                 .serialize_entry(
                     "validitySeconds",
                     &::buffa::json_helpers::ProtoJson(&__v),
+                )?;
+        }
+        if !self.attributes.is_empty() {
+            __map
+                .serialize_entry(
+                    "attributes",
+                    &::buffa::json_helpers::EnumSeqJson(&self.attributes),
                 )?;
         }
         __map.end()
@@ -2540,6 +2601,13 @@ impl GetDevTokenRequestOwnedView {
     pub fn validity_seconds(&self) -> ::core::option::Option<i64> {
         self.0.reborrow().validity_seconds
     }
+    /// Field 4: `attributes`
+    #[must_use]
+    pub fn attributes(
+        &self,
+    ) -> &::buffa::RepeatedView<'_, ::buffa::EnumValue<super::super::Attribute>> {
+        &self.0.reborrow().attributes
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<GetDevTokenRequestView<'static>>>
 for GetDevTokenRequestOwnedView {
@@ -2593,6 +2661,7 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for GetDevTokenRequestView<
                     self.validity_seconds.unwrap_or(0),
                 )
             }
+            4u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.attributes),
             _ => {
                 ::core::debug_assert!(
                     false,
@@ -2608,6 +2677,7 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for GetDevTokenRequestView<
             1u32 => !self.user_id.is_empty(),
             2u32 => !::buffa::RepeatedView::is_empty(&self.roles),
             3u32 => self.validity_seconds.is_some(),
+            4u32 => !::buffa::RepeatedView::is_empty(&self.attributes),
             _ => false,
         }
     }
@@ -5608,6 +5678,11 @@ pub struct AddAPIUserRequestView<'a> {
     pub username: &'a str,
     /// Field 3: `roles`
     pub roles: ::buffa::RepeatedView<'a, ::buffa::EnumValue<super::super::Permission>>,
+    /// Field 4: `attributes`
+    pub attributes: ::buffa::RepeatedView<
+        'a,
+        ::buffa::EnumValue<super::super::Attribute>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for AddAPIUserRequestView<'a> {
@@ -5676,6 +5751,35 @@ impl<'a> ::buffa::MessageView<'a> for AddAPIUserRequestView<'a> {
                     );
                 }
             }
+            4u32 => {
+                if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
+                    let payload = ::buffa::types::borrow_bytes(&mut cur)?;
+                    view.attributes.reserve(::buffa::encoding::count_varints(payload));
+                    let mut pcur: &[u8] = payload;
+                    while !pcur.is_empty() {
+                        view.attributes
+                            .push(
+                                ::buffa::EnumValue::from(
+                                    ::buffa::types::decode_int32_packed(&mut pcur)?,
+                                ),
+                            );
+                    }
+                } else if tag.wire_type() == ::buffa::encoding::WireType::Varint {
+                    view.attributes
+                        .push(
+                            ::buffa::EnumValue::from(
+                                ::buffa::types::decode_int32(&mut cur)?,
+                            ),
+                        );
+                } else {
+                    return Err(
+                        ::buffa::encoding::wire_type_mismatch(
+                            tag,
+                            ::buffa::encoding::WireType::LengthDelimited,
+                        ),
+                    );
+                }
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -5700,6 +5804,7 @@ impl<'a> ::buffa::MessageView<'a> for AddAPIUserRequestView<'a> {
         ::core::result::Result::Ok(super::super::AddAPIUserRequest {
             username: self.username.to_string(),
             roles: self.roles.to_vec(),
+            attributes: self.attributes.to_vec(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -5717,6 +5822,14 @@ impl<'a> ::buffa::ViewEncode<'a> for AddAPIUserRequestView<'a> {
         if !self.roles.is_empty() {
             let payload: u64 = self
                 .roles
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
+        }
+        if !self.attributes.is_empty() {
+            let payload: u64 = self
+                .attributes
                 .iter()
                 .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
                 .sum::<u64>();
@@ -5744,6 +5857,17 @@ impl<'a> ::buffa::ViewEncode<'a> for AddAPIUserRequestView<'a> {
                 .sum::<u64>();
             ::buffa::types::put_len_delimited_header(3u32, payload, buf);
             for v in &self.roles {
+                ::buffa::types::encode_int32(v.to_i32(), buf);
+            }
+        }
+        if !self.attributes.is_empty() {
+            let payload: u64 = self
+                .attributes
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            ::buffa::types::put_len_delimited_header(4u32, payload, buf);
+            for v in &self.attributes {
                 ::buffa::types::encode_int32(v.to_i32(), buf);
             }
         }
@@ -5776,6 +5900,13 @@ impl<'__a> ::serde::Serialize for AddAPIUserRequestView<'__a> {
                 .serialize_entry(
                     "roles",
                     &::buffa::json_helpers::EnumSeqJson(&self.roles),
+                )?;
+        }
+        if !self.attributes.is_empty() {
+            __map
+                .serialize_entry(
+                    "attributes",
+                    &::buffa::json_helpers::EnumSeqJson(&self.attributes),
                 )?;
         }
         __map.end()
@@ -5885,6 +6016,13 @@ impl AddAPIUserRequestOwnedView {
     ) -> &::buffa::RepeatedView<'_, ::buffa::EnumValue<super::super::Permission>> {
         &self.0.reborrow().roles
     }
+    /// Field 4: `attributes`
+    #[must_use]
+    pub fn attributes(
+        &self,
+    ) -> &::buffa::RepeatedView<'_, ::buffa::EnumValue<super::super::Attribute>> {
+        &self.0.reborrow().attributes
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<AddAPIUserRequestView<'static>>>
 for AddAPIUserRequestOwnedView {
@@ -5933,6 +6071,7 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for AddAPIUserRequestView<'
         match field.number() {
             1u32 => ::buffa_descriptor::reflect::ValueRef::String(self.username),
             3u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.roles),
+            4u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.attributes),
             _ => {
                 ::core::debug_assert!(
                     false,
@@ -5947,6 +6086,7 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for AddAPIUserRequestView<'
         match field.number() {
             1u32 => !self.username.is_empty(),
             3u32 => !::buffa::RepeatedView::is_empty(&self.roles),
+            4u32 => !::buffa::RepeatedView::is_empty(&self.attributes),
             _ => false,
         }
     }
@@ -6822,6 +6962,2837 @@ impl<'a> ::buffa_descriptor::reflect::ReflectElement for RemoveAPIUserRequestVie
     }
 }
 impl<'a> RemoveAPIUserRequestView<'a> {
+    /// Memoized `MessageIndex` for this view's message type, resolved
+    /// once against the package's embedded descriptor pool. An inherent
+    /// associated fn (not a free fn) so sibling views in the same module
+    /// do not collide.
+    #[doc(hidden)]
+    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+        *IDX
+            .get_or_init(|| {
+                super::super::__buffa::reflect::descriptor_pool()
+                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                    .expect(
+                        "generated view type is registered in the embedded descriptor pool",
+                    )
+            })
+    }
+}
+#[derive(Clone, Debug, Default)]
+pub struct RenewAPIUserTokenRequestView<'a> {
+    pub user_identifier: ::core::option::Option<
+        super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier<
+            'a,
+        >,
+    >,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for RenewAPIUserTokenRequestView<'a> {
+    type Owned = super::super::RenewAPIUserTokenRequest;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.user_identifier = Some(
+                    super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::UserId(
+                        ::buffa::types::decode_int64(&mut cur)?,
+                    ),
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.user_identifier = Some(
+                    super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::Username(
+                        ::buffa::types::borrow_str(&mut cur)?,
+                    ),
+                );
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::RenewAPIUserTokenRequest,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::RenewAPIUserTokenRequest,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::RenewAPIUserTokenRequest {
+            user_identifier: self
+                .user_identifier
+                .as_ref()
+                .map(|v| match v {
+                    super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::UserId(
+                        v,
+                    ) => {
+                        super::super::__buffa::oneof::renew_api_user_token_request::UserIdentifier::UserId(
+                            *v,
+                        )
+                    }
+                    super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::Username(
+                        v,
+                    ) => {
+                        super::super::__buffa::oneof::renew_api_user_token_request::UserIdentifier::Username(
+                            v.to_string(),
+                        )
+                    }
+                }),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for RenewAPIUserTokenRequestView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let ::core::option::Option::Some(ref v) = self.user_identifier {
+            match v {
+                super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::UserId(
+                    v,
+                ) => {
+                    size += 1u64 + ::buffa::types::int64_encoded_len(*v) as u64;
+                }
+                super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::Username(
+                    x,
+                ) => {
+                    size += 1u64 + ::buffa::types::string_encoded_len(x) as u64;
+                }
+            }
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let ::core::option::Option::Some(ref v) = self.user_identifier {
+            match v {
+                super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::UserId(
+                    x,
+                ) => {
+                    ::buffa::types::put_int64_field(1u32, *x, buf);
+                }
+                super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::Username(
+                    x,
+                ) => {
+                    ::buffa::types::put_string_field(2u32, x, buf);
+                }
+            }
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+/// Serializes this view as protobuf JSON.
+///
+/// Implicit-presence fields with default values are omitted, `required`
+/// fields are always emitted, explicit-presence (`optional`) fields are
+/// emitted only when set, bytes fields are base64-encoded, and enum
+/// values are their proto name strings.
+///
+/// This impl uses `serialize_map(None)` because the number of emitted
+/// fields depends on default-omission rules; serializers that require
+/// known map lengths (e.g. `bincode`) will return a runtime error.
+/// Use the owned message type for those formats.
+impl<'__a> ::serde::Serialize for RenewAPIUserTokenRequestView<'__a> {
+    fn serialize<__S: ::serde::Serializer>(
+        &self,
+        __s: __S,
+    ) -> ::core::result::Result<__S::Ok, __S::Error> {
+        use ::serde::ser::SerializeMap as _;
+        let mut __map = __s.serialize_map(::core::option::Option::None)?;
+        if let ::core::option::Option::Some(ref __ov) = self.user_identifier {
+            match __ov {
+                super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::UserId(
+                    v,
+                ) => {
+                    __map
+                        .serialize_entry(
+                            "userId",
+                            &::buffa::json_helpers::ProtoJson(v),
+                        )?;
+                }
+                super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::Username(
+                    v,
+                ) => {
+                    __map.serialize_entry("username", v)?;
+                }
+            }
+        }
+        __map.end()
+    }
+}
+impl<'a> ::buffa::MessageName for RenewAPIUserTokenRequestView<'a> {
+    const PACKAGE: &'static str = "auth.v2";
+    const NAME: &'static str = "RenewAPIUserTokenRequest";
+    const FULL_NAME: &'static str = "auth.v2.RenewAPIUserTokenRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.RenewAPIUserTokenRequest";
+}
+::buffa::impl_default_view_instance!(RenewAPIUserTokenRequestView);
+::buffa::impl_view_reborrow!(RenewAPIUserTokenRequestView);
+/** Self-contained, `'static` owned view of a `RenewAPIUserTokenRequest` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`RenewAPIUserTokenRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`RenewAPIUserTokenRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct RenewAPIUserTokenRequestOwnedView(
+    ::buffa::OwnedView<RenewAPIUserTokenRequestView<'static>>,
+);
+impl RenewAPIUserTokenRequestOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            RenewAPIUserTokenRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            RenewAPIUserTokenRequestOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::RenewAPIUserTokenRequest,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            RenewAPIUserTokenRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`RenewAPIUserTokenRequestView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &RenewAPIUserTokenRequestView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::RenewAPIUserTokenRequest {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Oneof `user_identifier`.
+    #[must_use]
+    pub fn user_identifier(
+        &self,
+    ) -> ::core::option::Option<
+        &super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier<
+            '_,
+        >,
+    > {
+        self.0.reborrow().user_identifier.as_ref()
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<RenewAPIUserTokenRequestView<'static>>>
+for RenewAPIUserTokenRequestOwnedView {
+    fn from(inner: ::buffa::OwnedView<RenewAPIUserTokenRequestView<'static>>) -> Self {
+        RenewAPIUserTokenRequestOwnedView(inner)
+    }
+}
+impl ::core::convert::From<RenewAPIUserTokenRequestOwnedView>
+for ::buffa::OwnedView<RenewAPIUserTokenRequestView<'static>> {
+    fn from(wrapper: RenewAPIUserTokenRequestOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<RenewAPIUserTokenRequestView<'static>>>
+for RenewAPIUserTokenRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<RenewAPIUserTokenRequestView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::RenewAPIUserTokenRequest {
+    type View<'a> = RenewAPIUserTokenRequestView<'a>;
+    type ViewHandle = RenewAPIUserTokenRequestOwnedView;
+}
+impl ::serde::Serialize for RenewAPIUserTokenRequestOwnedView {
+    fn serialize<__S: ::serde::Serializer>(
+        &self,
+        __s: __S,
+    ) -> ::core::result::Result<__S::Ok, __S::Error> {
+        ::serde::Serialize::serialize(&self.0, __s)
+    }
+}
+impl<'a> ::buffa_descriptor::reflect::ReflectMessage
+for RenewAPIUserTokenRequestView<'a> {
+    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+        super::super::__buffa::reflect::descriptor_pool()
+            .message(Self::__buffa_reflect_message_index())
+    }
+    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+        super::super::__buffa::reflect::descriptor_pool()
+    }
+    fn get(
+        &self,
+        field: &::buffa_descriptor::FieldDescriptor,
+    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match field.number() {
+            1u32 => {
+                match &self.user_identifier {
+                    ::core::option::Option::Some(
+                        super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::UserId(
+                            v,
+                        ),
+                    ) => ::buffa_descriptor::reflect::ValueRef::I64(*v),
+                    _ => ::buffa_descriptor::reflect::ValueRef::I64(0),
+                }
+            }
+            2u32 => {
+                match &self.user_identifier {
+                    ::core::option::Option::Some(
+                        super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::Username(
+                            v,
+                        ),
+                    ) => ::buffa_descriptor::reflect::ValueRef::String(v),
+                    _ => ::buffa_descriptor::reflect::ValueRef::String(""),
+                }
+            }
+            _ => {
+                ::core::debug_assert!(
+                    false,
+                    "field number {} is not a member of this view's reflect get()", field
+                    .number(),
+                );
+                ::buffa_descriptor::reflect::ValueRef::Bool(false)
+            }
+        }
+    }
+    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+        match field.number() {
+            1u32 => {
+                ::core::matches!(
+                    & self.user_identifier,
+                    ::core::option::Option::Some(super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::UserId(_))
+                )
+            }
+            2u32 => {
+                ::core::matches!(
+                    & self.user_identifier,
+                    ::core::option::Option::Some(super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::Username(_))
+                )
+            }
+            _ => false,
+        }
+    }
+    fn for_each_set(
+        &self,
+        f: &mut dyn ::core::ops::FnMut(
+            &::buffa_descriptor::FieldDescriptor,
+            ::buffa_descriptor::reflect::ValueRef<'_>,
+        ),
+    ) {
+        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
+        for fd in md.fields() {
+            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+            }
+        }
+    }
+    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+        let bytes = ::buffa::ViewEncode::encode_to_vec(self);
+        let options = ::buffa::DecodeOptions::new()
+            .with_element_memory_limit(
+                bytes
+                    .len()
+                    .saturating_mul(128)
+                    .max(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT),
+            )
+            .with_unknown_field_limit(
+                bytes.len().max(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT),
+            );
+        ::buffa_descriptor::reflect::DynamicMessage::decode_with_options(
+                ::buffa::alloc::sync::Arc::clone(
+                    super::super::__buffa::reflect::descriptor_pool(),
+                ),
+                Self::__buffa_reflect_message_index(),
+                &bytes,
+                &options,
+            )
+            .expect("view re-encodes to bytes decodable against its own descriptor")
+    }
+}
+impl<'a> ::buffa_descriptor::reflect::ReflectElement
+for RenewAPIUserTokenRequestView<'a> {
+    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        ::buffa_descriptor::reflect::ValueRef::Message(
+            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+        )
+    }
+}
+impl<'a> RenewAPIUserTokenRequestView<'a> {
+    /// Memoized `MessageIndex` for this view's message type, resolved
+    /// once against the package's embedded descriptor pool. An inherent
+    /// associated fn (not a free fn) so sibling views in the same module
+    /// do not collide.
+    #[doc(hidden)]
+    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+        *IDX
+            .get_or_init(|| {
+                super::super::__buffa::reflect::descriptor_pool()
+                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                    .expect(
+                        "generated view type is registered in the embedded descriptor pool",
+                    )
+            })
+    }
+}
+#[derive(Clone, Debug, Default)]
+pub struct RenewAPIUserTokenResponseView<'a> {
+    /// Field 1: `api_token`
+    pub api_token: &'a str,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for RenewAPIUserTokenResponseView<'a> {
+    type Owned = super::super::RenewAPIUserTokenResponse;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.api_token = ::buffa::types::borrow_str(&mut cur)?;
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::RenewAPIUserTokenResponse,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::RenewAPIUserTokenResponse,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::RenewAPIUserTokenResponse {
+            api_token: self.api_token.to_string(),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for RenewAPIUserTokenResponseView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if !self.api_token.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.api_token) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if !self.api_token.is_empty() {
+            ::buffa::types::put_string_field(1u32, &self.api_token, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+/// Serializes this view as protobuf JSON.
+///
+/// Implicit-presence fields with default values are omitted, `required`
+/// fields are always emitted, explicit-presence (`optional`) fields are
+/// emitted only when set, bytes fields are base64-encoded, and enum
+/// values are their proto name strings.
+///
+/// This impl uses `serialize_map(None)` because the number of emitted
+/// fields depends on default-omission rules; serializers that require
+/// known map lengths (e.g. `bincode`) will return a runtime error.
+/// Use the owned message type for those formats.
+impl<'__a> ::serde::Serialize for RenewAPIUserTokenResponseView<'__a> {
+    fn serialize<__S: ::serde::Serializer>(
+        &self,
+        __s: __S,
+    ) -> ::core::result::Result<__S::Ok, __S::Error> {
+        use ::serde::ser::SerializeMap as _;
+        let mut __map = __s.serialize_map(::core::option::Option::None)?;
+        if !::buffa::json_helpers::skip_if::is_empty_str(self.api_token) {
+            __map.serialize_entry("apiToken", self.api_token)?;
+        }
+        __map.end()
+    }
+}
+impl<'a> ::buffa::MessageName for RenewAPIUserTokenResponseView<'a> {
+    const PACKAGE: &'static str = "auth.v2";
+    const NAME: &'static str = "RenewAPIUserTokenResponse";
+    const FULL_NAME: &'static str = "auth.v2.RenewAPIUserTokenResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.RenewAPIUserTokenResponse";
+}
+::buffa::impl_default_view_instance!(RenewAPIUserTokenResponseView);
+::buffa::impl_view_reborrow!(RenewAPIUserTokenResponseView);
+/** Self-contained, `'static` owned view of a `RenewAPIUserTokenResponse` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`RenewAPIUserTokenResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`RenewAPIUserTokenResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct RenewAPIUserTokenResponseOwnedView(
+    ::buffa::OwnedView<RenewAPIUserTokenResponseView<'static>>,
+);
+impl RenewAPIUserTokenResponseOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            RenewAPIUserTokenResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            RenewAPIUserTokenResponseOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::RenewAPIUserTokenResponse,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            RenewAPIUserTokenResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`RenewAPIUserTokenResponseView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &RenewAPIUserTokenResponseView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::RenewAPIUserTokenResponse {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `api_token`
+    #[must_use]
+    pub fn api_token(&self) -> &'_ str {
+        self.0.reborrow().api_token
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<RenewAPIUserTokenResponseView<'static>>>
+for RenewAPIUserTokenResponseOwnedView {
+    fn from(inner: ::buffa::OwnedView<RenewAPIUserTokenResponseView<'static>>) -> Self {
+        RenewAPIUserTokenResponseOwnedView(inner)
+    }
+}
+impl ::core::convert::From<RenewAPIUserTokenResponseOwnedView>
+for ::buffa::OwnedView<RenewAPIUserTokenResponseView<'static>> {
+    fn from(wrapper: RenewAPIUserTokenResponseOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<RenewAPIUserTokenResponseView<'static>>>
+for RenewAPIUserTokenResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<RenewAPIUserTokenResponseView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::RenewAPIUserTokenResponse {
+    type View<'a> = RenewAPIUserTokenResponseView<'a>;
+    type ViewHandle = RenewAPIUserTokenResponseOwnedView;
+}
+impl ::serde::Serialize for RenewAPIUserTokenResponseOwnedView {
+    fn serialize<__S: ::serde::Serializer>(
+        &self,
+        __s: __S,
+    ) -> ::core::result::Result<__S::Ok, __S::Error> {
+        ::serde::Serialize::serialize(&self.0, __s)
+    }
+}
+impl<'a> ::buffa_descriptor::reflect::ReflectMessage
+for RenewAPIUserTokenResponseView<'a> {
+    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+        super::super::__buffa::reflect::descriptor_pool()
+            .message(Self::__buffa_reflect_message_index())
+    }
+    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+        super::super::__buffa::reflect::descriptor_pool()
+    }
+    fn get(
+        &self,
+        field: &::buffa_descriptor::FieldDescriptor,
+    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match field.number() {
+            1u32 => ::buffa_descriptor::reflect::ValueRef::String(self.api_token),
+            _ => {
+                ::core::debug_assert!(
+                    false,
+                    "field number {} is not a member of this view's reflect get()", field
+                    .number(),
+                );
+                ::buffa_descriptor::reflect::ValueRef::Bool(false)
+            }
+        }
+    }
+    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+        match field.number() {
+            1u32 => !self.api_token.is_empty(),
+            _ => false,
+        }
+    }
+    fn for_each_set(
+        &self,
+        f: &mut dyn ::core::ops::FnMut(
+            &::buffa_descriptor::FieldDescriptor,
+            ::buffa_descriptor::reflect::ValueRef<'_>,
+        ),
+    ) {
+        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
+        for fd in md.fields() {
+            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+            }
+        }
+    }
+    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+        let bytes = ::buffa::ViewEncode::encode_to_vec(self);
+        let options = ::buffa::DecodeOptions::new()
+            .with_element_memory_limit(
+                bytes
+                    .len()
+                    .saturating_mul(128)
+                    .max(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT),
+            )
+            .with_unknown_field_limit(
+                bytes.len().max(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT),
+            );
+        ::buffa_descriptor::reflect::DynamicMessage::decode_with_options(
+                ::buffa::alloc::sync::Arc::clone(
+                    super::super::__buffa::reflect::descriptor_pool(),
+                ),
+                Self::__buffa_reflect_message_index(),
+                &bytes,
+                &options,
+            )
+            .expect("view re-encodes to bytes decodable against its own descriptor")
+    }
+}
+impl<'a> ::buffa_descriptor::reflect::ReflectElement
+for RenewAPIUserTokenResponseView<'a> {
+    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        ::buffa_descriptor::reflect::ValueRef::Message(
+            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+        )
+    }
+}
+impl<'a> RenewAPIUserTokenResponseView<'a> {
+    /// Memoized `MessageIndex` for this view's message type, resolved
+    /// once against the package's embedded descriptor pool. An inherent
+    /// associated fn (not a free fn) so sibling views in the same module
+    /// do not collide.
+    #[doc(hidden)]
+    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+        *IDX
+            .get_or_init(|| {
+                super::super::__buffa::reflect::descriptor_pool()
+                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                    .expect(
+                        "generated view type is registered in the embedded descriptor pool",
+                    )
+            })
+    }
+}
+#[derive(Clone, Debug, Default)]
+pub struct ListAPIUsersResponseView<'a> {
+    /// Field 1: `users`
+    pub users: ::buffa::RepeatedView<
+        'a,
+        super::super::__buffa::view::list_api_users_response::APIUserView<'a>,
+    >,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for ListAPIUsersResponseView<'a> {
+    type Owned = super::super::ListAPIUsersResponse;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                ctx.register_element_memory(
+                    ::core::mem::size_of::<
+                        super::super::__buffa::view::list_api_users_response::APIUserView,
+                    >(),
+                )?;
+                view.users
+                    .push(
+                        <super::super::__buffa::view::list_api_users_response::APIUserView as ::buffa::MessageView>::decode_view_ctx(
+                            sub,
+                            __sub_ctx,
+                        )?,
+                    );
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::ListAPIUsersResponse,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::ListAPIUsersResponse,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::ListAPIUsersResponse {
+            users: self
+                .users
+                .iter()
+                .map(|v| v.to_owned_from_source(__buffa_src))
+                .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for ListAPIUsersResponseView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        for v in &self.users {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        for v in &self.users {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+/// Serializes this view as protobuf JSON.
+///
+/// Implicit-presence fields with default values are omitted, `required`
+/// fields are always emitted, explicit-presence (`optional`) fields are
+/// emitted only when set, bytes fields are base64-encoded, and enum
+/// values are their proto name strings.
+///
+/// This impl uses `serialize_map(None)` because the number of emitted
+/// fields depends on default-omission rules; serializers that require
+/// known map lengths (e.g. `bincode`) will return a runtime error.
+/// Use the owned message type for those formats.
+impl<'__a> ::serde::Serialize for ListAPIUsersResponseView<'__a> {
+    fn serialize<__S: ::serde::Serializer>(
+        &self,
+        __s: __S,
+    ) -> ::core::result::Result<__S::Ok, __S::Error> {
+        use ::serde::ser::SerializeMap as _;
+        let mut __map = __s.serialize_map(::core::option::Option::None)?;
+        if !self.users.is_empty() {
+            __map.serialize_entry("users", &*self.users)?;
+        }
+        __map.end()
+    }
+}
+impl<'a> ::buffa::MessageName for ListAPIUsersResponseView<'a> {
+    const PACKAGE: &'static str = "auth.v2";
+    const NAME: &'static str = "ListAPIUsersResponse";
+    const FULL_NAME: &'static str = "auth.v2.ListAPIUsersResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.ListAPIUsersResponse";
+}
+::buffa::impl_default_view_instance!(ListAPIUsersResponseView);
+::buffa::impl_view_reborrow!(ListAPIUsersResponseView);
+/** Self-contained, `'static` owned view of a `ListAPIUsersResponse` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`ListAPIUsersResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`ListAPIUsersResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct ListAPIUsersResponseOwnedView(
+    ::buffa::OwnedView<ListAPIUsersResponseView<'static>>,
+);
+impl ListAPIUsersResponseOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ListAPIUsersResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ListAPIUsersResponseOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::ListAPIUsersResponse,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ListAPIUsersResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`ListAPIUsersResponseView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &ListAPIUsersResponseView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::ListAPIUsersResponse {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `users`
+    #[must_use]
+    pub fn users(
+        &self,
+    ) -> &::buffa::RepeatedView<
+        '_,
+        super::super::__buffa::view::list_api_users_response::APIUserView<'_>,
+    > {
+        &self.0.reborrow().users
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<ListAPIUsersResponseView<'static>>>
+for ListAPIUsersResponseOwnedView {
+    fn from(inner: ::buffa::OwnedView<ListAPIUsersResponseView<'static>>) -> Self {
+        ListAPIUsersResponseOwnedView(inner)
+    }
+}
+impl ::core::convert::From<ListAPIUsersResponseOwnedView>
+for ::buffa::OwnedView<ListAPIUsersResponseView<'static>> {
+    fn from(wrapper: ListAPIUsersResponseOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<ListAPIUsersResponseView<'static>>>
+for ListAPIUsersResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<ListAPIUsersResponseView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::ListAPIUsersResponse {
+    type View<'a> = ListAPIUsersResponseView<'a>;
+    type ViewHandle = ListAPIUsersResponseOwnedView;
+}
+impl ::serde::Serialize for ListAPIUsersResponseOwnedView {
+    fn serialize<__S: ::serde::Serializer>(
+        &self,
+        __s: __S,
+    ) -> ::core::result::Result<__S::Ok, __S::Error> {
+        ::serde::Serialize::serialize(&self.0, __s)
+    }
+}
+impl<'a> ::buffa_descriptor::reflect::ReflectMessage for ListAPIUsersResponseView<'a> {
+    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+        super::super::__buffa::reflect::descriptor_pool()
+            .message(Self::__buffa_reflect_message_index())
+    }
+    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+        super::super::__buffa::reflect::descriptor_pool()
+    }
+    fn get(
+        &self,
+        field: &::buffa_descriptor::FieldDescriptor,
+    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match field.number() {
+            1u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.users),
+            _ => {
+                ::core::debug_assert!(
+                    false,
+                    "field number {} is not a member of this view's reflect get()", field
+                    .number(),
+                );
+                ::buffa_descriptor::reflect::ValueRef::Bool(false)
+            }
+        }
+    }
+    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+        match field.number() {
+            1u32 => !::buffa::RepeatedView::is_empty(&self.users),
+            _ => false,
+        }
+    }
+    fn for_each_set(
+        &self,
+        f: &mut dyn ::core::ops::FnMut(
+            &::buffa_descriptor::FieldDescriptor,
+            ::buffa_descriptor::reflect::ValueRef<'_>,
+        ),
+    ) {
+        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
+        for fd in md.fields() {
+            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+            }
+        }
+    }
+    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+        let bytes = ::buffa::ViewEncode::encode_to_vec(self);
+        let options = ::buffa::DecodeOptions::new()
+            .with_element_memory_limit(
+                bytes
+                    .len()
+                    .saturating_mul(128)
+                    .max(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT),
+            )
+            .with_unknown_field_limit(
+                bytes.len().max(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT),
+            );
+        ::buffa_descriptor::reflect::DynamicMessage::decode_with_options(
+                ::buffa::alloc::sync::Arc::clone(
+                    super::super::__buffa::reflect::descriptor_pool(),
+                ),
+                Self::__buffa_reflect_message_index(),
+                &bytes,
+                &options,
+            )
+            .expect("view re-encodes to bytes decodable against its own descriptor")
+    }
+}
+impl<'a> ::buffa_descriptor::reflect::ReflectElement for ListAPIUsersResponseView<'a> {
+    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        ::buffa_descriptor::reflect::ValueRef::Message(
+            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+        )
+    }
+}
+impl<'a> ListAPIUsersResponseView<'a> {
+    /// Memoized `MessageIndex` for this view's message type, resolved
+    /// once against the package's embedded descriptor pool. An inherent
+    /// associated fn (not a free fn) so sibling views in the same module
+    /// do not collide.
+    #[doc(hidden)]
+    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+        *IDX
+            .get_or_init(|| {
+                super::super::__buffa::reflect::descriptor_pool()
+                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                    .expect(
+                        "generated view type is registered in the embedded descriptor pool",
+                    )
+            })
+    }
+}
+pub mod list_api_users_response {
+    #[allow(unused_imports)]
+    use super::*;
+    #[derive(Clone, Debug, Default)]
+    pub struct APIUserView<'a> {
+        /// Field 1: `user_id`
+        pub user_id: i64,
+        /// Field 2: `username`
+        pub username: &'a str,
+        /// Field 3: `roles`
+        pub roles: ::buffa::RepeatedView<
+            'a,
+            ::buffa::EnumValue<super::super::super::Permission>,
+        >,
+        /// Field 4: `attributes`
+        pub attributes: ::buffa::RepeatedView<
+            'a,
+            ::buffa::EnumValue<super::super::super::Attribute>,
+        >,
+        /// Field 5: `has_api_token`
+        pub has_api_token: bool,
+        /// Field 6: `token_created_at`
+        pub token_created_at: ::buffa::MessageFieldView<
+            ::buffa_types::google::protobuf::__buffa::view::TimestampView<'a>,
+        >,
+        /// Field 7: `token_expires_at`
+        pub token_expires_at: ::buffa::MessageFieldView<
+            ::buffa_types::google::protobuf::__buffa::view::TimestampView<'a>,
+        >,
+        /// Field 8: `token_id`
+        pub token_id: ::core::option::Option<i64>,
+        pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+    }
+    impl<'a> ::buffa::MessageView<'a> for APIUserView<'a> {
+        type Owned = super::super::super::list_api_users_response::APIUser;
+        fn decode_view(
+            buf: &'a [u8],
+        ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+            let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+            let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+            <Self as ::buffa::MessageView>::decode_view_ctx(
+                buf,
+                ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                    .with_element_memory(&__elem),
+            )
+        }
+        fn decode_view_with_ctx(
+            buf: &'a [u8],
+            ctx: ::buffa::DecodeContext<'_>,
+        ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+            <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+        }
+        #[inline]
+        fn merge_view_field(
+            &mut self,
+            tag: ::buffa::encoding::Tag,
+            cur: &'a [u8],
+            before_tag: &'a [u8],
+            ctx: ::buffa::DecodeContext<'_>,
+        ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+            let _ = ctx;
+            #[allow(unused_variables)]
+            let view = self;
+            let mut cur = cur;
+            match tag.field_number() {
+                1u32 => {
+                    ::buffa::encoding::check_wire_type(
+                        tag,
+                        ::buffa::encoding::WireType::Varint,
+                    )?;
+                    view.user_id = ::buffa::types::decode_int64(&mut cur)?;
+                }
+                2u32 => {
+                    ::buffa::encoding::check_wire_type(
+                        tag,
+                        ::buffa::encoding::WireType::LengthDelimited,
+                    )?;
+                    view.username = ::buffa::types::borrow_str(&mut cur)?;
+                }
+                5u32 => {
+                    ::buffa::encoding::check_wire_type(
+                        tag,
+                        ::buffa::encoding::WireType::Varint,
+                    )?;
+                    view.has_api_token = ::buffa::types::decode_bool(&mut cur)?;
+                }
+                6u32 => {
+                    ::buffa::encoding::check_wire_type(
+                        tag,
+                        ::buffa::encoding::WireType::LengthDelimited,
+                    )?;
+                    let __sub_ctx = ctx.descend()?;
+                    let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                    match view.token_created_at.as_mut() {
+                        Some(existing) => {
+                            ::buffa::MessageView::merge_into_view(
+                                existing,
+                                sub,
+                                __sub_ctx,
+                            )?
+                        }
+                        None => {
+                            view.token_created_at = ::buffa::MessageFieldView::set(
+                                <::buffa_types::google::protobuf::__buffa::view::TimestampView as ::buffa::MessageView>::decode_view_ctx(
+                                    sub,
+                                    __sub_ctx,
+                                )?,
+                            );
+                        }
+                    }
+                }
+                7u32 => {
+                    ::buffa::encoding::check_wire_type(
+                        tag,
+                        ::buffa::encoding::WireType::LengthDelimited,
+                    )?;
+                    let __sub_ctx = ctx.descend()?;
+                    let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                    match view.token_expires_at.as_mut() {
+                        Some(existing) => {
+                            ::buffa::MessageView::merge_into_view(
+                                existing,
+                                sub,
+                                __sub_ctx,
+                            )?
+                        }
+                        None => {
+                            view.token_expires_at = ::buffa::MessageFieldView::set(
+                                <::buffa_types::google::protobuf::__buffa::view::TimestampView as ::buffa::MessageView>::decode_view_ctx(
+                                    sub,
+                                    __sub_ctx,
+                                )?,
+                            );
+                        }
+                    }
+                }
+                8u32 => {
+                    ::buffa::encoding::check_wire_type(
+                        tag,
+                        ::buffa::encoding::WireType::Varint,
+                    )?;
+                    view.token_id = Some(::buffa::types::decode_int64(&mut cur)?);
+                }
+                3u32 => {
+                    if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
+                        let payload = ::buffa::types::borrow_bytes(&mut cur)?;
+                        view.roles.reserve(::buffa::encoding::count_varints(payload));
+                        let mut pcur: &[u8] = payload;
+                        while !pcur.is_empty() {
+                            view.roles
+                                .push(
+                                    ::buffa::EnumValue::from(
+                                        ::buffa::types::decode_int32_packed(&mut pcur)?,
+                                    ),
+                                );
+                        }
+                    } else if tag.wire_type() == ::buffa::encoding::WireType::Varint {
+                        view.roles
+                            .push(
+                                ::buffa::EnumValue::from(
+                                    ::buffa::types::decode_int32(&mut cur)?,
+                                ),
+                            );
+                    } else {
+                        return Err(
+                            ::buffa::encoding::wire_type_mismatch(
+                                tag,
+                                ::buffa::encoding::WireType::LengthDelimited,
+                            ),
+                        );
+                    }
+                }
+                4u32 => {
+                    if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
+                        let payload = ::buffa::types::borrow_bytes(&mut cur)?;
+                        view.attributes
+                            .reserve(::buffa::encoding::count_varints(payload));
+                        let mut pcur: &[u8] = payload;
+                        while !pcur.is_empty() {
+                            view.attributes
+                                .push(
+                                    ::buffa::EnumValue::from(
+                                        ::buffa::types::decode_int32_packed(&mut pcur)?,
+                                    ),
+                                );
+                        }
+                    } else if tag.wire_type() == ::buffa::encoding::WireType::Varint {
+                        view.attributes
+                            .push(
+                                ::buffa::EnumValue::from(
+                                    ::buffa::types::decode_int32(&mut cur)?,
+                                ),
+                            );
+                    } else {
+                        return Err(
+                            ::buffa::encoding::wire_type_mismatch(
+                                tag,
+                                ::buffa::encoding::WireType::LengthDelimited,
+                            ),
+                        );
+                    }
+                }
+                _ => {
+                    ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                    let span_len = before_tag.len() - cur.len();
+                    view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+                }
+            }
+            ::core::result::Result::Ok(cur)
+        }
+        fn to_owned_message(
+            &self,
+        ) -> ::core::result::Result<
+            super::super::super::list_api_users_response::APIUser,
+            ::buffa::DecodeError,
+        > {
+            self.to_owned_from_source(None)
+        }
+        #[allow(clippy::useless_conversion, clippy::needless_update)]
+        fn to_owned_from_source(
+            &self,
+            __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+        ) -> ::core::result::Result<
+            super::super::super::list_api_users_response::APIUser,
+            ::buffa::DecodeError,
+        > {
+            #[allow(unused_imports)]
+            use ::buffa::alloc::string::ToString as _;
+            let _ = __buffa_src;
+            ::core::result::Result::Ok(super::super::super::list_api_users_response::APIUser {
+                user_id: self.user_id,
+                username: self.username.to_string(),
+                roles: self.roles.to_vec(),
+                attributes: self.attributes.to_vec(),
+                has_api_token: self.has_api_token,
+                token_created_at: match self.token_created_at.as_option() {
+                    Some(v) => {
+                        ::buffa::MessageField::<
+                            ::buffa_types::google::protobuf::Timestamp,
+                            ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+                        >::some(v.to_owned_from_source(__buffa_src)?)
+                    }
+                    None => ::buffa::MessageField::none(),
+                },
+                token_expires_at: match self.token_expires_at.as_option() {
+                    Some(v) => {
+                        ::buffa::MessageField::<
+                            ::buffa_types::google::protobuf::Timestamp,
+                            ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+                        >::some(v.to_owned_from_source(__buffa_src)?)
+                    }
+                    None => ::buffa::MessageField::none(),
+                },
+                token_id: self.token_id,
+                __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+                ..::core::default::Default::default()
+            })
+        }
+    }
+    impl<'a> ::buffa::ViewEncode<'a> for APIUserView<'a> {
+        #[allow(clippy::needless_borrow, clippy::let_and_return)]
+        fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+            #[allow(unused_imports)]
+            use ::buffa::Enumeration as _;
+            let mut size = 0u64;
+            if self.user_id != 0i64 {
+                size += 1u64 + ::buffa::types::int64_encoded_len(self.user_id) as u64;
+            }
+            if !self.username.is_empty() {
+                size += 1u64 + ::buffa::types::string_encoded_len(&self.username) as u64;
+            }
+            if !self.roles.is_empty() {
+                let payload: u64 = self
+                    .roles
+                    .iter()
+                    .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                    .sum::<u64>();
+                size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
+            }
+            if !self.attributes.is_empty() {
+                let payload: u64 = self
+                    .attributes
+                    .iter()
+                    .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                    .sum::<u64>();
+                size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
+            }
+            if self.has_api_token {
+                size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+            }
+            if self.token_created_at.is_set() {
+                let __slot = __cache.reserve();
+                let inner_size = self.token_created_at.compute_size(__cache);
+                __cache.set(__slot, inner_size);
+                size
+                    += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                        + inner_size as u64;
+            }
+            if self.token_expires_at.is_set() {
+                let __slot = __cache.reserve();
+                let inner_size = self.token_expires_at.compute_size(__cache);
+                __cache.set(__slot, inner_size);
+                size
+                    += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                        + inner_size as u64;
+            }
+            if let Some(v) = self.token_id {
+                size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+            }
+            size += self.__buffa_unknown_fields.encoded_len() as u64;
+            ::buffa::saturate_size(size)
+        }
+        #[allow(clippy::needless_borrow)]
+        fn write_to(
+            &self,
+            __cache: &mut ::buffa::SizeCache,
+            buf: &mut impl ::buffa::EncodeSink,
+        ) {
+            #[allow(unused_imports)]
+            use ::buffa::Enumeration as _;
+            if self.user_id != 0i64 {
+                ::buffa::types::put_int64_field(1u32, self.user_id, buf);
+            }
+            if !self.username.is_empty() {
+                ::buffa::types::put_string_field(2u32, &self.username, buf);
+            }
+            if !self.roles.is_empty() {
+                let payload: u64 = self
+                    .roles
+                    .iter()
+                    .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                    .sum::<u64>();
+                ::buffa::types::put_len_delimited_header(3u32, payload, buf);
+                for v in &self.roles {
+                    ::buffa::types::encode_int32(v.to_i32(), buf);
+                }
+            }
+            if !self.attributes.is_empty() {
+                let payload: u64 = self
+                    .attributes
+                    .iter()
+                    .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                    .sum::<u64>();
+                ::buffa::types::put_len_delimited_header(4u32, payload, buf);
+                for v in &self.attributes {
+                    ::buffa::types::encode_int32(v.to_i32(), buf);
+                }
+            }
+            if self.has_api_token {
+                ::buffa::types::put_bool_field(5u32, self.has_api_token, buf);
+            }
+            if self.token_created_at.is_set() {
+                ::buffa::types::put_len_delimited_header(
+                    6u32,
+                    u64::from(__cache.consume_next()),
+                    buf,
+                );
+                self.token_created_at.write_to(__cache, buf);
+            }
+            if self.token_expires_at.is_set() {
+                ::buffa::types::put_len_delimited_header(
+                    7u32,
+                    u64::from(__cache.consume_next()),
+                    buf,
+                );
+                self.token_expires_at.write_to(__cache, buf);
+            }
+            if let Some(v) = self.token_id {
+                ::buffa::types::put_int64_field(8u32, v, buf);
+            }
+            self.__buffa_unknown_fields.write_to(buf);
+        }
+    }
+    /// Serializes this view as protobuf JSON.
+    ///
+    /// Implicit-presence fields with default values are omitted, `required`
+    /// fields are always emitted, explicit-presence (`optional`) fields are
+    /// emitted only when set, bytes fields are base64-encoded, and enum
+    /// values are their proto name strings.
+    ///
+    /// This impl uses `serialize_map(None)` because the number of emitted
+    /// fields depends on default-omission rules; serializers that require
+    /// known map lengths (e.g. `bincode`) will return a runtime error.
+    /// Use the owned message type for those formats.
+    impl<'__a> ::serde::Serialize for APIUserView<'__a> {
+        fn serialize<__S: ::serde::Serializer>(
+            &self,
+            __s: __S,
+        ) -> ::core::result::Result<__S::Ok, __S::Error> {
+            use ::serde::ser::SerializeMap as _;
+            let mut __map = __s.serialize_map(::core::option::Option::None)?;
+            if !::buffa::json_helpers::skip_if::is_zero_i64(&self.user_id) {
+                __map
+                    .serialize_entry(
+                        "userId",
+                        &::buffa::json_helpers::ProtoJson(&self.user_id),
+                    )?;
+            }
+            if !::buffa::json_helpers::skip_if::is_empty_str(self.username) {
+                __map.serialize_entry("username", self.username)?;
+            }
+            if !self.roles.is_empty() {
+                __map
+                    .serialize_entry(
+                        "roles",
+                        &::buffa::json_helpers::EnumSeqJson(&self.roles),
+                    )?;
+            }
+            if !self.attributes.is_empty() {
+                __map
+                    .serialize_entry(
+                        "attributes",
+                        &::buffa::json_helpers::EnumSeqJson(&self.attributes),
+                    )?;
+            }
+            if self.has_api_token {
+                __map.serialize_entry("hasApiToken", &self.has_api_token)?;
+            }
+            {
+                if let ::core::option::Option::Some(__v) = self
+                    .token_created_at
+                    .as_option()
+                {
+                    __map.serialize_entry("tokenCreatedAt", __v)?;
+                }
+            }
+            {
+                if let ::core::option::Option::Some(__v) = self
+                    .token_expires_at
+                    .as_option()
+                {
+                    __map.serialize_entry("tokenExpiresAt", __v)?;
+                }
+            }
+            if let ::core::option::Option::Some(__v) = self.token_id {
+                __map
+                    .serialize_entry(
+                        "tokenId",
+                        &::buffa::json_helpers::ProtoJson(&__v),
+                    )?;
+            }
+            __map.end()
+        }
+    }
+    impl<'a> ::buffa::MessageName for APIUserView<'a> {
+        const PACKAGE: &'static str = "auth.v2";
+        const NAME: &'static str = "ListAPIUsersResponse.APIUser";
+        const FULL_NAME: &'static str = "auth.v2.ListAPIUsersResponse.APIUser";
+        const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.ListAPIUsersResponse.APIUser";
+    }
+    ::buffa::impl_default_view_instance!(APIUserView);
+    ::buffa::impl_view_reborrow!(APIUserView);
+    /** Self-contained, `'static` owned view of a `APIUser` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`APIUserView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`APIUserView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+    #[derive(Clone, Debug)]
+    pub struct APIUserOwnedView(::buffa::OwnedView<APIUserView<'static>>);
+    impl APIUserOwnedView {
+        /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+        ///
+        /// The view borrows directly from the buffer's data; the buffer is
+        /// retained inside the returned handle.
+        ///
+        /// # Errors
+        ///
+        /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+        /// protobuf data.
+        pub fn decode(
+            bytes: ::buffa::bytes::Bytes,
+        ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+            ::core::result::Result::Ok(
+                APIUserOwnedView(::buffa::OwnedView::decode(bytes)?),
+            )
+        }
+        /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+        /// max message size).
+        ///
+        /// # Errors
+        ///
+        /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+        /// exceeds the configured limits.
+        pub fn decode_with_options(
+            bytes: ::buffa::bytes::Bytes,
+            opts: &::buffa::DecodeOptions,
+        ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+            ::core::result::Result::Ok(
+                APIUserOwnedView(::buffa::OwnedView::decode_with_options(bytes, opts)?),
+            )
+        }
+        /// Build from an owned message via an encode → decode round-trip.
+        ///
+        /// # Errors
+        ///
+        /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+        /// message's encoded size exceeds the 2 GiB protobuf limit, or
+        /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+        /// somehow invalid (should not happen for well-formed messages).
+        pub fn from_owned(
+            msg: &super::super::super::list_api_users_response::APIUser,
+        ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+            ::core::result::Result::Ok(
+                APIUserOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            )
+        }
+        /// Borrow the full [`APIUserView`] with its lifetime tied to `&self`.
+        #[must_use]
+        pub fn view(&self) -> &APIUserView<'_> {
+            self.0.reborrow()
+        }
+        /// Convert to the owned message type.
+        ///
+        /// Infallible: this type's constructors wire-decode their
+        /// buffer, and a view produced by wire decoding always
+        /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+        /// whose contract also governs handles converted from a raw
+        /// [`::buffa::OwnedView`].
+        #[must_use]
+        pub fn to_owned_message(
+            &self,
+        ) -> super::super::super::list_api_users_response::APIUser {
+            self.0.to_owned_message()
+        }
+        /// The underlying bytes buffer.
+        #[must_use]
+        pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+            self.0.bytes()
+        }
+        /// Consume the handle, returning the underlying bytes buffer.
+        #[must_use]
+        pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+            self.0.into_bytes()
+        }
+        /// Field 1: `user_id`
+        #[must_use]
+        pub fn user_id(&self) -> i64 {
+            self.0.reborrow().user_id
+        }
+        /// Field 2: `username`
+        #[must_use]
+        pub fn username(&self) -> &'_ str {
+            self.0.reborrow().username
+        }
+        /// Field 3: `roles`
+        #[must_use]
+        pub fn roles(
+            &self,
+        ) -> &::buffa::RepeatedView<
+            '_,
+            ::buffa::EnumValue<super::super::super::Permission>,
+        > {
+            &self.0.reborrow().roles
+        }
+        /// Field 4: `attributes`
+        #[must_use]
+        pub fn attributes(
+            &self,
+        ) -> &::buffa::RepeatedView<
+            '_,
+            ::buffa::EnumValue<super::super::super::Attribute>,
+        > {
+            &self.0.reborrow().attributes
+        }
+        /// Field 5: `has_api_token`
+        #[must_use]
+        pub fn has_api_token(&self) -> bool {
+            self.0.reborrow().has_api_token
+        }
+        /// Field 6: `token_created_at`
+        #[must_use]
+        pub fn token_created_at(
+            &self,
+        ) -> &::buffa::MessageFieldView<
+            ::buffa_types::google::protobuf::__buffa::view::TimestampView<'_>,
+        > {
+            &self.0.reborrow().token_created_at
+        }
+        /// Field 7: `token_expires_at`
+        #[must_use]
+        pub fn token_expires_at(
+            &self,
+        ) -> &::buffa::MessageFieldView<
+            ::buffa_types::google::protobuf::__buffa::view::TimestampView<'_>,
+        > {
+            &self.0.reborrow().token_expires_at
+        }
+        /// Field 8: `token_id`
+        #[must_use]
+        pub fn token_id(&self) -> ::core::option::Option<i64> {
+            self.0.reborrow().token_id
+        }
+    }
+    impl ::core::convert::From<::buffa::OwnedView<APIUserView<'static>>>
+    for APIUserOwnedView {
+        fn from(inner: ::buffa::OwnedView<APIUserView<'static>>) -> Self {
+            APIUserOwnedView(inner)
+        }
+    }
+    impl ::core::convert::From<APIUserOwnedView>
+    for ::buffa::OwnedView<APIUserView<'static>> {
+        fn from(wrapper: APIUserOwnedView) -> Self {
+            wrapper.0
+        }
+    }
+    impl ::core::convert::AsRef<::buffa::OwnedView<APIUserView<'static>>>
+    for APIUserOwnedView {
+        fn as_ref(&self) -> &::buffa::OwnedView<APIUserView<'static>> {
+            &self.0
+        }
+    }
+    impl ::buffa::HasMessageView
+    for super::super::super::list_api_users_response::APIUser {
+        type View<'a> = APIUserView<'a>;
+        type ViewHandle = APIUserOwnedView;
+    }
+    impl ::serde::Serialize for APIUserOwnedView {
+        fn serialize<__S: ::serde::Serializer>(
+            &self,
+            __s: __S,
+        ) -> ::core::result::Result<__S::Ok, __S::Error> {
+            ::serde::Serialize::serialize(&self.0, __s)
+        }
+    }
+    impl<'a> ::buffa_descriptor::reflect::ReflectMessage for APIUserView<'a> {
+        fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+            super::super::super::__buffa::reflect::descriptor_pool()
+                .message(Self::__buffa_reflect_message_index())
+        }
+        fn pool(
+            &self,
+        ) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+            super::super::super::__buffa::reflect::descriptor_pool()
+        }
+        fn get(
+            &self,
+            field: &::buffa_descriptor::FieldDescriptor,
+        ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+            #[allow(unused_imports)]
+            use ::buffa::Enumeration as _;
+            match field.number() {
+                1u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.user_id),
+                2u32 => ::buffa_descriptor::reflect::ValueRef::String(self.username),
+                3u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.roles),
+                4u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.attributes),
+                5u32 => ::buffa_descriptor::reflect::ValueRef::Bool(self.has_api_token),
+                6u32 => {
+                    ::buffa_descriptor::reflect::ValueRef::Message(
+                        ::buffa_descriptor::reflect::ReflectCow::Borrowed(
+                            &*self.token_created_at,
+                        ),
+                    )
+                }
+                7u32 => {
+                    ::buffa_descriptor::reflect::ValueRef::Message(
+                        ::buffa_descriptor::reflect::ReflectCow::Borrowed(
+                            &*self.token_expires_at,
+                        ),
+                    )
+                }
+                8u32 => {
+                    ::buffa_descriptor::reflect::ValueRef::I64(
+                        self.token_id.unwrap_or(0),
+                    )
+                }
+                _ => {
+                    ::core::debug_assert!(
+                        false,
+                        "field number {} is not a member of this view's reflect get()",
+                        field.number(),
+                    );
+                    ::buffa_descriptor::reflect::ValueRef::Bool(false)
+                }
+            }
+        }
+        fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+            match field.number() {
+                1u32 => self.user_id != 0,
+                2u32 => !self.username.is_empty(),
+                3u32 => !::buffa::RepeatedView::is_empty(&self.roles),
+                4u32 => !::buffa::RepeatedView::is_empty(&self.attributes),
+                5u32 => self.has_api_token,
+                6u32 => self.token_created_at.is_set(),
+                7u32 => self.token_expires_at.is_set(),
+                8u32 => self.token_id.is_some(),
+                _ => false,
+            }
+        }
+        fn for_each_set(
+            &self,
+            f: &mut dyn ::core::ops::FnMut(
+                &::buffa_descriptor::FieldDescriptor,
+                ::buffa_descriptor::reflect::ValueRef<'_>,
+            ),
+        ) {
+            let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(
+                self,
+            );
+            for fd in md.fields() {
+                if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                    f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+                }
+            }
+        }
+        fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+            let bytes = ::buffa::ViewEncode::encode_to_vec(self);
+            let options = ::buffa::DecodeOptions::new()
+                .with_element_memory_limit(
+                    bytes
+                        .len()
+                        .saturating_mul(128)
+                        .max(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT),
+                )
+                .with_unknown_field_limit(
+                    bytes.len().max(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT),
+                );
+            ::buffa_descriptor::reflect::DynamicMessage::decode_with_options(
+                    ::buffa::alloc::sync::Arc::clone(
+                        super::super::super::__buffa::reflect::descriptor_pool(),
+                    ),
+                    Self::__buffa_reflect_message_index(),
+                    &bytes,
+                    &options,
+                )
+                .expect("view re-encodes to bytes decodable against its own descriptor")
+        }
+    }
+    impl<'a> ::buffa_descriptor::reflect::ReflectElement for APIUserView<'a> {
+        fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+            ::buffa_descriptor::reflect::ValueRef::Message(
+                ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+            )
+        }
+    }
+    impl<'a> APIUserView<'a> {
+        /// Memoized `MessageIndex` for this view's message type, resolved
+        /// once against the package's embedded descriptor pool. An inherent
+        /// associated fn (not a free fn) so sibling views in the same module
+        /// do not collide.
+        #[doc(hidden)]
+        fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+            static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+            *IDX
+                .get_or_init(|| {
+                    super::super::super::__buffa::reflect::descriptor_pool()
+                        .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                        .expect(
+                            "generated view type is registered in the embedded descriptor pool",
+                        )
+                })
+        }
+    }
+}
+#[derive(Clone, Debug, Default)]
+pub struct APILoginRequestView<'a> {
+    /// Field 3: `api_token`
+    pub api_token: &'a str,
+    pub user_identifier: ::core::option::Option<
+        super::super::__buffa::view::oneof::api_login_request::UserIdentifier<'a>,
+    >,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for APILoginRequestView<'a> {
+    type Owned = super::super::APILoginRequest;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.api_token = ::buffa::types::borrow_str(&mut cur)?;
+            }
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.user_identifier = Some(
+                    super::super::__buffa::view::oneof::api_login_request::UserIdentifier::UserId(
+                        ::buffa::types::decode_int64(&mut cur)?,
+                    ),
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.user_identifier = Some(
+                    super::super::__buffa::view::oneof::api_login_request::UserIdentifier::Username(
+                        ::buffa::types::borrow_str(&mut cur)?,
+                    ),
+                );
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<super::super::APILoginRequest, ::buffa::DecodeError> {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<super::super::APILoginRequest, ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::APILoginRequest {
+            api_token: self.api_token.to_string(),
+            user_identifier: self
+                .user_identifier
+                .as_ref()
+                .map(|v| match v {
+                    super::super::__buffa::view::oneof::api_login_request::UserIdentifier::UserId(
+                        v,
+                    ) => {
+                        super::super::__buffa::oneof::api_login_request::UserIdentifier::UserId(
+                            *v,
+                        )
+                    }
+                    super::super::__buffa::view::oneof::api_login_request::UserIdentifier::Username(
+                        v,
+                    ) => {
+                        super::super::__buffa::oneof::api_login_request::UserIdentifier::Username(
+                            v.to_string(),
+                        )
+                    }
+                }),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for APILoginRequestView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let ::core::option::Option::Some(ref v) = self.user_identifier {
+            match v {
+                super::super::__buffa::view::oneof::api_login_request::UserIdentifier::UserId(
+                    v,
+                ) => {
+                    size += 1u64 + ::buffa::types::int64_encoded_len(*v) as u64;
+                }
+                super::super::__buffa::view::oneof::api_login_request::UserIdentifier::Username(
+                    x,
+                ) => {
+                    size += 1u64 + ::buffa::types::string_encoded_len(x) as u64;
+                }
+            }
+        }
+        if !self.api_token.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.api_token) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let ::core::option::Option::Some(ref v) = self.user_identifier {
+            match v {
+                super::super::__buffa::view::oneof::api_login_request::UserIdentifier::UserId(
+                    x,
+                ) => {
+                    ::buffa::types::put_int64_field(1u32, *x, buf);
+                }
+                super::super::__buffa::view::oneof::api_login_request::UserIdentifier::Username(
+                    x,
+                ) => {
+                    ::buffa::types::put_string_field(2u32, x, buf);
+                }
+            }
+        }
+        if !self.api_token.is_empty() {
+            ::buffa::types::put_string_field(3u32, &self.api_token, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+/// Serializes this view as protobuf JSON.
+///
+/// Implicit-presence fields with default values are omitted, `required`
+/// fields are always emitted, explicit-presence (`optional`) fields are
+/// emitted only when set, bytes fields are base64-encoded, and enum
+/// values are their proto name strings.
+///
+/// This impl uses `serialize_map(None)` because the number of emitted
+/// fields depends on default-omission rules; serializers that require
+/// known map lengths (e.g. `bincode`) will return a runtime error.
+/// Use the owned message type for those formats.
+impl<'__a> ::serde::Serialize for APILoginRequestView<'__a> {
+    fn serialize<__S: ::serde::Serializer>(
+        &self,
+        __s: __S,
+    ) -> ::core::result::Result<__S::Ok, __S::Error> {
+        use ::serde::ser::SerializeMap as _;
+        let mut __map = __s.serialize_map(::core::option::Option::None)?;
+        if !::buffa::json_helpers::skip_if::is_empty_str(self.api_token) {
+            __map.serialize_entry("apiToken", self.api_token)?;
+        }
+        if let ::core::option::Option::Some(ref __ov) = self.user_identifier {
+            match __ov {
+                super::super::__buffa::view::oneof::api_login_request::UserIdentifier::UserId(
+                    v,
+                ) => {
+                    __map
+                        .serialize_entry(
+                            "userId",
+                            &::buffa::json_helpers::ProtoJson(v),
+                        )?;
+                }
+                super::super::__buffa::view::oneof::api_login_request::UserIdentifier::Username(
+                    v,
+                ) => {
+                    __map.serialize_entry("username", v)?;
+                }
+            }
+        }
+        __map.end()
+    }
+}
+impl<'a> ::buffa::MessageName for APILoginRequestView<'a> {
+    const PACKAGE: &'static str = "auth.v2";
+    const NAME: &'static str = "APILoginRequest";
+    const FULL_NAME: &'static str = "auth.v2.APILoginRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.APILoginRequest";
+}
+::buffa::impl_default_view_instance!(APILoginRequestView);
+::buffa::impl_view_reborrow!(APILoginRequestView);
+/** Self-contained, `'static` owned view of a `APILoginRequest` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`APILoginRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`APILoginRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct APILoginRequestOwnedView(::buffa::OwnedView<APILoginRequestView<'static>>);
+impl APILoginRequestOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            APILoginRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            APILoginRequestOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::APILoginRequest,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            APILoginRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`APILoginRequestView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &APILoginRequestView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::APILoginRequest {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 3: `api_token`
+    #[must_use]
+    pub fn api_token(&self) -> &'_ str {
+        self.0.reborrow().api_token
+    }
+    /// Oneof `user_identifier`.
+    #[must_use]
+    pub fn user_identifier(
+        &self,
+    ) -> ::core::option::Option<
+        &super::super::__buffa::view::oneof::api_login_request::UserIdentifier<'_>,
+    > {
+        self.0.reborrow().user_identifier.as_ref()
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<APILoginRequestView<'static>>>
+for APILoginRequestOwnedView {
+    fn from(inner: ::buffa::OwnedView<APILoginRequestView<'static>>) -> Self {
+        APILoginRequestOwnedView(inner)
+    }
+}
+impl ::core::convert::From<APILoginRequestOwnedView>
+for ::buffa::OwnedView<APILoginRequestView<'static>> {
+    fn from(wrapper: APILoginRequestOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<APILoginRequestView<'static>>>
+for APILoginRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<APILoginRequestView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::APILoginRequest {
+    type View<'a> = APILoginRequestView<'a>;
+    type ViewHandle = APILoginRequestOwnedView;
+}
+impl ::serde::Serialize for APILoginRequestOwnedView {
+    fn serialize<__S: ::serde::Serializer>(
+        &self,
+        __s: __S,
+    ) -> ::core::result::Result<__S::Ok, __S::Error> {
+        ::serde::Serialize::serialize(&self.0, __s)
+    }
+}
+impl<'a> ::buffa_descriptor::reflect::ReflectMessage for APILoginRequestView<'a> {
+    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+        super::super::__buffa::reflect::descriptor_pool()
+            .message(Self::__buffa_reflect_message_index())
+    }
+    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+        super::super::__buffa::reflect::descriptor_pool()
+    }
+    fn get(
+        &self,
+        field: &::buffa_descriptor::FieldDescriptor,
+    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match field.number() {
+            3u32 => ::buffa_descriptor::reflect::ValueRef::String(self.api_token),
+            1u32 => {
+                match &self.user_identifier {
+                    ::core::option::Option::Some(
+                        super::super::__buffa::view::oneof::api_login_request::UserIdentifier::UserId(
+                            v,
+                        ),
+                    ) => ::buffa_descriptor::reflect::ValueRef::I64(*v),
+                    _ => ::buffa_descriptor::reflect::ValueRef::I64(0),
+                }
+            }
+            2u32 => {
+                match &self.user_identifier {
+                    ::core::option::Option::Some(
+                        super::super::__buffa::view::oneof::api_login_request::UserIdentifier::Username(
+                            v,
+                        ),
+                    ) => ::buffa_descriptor::reflect::ValueRef::String(v),
+                    _ => ::buffa_descriptor::reflect::ValueRef::String(""),
+                }
+            }
+            _ => {
+                ::core::debug_assert!(
+                    false,
+                    "field number {} is not a member of this view's reflect get()", field
+                    .number(),
+                );
+                ::buffa_descriptor::reflect::ValueRef::Bool(false)
+            }
+        }
+    }
+    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+        match field.number() {
+            3u32 => !self.api_token.is_empty(),
+            1u32 => {
+                ::core::matches!(
+                    & self.user_identifier,
+                    ::core::option::Option::Some(super::super::__buffa::view::oneof::api_login_request::UserIdentifier::UserId(_))
+                )
+            }
+            2u32 => {
+                ::core::matches!(
+                    & self.user_identifier,
+                    ::core::option::Option::Some(super::super::__buffa::view::oneof::api_login_request::UserIdentifier::Username(_))
+                )
+            }
+            _ => false,
+        }
+    }
+    fn for_each_set(
+        &self,
+        f: &mut dyn ::core::ops::FnMut(
+            &::buffa_descriptor::FieldDescriptor,
+            ::buffa_descriptor::reflect::ValueRef<'_>,
+        ),
+    ) {
+        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
+        for fd in md.fields() {
+            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+            }
+        }
+    }
+    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+        let bytes = ::buffa::ViewEncode::encode_to_vec(self);
+        let options = ::buffa::DecodeOptions::new()
+            .with_element_memory_limit(
+                bytes
+                    .len()
+                    .saturating_mul(128)
+                    .max(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT),
+            )
+            .with_unknown_field_limit(
+                bytes.len().max(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT),
+            );
+        ::buffa_descriptor::reflect::DynamicMessage::decode_with_options(
+                ::buffa::alloc::sync::Arc::clone(
+                    super::super::__buffa::reflect::descriptor_pool(),
+                ),
+                Self::__buffa_reflect_message_index(),
+                &bytes,
+                &options,
+            )
+            .expect("view re-encodes to bytes decodable against its own descriptor")
+    }
+}
+impl<'a> ::buffa_descriptor::reflect::ReflectElement for APILoginRequestView<'a> {
+    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        ::buffa_descriptor::reflect::ValueRef::Message(
+            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+        )
+    }
+}
+impl<'a> APILoginRequestView<'a> {
+    /// Memoized `MessageIndex` for this view's message type, resolved
+    /// once against the package's embedded descriptor pool. An inherent
+    /// associated fn (not a free fn) so sibling views in the same module
+    /// do not collide.
+    #[doc(hidden)]
+    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+        *IDX
+            .get_or_init(|| {
+                super::super::__buffa::reflect::descriptor_pool()
+                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                    .expect(
+                        "generated view type is registered in the embedded descriptor pool",
+                    )
+            })
+    }
+}
+#[derive(Clone, Debug, Default)]
+pub struct APILoginResponseView<'a> {
+    /// Field 1: `jwt`
+    pub jwt: &'a str,
+    /// Field 2: `jwt_max_age`
+    pub jwt_max_age: ::buffa::MessageFieldView<
+        ::buffa_types::google::protobuf::__buffa::view::DurationView<'a>,
+    >,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for APILoginResponseView<'a> {
+    type Owned = super::super::APILoginResponse;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.jwt = ::buffa::types::borrow_str(&mut cur)?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.jwt_max_age.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.jwt_max_age = ::buffa::MessageFieldView::set(
+                            <::buffa_types::google::protobuf::__buffa::view::DurationView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<super::super::APILoginResponse, ::buffa::DecodeError> {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<super::super::APILoginResponse, ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::APILoginResponse {
+            jwt: self.jwt.to_string(),
+            jwt_max_age: match self.jwt_max_age.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        ::buffa_types::google::protobuf::Duration,
+                        ::buffa::Inline<::buffa_types::google::protobuf::Duration>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for APILoginResponseView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if !self.jwt.is_empty() {
+            size += 1u64 + ::buffa::types::string_encoded_len(&self.jwt) as u64;
+        }
+        if self.jwt_max_age.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.jwt_max_age.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if !self.jwt.is_empty() {
+            ::buffa::types::put_string_field(1u32, &self.jwt, buf);
+        }
+        if self.jwt_max_age.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                2u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.jwt_max_age.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+/// Serializes this view as protobuf JSON.
+///
+/// Implicit-presence fields with default values are omitted, `required`
+/// fields are always emitted, explicit-presence (`optional`) fields are
+/// emitted only when set, bytes fields are base64-encoded, and enum
+/// values are their proto name strings.
+///
+/// This impl uses `serialize_map(None)` because the number of emitted
+/// fields depends on default-omission rules; serializers that require
+/// known map lengths (e.g. `bincode`) will return a runtime error.
+/// Use the owned message type for those formats.
+impl<'__a> ::serde::Serialize for APILoginResponseView<'__a> {
+    fn serialize<__S: ::serde::Serializer>(
+        &self,
+        __s: __S,
+    ) -> ::core::result::Result<__S::Ok, __S::Error> {
+        use ::serde::ser::SerializeMap as _;
+        let mut __map = __s.serialize_map(::core::option::Option::None)?;
+        if !::buffa::json_helpers::skip_if::is_empty_str(self.jwt) {
+            __map.serialize_entry("jwt", self.jwt)?;
+        }
+        {
+            if let ::core::option::Option::Some(__v) = self.jwt_max_age.as_option() {
+                __map.serialize_entry("jwtMaxAge", __v)?;
+            }
+        }
+        __map.end()
+    }
+}
+impl<'a> ::buffa::MessageName for APILoginResponseView<'a> {
+    const PACKAGE: &'static str = "auth.v2";
+    const NAME: &'static str = "APILoginResponse";
+    const FULL_NAME: &'static str = "auth.v2.APILoginResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.APILoginResponse";
+}
+::buffa::impl_default_view_instance!(APILoginResponseView);
+::buffa::impl_view_reborrow!(APILoginResponseView);
+/** Self-contained, `'static` owned view of a `APILoginResponse` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`APILoginResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`APILoginResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct APILoginResponseOwnedView(::buffa::OwnedView<APILoginResponseView<'static>>);
+impl APILoginResponseOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            APILoginResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            APILoginResponseOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::APILoginResponse,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            APILoginResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`APILoginResponseView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &APILoginResponseView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::APILoginResponse {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `jwt`
+    #[must_use]
+    pub fn jwt(&self) -> &'_ str {
+        self.0.reborrow().jwt
+    }
+    /// Field 2: `jwt_max_age`
+    #[must_use]
+    pub fn jwt_max_age(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        ::buffa_types::google::protobuf::__buffa::view::DurationView<'_>,
+    > {
+        &self.0.reborrow().jwt_max_age
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<APILoginResponseView<'static>>>
+for APILoginResponseOwnedView {
+    fn from(inner: ::buffa::OwnedView<APILoginResponseView<'static>>) -> Self {
+        APILoginResponseOwnedView(inner)
+    }
+}
+impl ::core::convert::From<APILoginResponseOwnedView>
+for ::buffa::OwnedView<APILoginResponseView<'static>> {
+    fn from(wrapper: APILoginResponseOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<APILoginResponseView<'static>>>
+for APILoginResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<APILoginResponseView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::APILoginResponse {
+    type View<'a> = APILoginResponseView<'a>;
+    type ViewHandle = APILoginResponseOwnedView;
+}
+impl ::serde::Serialize for APILoginResponseOwnedView {
+    fn serialize<__S: ::serde::Serializer>(
+        &self,
+        __s: __S,
+    ) -> ::core::result::Result<__S::Ok, __S::Error> {
+        ::serde::Serialize::serialize(&self.0, __s)
+    }
+}
+impl<'a> ::buffa_descriptor::reflect::ReflectMessage for APILoginResponseView<'a> {
+    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+        super::super::__buffa::reflect::descriptor_pool()
+            .message(Self::__buffa_reflect_message_index())
+    }
+    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+        super::super::__buffa::reflect::descriptor_pool()
+    }
+    fn get(
+        &self,
+        field: &::buffa_descriptor::FieldDescriptor,
+    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match field.number() {
+            1u32 => ::buffa_descriptor::reflect::ValueRef::String(self.jwt),
+            2u32 => {
+                ::buffa_descriptor::reflect::ValueRef::Message(
+                    ::buffa_descriptor::reflect::ReflectCow::Borrowed(&*self.jwt_max_age),
+                )
+            }
+            _ => {
+                ::core::debug_assert!(
+                    false,
+                    "field number {} is not a member of this view's reflect get()", field
+                    .number(),
+                );
+                ::buffa_descriptor::reflect::ValueRef::Bool(false)
+            }
+        }
+    }
+    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+        match field.number() {
+            1u32 => !self.jwt.is_empty(),
+            2u32 => self.jwt_max_age.is_set(),
+            _ => false,
+        }
+    }
+    fn for_each_set(
+        &self,
+        f: &mut dyn ::core::ops::FnMut(
+            &::buffa_descriptor::FieldDescriptor,
+            ::buffa_descriptor::reflect::ValueRef<'_>,
+        ),
+    ) {
+        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
+        for fd in md.fields() {
+            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+            }
+        }
+    }
+    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+        let bytes = ::buffa::ViewEncode::encode_to_vec(self);
+        let options = ::buffa::DecodeOptions::new()
+            .with_element_memory_limit(
+                bytes
+                    .len()
+                    .saturating_mul(128)
+                    .max(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT),
+            )
+            .with_unknown_field_limit(
+                bytes.len().max(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT),
+            );
+        ::buffa_descriptor::reflect::DynamicMessage::decode_with_options(
+                ::buffa::alloc::sync::Arc::clone(
+                    super::super::__buffa::reflect::descriptor_pool(),
+                ),
+                Self::__buffa_reflect_message_index(),
+                &bytes,
+                &options,
+            )
+            .expect("view re-encodes to bytes decodable against its own descriptor")
+    }
+}
+impl<'a> ::buffa_descriptor::reflect::ReflectElement for APILoginResponseView<'a> {
+    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+        ::buffa_descriptor::reflect::ValueRef::Message(
+            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+        )
+    }
+}
+impl<'a> APILoginResponseView<'a> {
     /// Memoized `MessageIndex` for this view's message type, resolved
     /// once against the package's embedded descriptor pool. An inherent
     /// associated fn (not a free fn) so sibling views in the same module

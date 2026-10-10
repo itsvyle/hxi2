@@ -7,6 +7,8 @@ import "auth/v2/auth_data.proto";
 // import something for time type
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/duration.proto";
 
 
 service AuthService {
@@ -82,6 +84,18 @@ service AuthService {
         option (permission_level).allow_role = PERMISSION_ADMIN;
     }
 
+    rpc RenewAPIUserToken(RenewAPIUserTokenRequest) returns (RenewAPIUserTokenResponse) {
+        option (permission_level).allow_role = PERMISSION_ADMIN;
+    }
+
+    rpc ListAPIUsers(google.protobuf.Empty) returns (ListAPIUsersResponse) {
+        option (permission_level).allow_role = PERMISSION_ADMIN;
+    }
+
+    rpc APILogin(APILoginRequest) returns (APILoginResponse) {
+        option (permission_level).is_public = true;
+    }
+
     // FRONTEND PAGES
     rpc FrontendIndex(google.protobuf.Empty) returns (google.protobuf.Empty) {
         option (permission_level).is_public = true;
@@ -137,6 +151,7 @@ message GetDevTokenRequest {
     string user_id = 1;
     repeated Permission roles = 2;
     optional int64 validity_seconds = 3;
+    repeated Attribute attributes = 4;
 }
 
 message GetDevTokenResponse {
@@ -184,6 +199,7 @@ message PasswordLoginResponse {
 message AddAPIUserRequest {
     string username = 1;
     repeated Permission roles = 3;
+    repeated Attribute attributes = 4;
 }
 
 message AddAPIUserResponse {
@@ -196,4 +212,42 @@ message RemoveAPIUserRequest {
         int64 user_id = 1;
         string username = 2;
     }
+}
+
+message RenewAPIUserTokenRequest {
+    oneof user_identifier {
+        int64 user_id = 1;
+        string username = 2;
+    }
+}
+
+message RenewAPIUserTokenResponse {
+    string api_token = 1;
+}
+
+message ListAPIUsersResponse {
+    message APIUser {
+        int64 user_id = 1;
+        string username = 2;
+        repeated Permission roles = 3;
+        repeated Attribute attributes = 4;
+        bool has_api_token = 5;
+        optional google.protobuf.Timestamp token_created_at = 6;
+        optional google.protobuf.Timestamp token_expires_at = 7;
+        optional int64 token_id = 8;
+    }
+    repeated APIUser users = 1;
+}
+
+message APILoginRequest {
+    oneof user_identifier {
+        int64 user_id = 1;
+        string username = 2;
+    }
+    string api_token = 3;
+}
+
+message APILoginResponse {
+    string jwt = 1;
+    google.protobuf.Duration jwt_max_age = 2;
 }

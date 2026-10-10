@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file auth/v2/auth_data.proto.
  */
 export const file_auth_v2_auth_data: GenFile = /*@__PURE__*/
-  fileDesc("ChdhdXRoL3YyL2F1dGhfZGF0YS5wcm90bxIHYXV0aC52MiK1AgoGREJVc2VyEgoKAmlkGAEgASgDEhAKCHVzZXJuYW1lGAIgASgJEhIKCmZpcnN0X25hbWUYAyABKAkSFgoJbGFzdF9uYW1lGAQgASgJSACIAQESEgoKZGlzY29yZF9pZBgFIAEoCRI4ChRhY2NvdW50X2NyZWF0ZWRfZGF0ZRgGIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASOQoVYWNjb3VudF9tb2RpZmllZF9kYXRlGAcgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIRCglwcm9tb3Rpb24YCCABKAUSEwoLcGVybWlzc2lvbnMYCSABKAMSDgoGaXNfYXBpGAogASgIEhIKCmF0dHJpYnV0ZXMYCyABKANCDAoKX2xhc3RfbmFtZSp3CglBdHRyaWJ1dGUSGQoVQVRUUklCVVRFX1VOU1BFQ0lGSUVEEAASEgoOQVRUUklCVVRFX0NVQkUQARISCg5BVFRSSUJVVEVfTVBTSRACEhIKDkFUVFJJQlVURV9QQ1NJEAMSEwoPQVRUUklCVVRFX0JDUFNUEARiBnByb3RvMw", [file_google_protobuf_timestamp]);
+  fileDesc("ChdhdXRoL3YyL2F1dGhfZGF0YS5wcm90bxIHYXV0aC52MiLJAgoGREJVc2VyEgoKAmlkGAEgASgDEhAKCHVzZXJuYW1lGAIgASgJEhIKCmZpcnN0X25hbWUYAyABKAkSFgoJbGFzdF9uYW1lGAQgASgJSACIAQESFwoKZGlzY29yZF9pZBgFIAEoCUgBiAEBEjgKFGFjY291bnRfY3JlYXRlZF9kYXRlGAYgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBI5ChVhY2NvdW50X21vZGlmaWVkX2RhdGUYByABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhEKCXByb21vdGlvbhgIIAEoBRITCgtwZXJtaXNzaW9ucxgJIAEoAxIOCgZpc19hcGkYCiABKAgSEgoKYXR0cmlidXRlcxgLIAEoA0IMCgpfbGFzdF9uYW1lQg0KC19kaXNjb3JkX2lkKncKCUF0dHJpYnV0ZRIZChVBVFRSSUJVVEVfVU5TUEVDSUZJRUQQABISCg5BVFRSSUJVVEVfQ1VCRRABEhIKDkFUVFJJQlVURV9NUFNJEAISEgoOQVRUUklCVVRFX1BDU0kQAxITCg9BVFRSSUJVVEVfQkNQU1QQBGIGcHJvdG8z", [file_google_protobuf_timestamp]);
 
 /**
  * @generated from message auth.v2.DBUser
@@ -39,9 +39,9 @@ export type DBUser = Message<"auth.v2.DBUser"> & {
   lastName?: string | undefined;
 
   /**
-   * @generated from field: string discord_id = 5;
+   * @generated from field: optional string discord_id = 5;
    */
-  discordId: string;
+  discordId?: string | undefined;
 
   /**
    * @generated from field: google.protobuf.Timestamp account_created_date = 6;

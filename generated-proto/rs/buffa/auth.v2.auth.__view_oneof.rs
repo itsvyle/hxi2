@@ -28,3 +28,21 @@ pub mod remove_api_user_request {
         Username(&'a str),
     }
 }
+pub mod renew_api_user_token_request {
+    #[allow(unused_imports)]
+    use super::*;
+    #[derive(Clone, Debug)]
+    pub enum UserIdentifier<'a> {
+        UserId(i64),
+        Username(&'a str),
+    }
+}
+pub mod api_login_request {
+    #[allow(unused_imports)]
+    use super::*;
+    #[derive(Clone, Debug)]
+    pub enum UserIdentifier<'a> {
+        UserId(i64),
+        Username(&'a str),
+    }
+}

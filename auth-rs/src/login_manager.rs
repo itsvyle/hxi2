@@ -1,4 +1,3 @@
-use std::any::type_name;
 use std::sync::Arc;
 
 use anyhow::Context as _;
@@ -14,7 +13,10 @@ use base64::prelude::*;
 use buffa::MessageField;
 use buffa_types::Timestamp;
 use http::StatusCode;
-use hxi2_proto::proto::auth::v2::{Attribute, Permission, SmallData};
+use hxi2_proto::{
+    proto::auth::v2::{Attribute, Permission, SmallData, small_data::APITokenData},
+    utils::retrieve_active_bitfields,
+};
 use rand::RngExt;
 use tracing::{error, instrument, trace};
 
@@ -91,28 +93,6 @@ impl LoginManager {
         Self { signer, verifier }
     }
 
-    /// To move somewhere else, to be used more globally
-    #[instrument(level = "trace", fields(enum_type = %type_name::<T>()))]
-    pub fn retrieve_active_bitfields<T: buffa::Enumeration>(
-        bitfield: i64,
-    ) -> impl Iterator<Item = T> {
-        let mut copy = bitfield;
-
-        std::iter::from_fn(move || {
-            while copy != 0 {
-                let index = copy.trailing_zeros();
-                copy &= copy - 1;
-
-                if let Some(role) = T::from_i32(index as i32) {
-                    return Some(role);
-                } else {
-                    trace!("Unknown index {} in bitfield {}", index, bitfield);
-                }
-            }
-            None
-        })
-    }
-
     fn small_data_from_user(&self, user: &DbUser) -> SmallData {
         SmallData {
             user_id: user.id,
@@ -122,12 +102,12 @@ impl LoginManager {
             permissions: user.permissions,
             promotion: user.promotion,
             expiration: MessageField::none(),
-            roles: Self::retrieve_active_bitfields::<Permission>(user.permissions)
+            roles: retrieve_active_bitfields::<Permission>(user.permissions)
                 .map(Into::into)
                 .collect(),
-            is_api_token: user.is_api,
+            api_token_data: MessageField::none(),
             attributes: user.attributes,
-            attribute_list: Self::retrieve_active_bitfields::<Attribute>(user.attributes)
+            attribute_list: retrieve_active_bitfields::<Attribute>(user.attributes)
                 .map(Into::into)
                 .collect(),
             __buffa_unknown_fields: Default::default(),
@@ -157,7 +137,11 @@ impl LoginManager {
     // This creates a token for the user
     // Authorization to login as such a user must have been checked PRIOR
     #[cfg_attr(debug_assertions, instrument(skip(self), level = "trace", ret))]
-    pub async fn login_as(&self, identifier: &DbUserIdentifier) -> anyhow::Result<LoginResponse> {
+    pub async fn login_as(
+        &self,
+        identifier: &DbUserIdentifier,
+        api_token_data: Option<APITokenData>,
+    ) -> anyhow::Result<LoginResponse> {
         let cfg = crate::app_config::AppConfiguration::INSTANCE();
         let user = cfg
             .db()
@@ -166,29 +150,52 @@ impl LoginManager {
             .await
             .context("getting user from database")?;
 
+        if api_token_data.is_none() && user.is_api {
+            anyhow::bail!("API users must have API token data");
+        } else if api_token_data.is_some() && !user.is_api {
+            anyhow::bail!("Non-API users cannot have API token data");
+        }
+
+        let token_validity = if api_token_data.is_some() {
+            cfg.API_JWT_VALIDITY
+        } else {
+            cfg.JWT_TOKEN_VALIDITY
+        };
+
         let mut small_data = self.small_data_from_user(&user);
         small_data.expiration =
-            Timestamp::from_unix_secs((chrono::Utc::now() + cfg.JWT_TOKEN_VALIDITY).timestamp())
-                .into();
+            Timestamp::from_unix_secs((chrono::Utc::now() + token_validity).timestamp()).into();
+        if let Some(api_token_data) = api_token_data.as_ref() {
+            small_data.api_token_data = MessageField::some(api_token_data.to_owned());
+        }
 
-        let opts = JWTSignerOptions::default();
+        let opts = JWTSignerOptions::default().with_validity(token_validity);
         let (token, claims) = self
             .signer
             .new_token(&format!("{}", user.id), &small_data, &opts)?;
 
-        let refresh_token = Self::generate_refresh_token();
+        let refresh_token = if api_token_data.is_none() {
+            let refresh_token = Self::generate_refresh_token();
 
-        cfg.db()
-            .await
-            .add_refresh_token_pair(user.id, &refresh_token, &claims.jti)
-            .await
-            .context("inserting refresh token into database")?;
+            cfg.db()
+                .await
+                .add_refresh_token_pair(user.id, &refresh_token, &claims.jti)
+                .await
+                .context("inserting refresh token into database")?;
+            refresh_token
+        } else {
+            String::new()
+        };
 
         Ok(LoginResponse {
             token,
             token_max_age: opts.validity.num_seconds(),
+            refresh_token_max_age: if refresh_token.is_empty() {
+                0
+            } else {
+                cfg.JWT_REFRESH_TOKEN_VALIDITY.num_seconds()
+            },
             refresh_token,
-            refresh_token_max_age: cfg.JWT_REFRESH_TOKEN_VALIDITY.num_seconds(),
             small_data: claims
                 .data
                 .ok_or_else(|| anyhow::anyhow!("claims.data should be present"))?,
@@ -207,6 +214,10 @@ impl LoginManager {
             .verify_token_ignore_expiry(old_token)
             .context("verifying old token")?;
 
+        if claims.data.api_token_data.is_set() {
+            anyhow::bail!("API tokens cannot be renewed");
+        }
+
         let uid = claims
             .sub
             .parse::<i64>()
@@ -220,7 +231,7 @@ impl LoginManager {
             error!(error = ?e, "Failed to delete old refresh token");
         }
 
-        let l = self.login_as(&DbUserIdentifier::Id(uid)).await?;
+        let l = self.login_as(&DbUserIdentifier::Id(uid), None).await?;
         Ok(l)
     }
 

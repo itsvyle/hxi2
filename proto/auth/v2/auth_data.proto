@@ -11,7 +11,7 @@ message DBUser {
     string username = 2;
     string first_name = 3;
     optional string last_name = 4;
-    string discord_id = 5;
+    optional string discord_id = 5;
     google.protobuf.Timestamp account_created_date = 6;
     google.protobuf.Timestamp account_modified_date = 7;
     int32 promotion = 8;

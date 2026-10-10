@@ -4,19 +4,22 @@ use anyhow::Context as _;
 use axum::response::IntoResponse;
 use axum_extra::extract::CookieJar;
 use axum_extra::extract::cookie::Cookie;
-use buffa_types::Empty;
+use buffa::MessageField;
+use buffa_types::{Duration, Empty};
 use connectrpc::{
     ConnectError, ErrorCode, RequestContext, Response, ServiceRequest, ServiceResult,
 };
 use http::header::SET_COOKIE;
 pub use hxi2_proto::connect::auth::v2::AuthServiceExt;
 use hxi2_proto::proto::auth::v2::{
-    AddAPIUserRequest, AddAPIUserResponse, AddPasswordRequest, CreateUserRequest,
-    CreateUserResponse, DBUser, GetCSRFTokenRequest, GetCSRFTokenResponse, GetJWTPublicKeyRequest,
-    GetJWTPublicKeyResponse, ListUsersRequest, ListUsersResponse, PasswordLoginRequest,
-    PasswordLoginResponse, Permission, RemoveAPIUserRequest, RemovePasswordRequest,
-    RenewJWTRequest, RenewJWTResponse, SmallData,
+    APILoginRequest, APILoginResponse, AddAPIUserRequest, AddAPIUserResponse, AddPasswordRequest,
+    CreateUserRequest, CreateUserResponse, DBUser, GetCSRFTokenRequest, GetCSRFTokenResponse,
+    GetJWTPublicKeyRequest, GetJWTPublicKeyResponse, ListAPIUsersResponse, ListUsersRequest,
+    ListUsersResponse, PasswordLoginRequest, PasswordLoginResponse, Permission,
+    RemoveAPIUserRequest, RemovePasswordRequest, RenewAPIUserTokenRequest,
+    RenewAPIUserTokenResponse, RenewJWTRequest, RenewJWTResponse, SmallData,
 };
+use hxi2_proto::utils::compile_bitfield;
 use hxi2_proto::{
     connect::auth::v2::AuthService,
     proto::auth::v2::{GetDevTokenRequest, GetDevTokenResponse},
@@ -96,10 +99,8 @@ impl AuthService for AuthServiceImpl {
         }
 
         // compile to a bitfield
-        let final_permissions = req
-            .roles
-            .iter()
-            .fold(0_i64, |acc, role| acc | ((role.to_i32() as i64) << 1_i64));
+        let final_permissions = compile_bitfield(req.roles.iter().filter_map(|r| r.as_known()));
+        let final_attributes = compile_bitfield(req.attributes.iter().filter_map(|a| a.as_known()));
 
         let data = SmallData {
             user_id: 42,
@@ -108,7 +109,12 @@ impl AuthService for AuthServiceImpl {
             last_name: Some("T".to_owned()),
             permissions: final_permissions,
             promotion: 2024,
-            ..Default::default()
+            expiration: MessageField::none(),
+            roles: req.roles.clone().to_vec(),
+            attributes: final_attributes,
+            attribute_list: req.attributes.clone().to_vec(),
+            api_token_data: MessageField::none(),
+            __buffa_unknown_fields: Default::default(),
         };
 
         let token = self
@@ -399,7 +405,7 @@ impl AuthService for AuthServiceImpl {
 
         let login_response = self
             .login_manager
-            .login_as(&DbUserIdentifier::Id(user_id))
+            .login_as(&DbUserIdentifier::Id(user_id), None)
             .await
             .map_err(|err| {
                 if matches!(
@@ -473,7 +479,121 @@ impl AuthService for AuthServiceImpl {
         Ok(res)
     }
 
-    impl_unimplemented_rpc!(add_api_user, AddAPIUserRequest, AddAPIUserResponse);
+    async fn add_api_user(
+        &self,
+        _ctx: RequestContext,
+        _request: ServiceRequest<'_, AddAPIUserRequest>,
+    ) -> ServiceResult<AddAPIUserResponse> {
+        let req = _request.to_owned_message();
+
+        let (user_id, token) = self
+            .api_login_manager
+            .new_api_user(
+                &req.username,
+                &req.roles
+                    .iter()
+                    .filter_map(|r| r.as_known())
+                    .collect::<Vec<_>>(),
+                &req.attributes
+                    .iter()
+                    .filter_map(|a| a.as_known())
+                    .collect::<Vec<_>>(),
+            )
+            .await
+            .obfuscate()
+            .to_connect_internal()?;
+        Response::ok(AddAPIUserResponse {
+            user_id,
+            api_token: token,
+            ..Default::default()
+        })
+    }
+
+    async fn list_api_users(
+        &self,
+        _ctx: RequestContext,
+        _request: ServiceRequest<'_, Empty>,
+    ) -> ServiceResult<ListAPIUsersResponse> {
+        let db = AppConfiguration::INSTANCE().db().await;
+        let users = db
+            .list_api_users()
+            .await
+            .context("listing users")
+            .obfuscate()
+            .to_connect_internal()?;
+
+        Response::ok(ListAPIUsersResponse {
+            users,
+            ..Default::default()
+        })
+    }
+    async fn renew_api_user_token(
+        &self,
+        _ctx: RequestContext,
+        _request: ServiceRequest<'_, RenewAPIUserTokenRequest>,
+    ) -> ServiceResult<RenewAPIUserTokenResponse> {
+        let identifier = {
+            use hxi2_proto::proto::auth::v2::renew_api_user_token_request::UserIdentifierView;
+            match _request.user_identifier {
+                Some(UserIdentifierView::UserId(user_id)) => DbUserIdentifier::Id(user_id),
+                Some(UserIdentifierView::Username(username)) => {
+                    DbUserIdentifier::Username(username.to_string())
+                }
+                None => {
+                    return Err(ConnectError::invalid_argument(
+                        "user_identifier is required",
+                    ));
+                }
+            }
+        };
+
+        let token = self
+            .api_login_manager
+            .renew_api_token(&identifier)
+            .await
+            .obfuscate()
+            .to_connect_internal()?;
+
+        Response::ok(RenewAPIUserTokenResponse {
+            api_token: token,
+            __buffa_unknown_fields: Default::default(),
+        })
+    }
+
+    async fn api_login(
+        &self,
+        _ctx: RequestContext,
+        req: ServiceRequest<'_, APILoginRequest>,
+    ) -> ServiceResult<APILoginResponse> {
+        let identifier = {
+            use hxi2_proto::proto::auth::v2::api_login_request::UserIdentifierView;
+            match req.user_identifier {
+                Some(UserIdentifierView::UserId(user_id)) => DbUserIdentifier::Id(user_id),
+                Some(UserIdentifierView::Username(username)) => {
+                    DbUserIdentifier::Username(username.to_string())
+                }
+                None => {
+                    return Err(ConnectError::invalid_argument(
+                        "user_identifier is required",
+                    ));
+                }
+            }
+        };
+
+        let res = self
+            .api_login_manager
+            .login_with_api_token(&identifier, req.api_token)
+            .await
+            .obfuscate()
+            .to_connect_permission_denied()?;
+
+        Response::ok(APILoginResponse {
+            jwt: res.token,
+            jwt_max_age: Duration::from_secs(res.token_max_age).into(),
+            ..Default::default()
+        })
+    }
+
     impl_unimplemented_rpc!(remove_api_user, RemoveAPIUserRequest, Empty);
 
     impl_otherplace_rpc!(logout, Empty, Empty);

@@ -1276,6 +1276,7 @@ dependencies = [
  "http-body 1.0.1",
  "serde",
  "serde_json",
+ "tracing",
 ]
 
 [[package]]

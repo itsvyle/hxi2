@@ -19,7 +19,7 @@ use tracing::{error, trace, warn};
 use crate::{
     app_config::{self, AppConfiguration},
     database::DbUserIdentifier,
-    login_manager::{self, LoginManager},
+    login_manager::LoginManager,
 };
 
 #[derive(Deserialize)]
@@ -196,7 +196,7 @@ impl DiscordLoginManager {
 
         let login_response = manager
             .login_manager
-            .login_as((&DbUserIdentifier::DiscordId(discord_user.id.clone())))
+            .login_as(&DbUserIdentifier::DiscordId(discord_user.id.clone()), None)
             .await
             .map_err(|err| {
                 if matches!(

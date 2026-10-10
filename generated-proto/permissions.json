@@ -1,6 +1,20 @@
 {
 	"hash": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262",
   "permissions": {
+    "/auth.v2.AuthService/APILogin": {
+      "allow_roles": [
+        1
+      ],
+      "is_public": true,
+      "public_url": null,
+      "compiled_permissions_bitfield": 2,
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": false,
+      "is_frontend": false,
+      "frontend_static_file": null
+    },
     "/auth.v2.AuthService/AddAPIUser": {
       "allow_roles": [
         1,
@@ -171,6 +185,21 @@
       "is_frontend": false,
       "frontend_static_file": null
     },
+    "/auth.v2.AuthService/ListAPIUsers": {
+      "allow_roles": [
+        1,
+        1
+      ],
+      "is_public": false,
+      "public_url": null,
+      "compiled_permissions_bitfield": 2,
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": false,
+      "is_frontend": false,
+      "frontend_static_file": null
+    },
     "/auth.v2.AuthService/ListUsers": {
       "allow_roles": [
         1,
@@ -239,6 +268,21 @@
       "is_public": false,
       "public_url": null,
       "compiled_permissions_bitfield": 66,
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": false,
+      "is_frontend": false,
+      "frontend_static_file": null
+    },
+    "/auth.v2.AuthService/RenewAPIUserToken": {
+      "allow_roles": [
+        1,
+        1
+      ],
+      "is_public": false,
+      "public_url": null,
+      "compiled_permissions_bitfield": 2,
       "csrf_token_header": "X-CSRF-Token",
       "csrf_token_cookie": "csrf_token",
       "response_cors_headers": null,

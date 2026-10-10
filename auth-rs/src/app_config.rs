@@ -68,6 +68,8 @@ pub struct AppConfiguration {
     pub JWT_TOKEN_VALIDITY: Duration,
     #[doc = "Validity of a API token"]
     pub API_TOKEN_VALIDITY: Duration,
+    #[doc = "Validity of a API JWT token"]
+    pub API_JWT_VALIDITY: Duration,
 
     #[derivative(Debug = "ignore")]
     db_manager: OnceCell<DatabaseManager>,
@@ -127,6 +129,7 @@ impl AppConfiguration {
             ),
             JWT_TOKEN_VALIDITY: Duration::seconds(config.cookies.jwt_token_validity_seconds),
             API_TOKEN_VALIDITY: Duration::weeks(520), // 10 years
+            API_JWT_VALIDITY: Duration::weeks(520),   // 10 years
         })
     }
 

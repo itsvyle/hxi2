@@ -87,3 +87,59 @@ pub mod remove_api_user_request {
         }
     }
 }
+pub mod renew_api_user_token_request {
+    #[allow(unused_imports)]
+    use super::*;
+    #[derive(Clone, PartialEq, Debug)]
+    pub enum UserIdentifier {
+        UserId(i64),
+        Username(::buffa::alloc::string::String),
+    }
+    impl ::buffa::Oneof for UserIdentifier {}
+    impl ::serde::Serialize for UserIdentifier {
+        fn serialize<S: ::serde::Serializer>(
+            &self,
+            s: S,
+        ) -> ::core::result::Result<S::Ok, S::Error> {
+            use ::serde::ser::SerializeMap;
+            let mut map = s.serialize_map(Some(1))?;
+            match self {
+                Self::UserId(v) => {
+                    map.serialize_entry("userId", &::buffa::json_helpers::ProtoJson(v))?;
+                }
+                Self::Username(v) => {
+                    map.serialize_entry("username", v)?;
+                }
+            }
+            map.end()
+        }
+    }
+}
+pub mod api_login_request {
+    #[allow(unused_imports)]
+    use super::*;
+    #[derive(Clone, PartialEq, Debug)]
+    pub enum UserIdentifier {
+        UserId(i64),
+        Username(::buffa::alloc::string::String),
+    }
+    impl ::buffa::Oneof for UserIdentifier {}
+    impl ::serde::Serialize for UserIdentifier {
+        fn serialize<S: ::serde::Serializer>(
+            &self,
+            s: S,
+        ) -> ::core::result::Result<S::Ok, S::Error> {
+            use ::serde::ser::SerializeMap;
+            let mut map = s.serialize_map(Some(1))?;
+            match self {
+                Self::UserId(v) => {
+                    map.serialize_entry("userId", &::buffa::json_helpers::ProtoJson(v))?;
+                }
+                Self::Username(v) => {
+                    map.serialize_entry("username", v)?;
+                }
+            }
+            map.end()
+        }
+    }
+}

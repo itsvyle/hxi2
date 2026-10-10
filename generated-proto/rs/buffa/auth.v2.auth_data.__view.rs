@@ -12,7 +12,7 @@ pub struct DBUserView<'a> {
     /// Field 4: `last_name`
     pub last_name: ::core::option::Option<&'a str>,
     /// Field 5: `discord_id`
-    pub discord_id: &'a str,
+    pub discord_id: ::core::option::Option<&'a str>,
     /// Field 6: `account_created_date`
     pub account_created_date: ::buffa::MessageFieldView<
         ::buffa_types::google::protobuf::__buffa::view::TimestampView<'a>,
@@ -94,7 +94,7 @@ impl<'a> ::buffa::MessageView<'a> for DBUserView<'a> {
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.discord_id = ::buffa::types::borrow_str(&mut cur)?;
+                view.discord_id = Some(::buffa::types::borrow_str(&mut cur)?);
             }
             6u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -192,7 +192,7 @@ impl<'a> ::buffa::MessageView<'a> for DBUserView<'a> {
             username: self.username.to_string(),
             first_name: self.first_name.to_string(),
             last_name: self.last_name.map(|s| s.to_string()),
-            discord_id: self.discord_id.to_string(),
+            discord_id: self.discord_id.map(|s| s.to_string()),
             account_created_date: match self.account_created_date.as_option() {
                 Some(v) => {
                     ::buffa::MessageField::<
@@ -238,8 +238,8 @@ impl<'a> ::buffa::ViewEncode<'a> for DBUserView<'a> {
         if let Some(ref v) = self.last_name {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
-        if !self.discord_id.is_empty() {
-            size += 1u64 + ::buffa::types::string_encoded_len(&self.discord_id) as u64;
+        if let Some(ref v) = self.discord_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         if self.account_created_date.is_set() {
             let __slot = __cache.reserve();
@@ -292,8 +292,8 @@ impl<'a> ::buffa::ViewEncode<'a> for DBUserView<'a> {
         if let Some(ref v) = self.last_name {
             ::buffa::types::put_string_field(4u32, v, buf);
         }
-        if !self.discord_id.is_empty() {
-            ::buffa::types::put_string_field(5u32, &self.discord_id, buf);
+        if let Some(ref v) = self.discord_id {
+            ::buffa::types::put_string_field(5u32, v, buf);
         }
         if self.account_created_date.is_set() {
             ::buffa::types::put_len_delimited_header(
@@ -356,8 +356,8 @@ impl<'__a> ::serde::Serialize for DBUserView<'__a> {
         if let ::core::option::Option::Some(__v) = self.last_name {
             __map.serialize_entry("lastName", __v)?;
         }
-        if !::buffa::json_helpers::skip_if::is_empty_str(self.discord_id) {
-            __map.serialize_entry("discordId", self.discord_id)?;
+        if let ::core::option::Option::Some(__v) = self.discord_id {
+            __map.serialize_entry("discordId", __v)?;
         }
         {
             if let ::core::option::Option::Some(__v) = self
@@ -508,7 +508,7 @@ impl DBUserOwnedView {
     }
     /// Field 5: `discord_id`
     #[must_use]
-    pub fn discord_id(&self) -> &'_ str {
+    pub fn discord_id(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().discord_id
     }
     /// Field 6: `account_created_date`
@@ -601,7 +601,11 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for DBUserView<'a> {
                     self.last_name.unwrap_or(""),
                 )
             }
-            5u32 => ::buffa_descriptor::reflect::ValueRef::String(self.discord_id),
+            5u32 => {
+                ::buffa_descriptor::reflect::ValueRef::String(
+                    self.discord_id.unwrap_or(""),
+                )
+            }
             6u32 => {
                 ::buffa_descriptor::reflect::ValueRef::Message(
                     ::buffa_descriptor::reflect::ReflectCow::Borrowed(
@@ -636,7 +640,7 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for DBUserView<'a> {
             2u32 => !self.username.is_empty(),
             3u32 => !self.first_name.is_empty(),
             4u32 => self.last_name.is_some(),
-            5u32 => !self.discord_id.is_empty(),
+            5u32 => self.discord_id.is_some(),
             6u32 => self.account_created_date.is_set(),
             7u32 => self.account_modified_date.is_set(),
             8u32 => self.promotion != 0,

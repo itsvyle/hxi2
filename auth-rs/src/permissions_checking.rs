@@ -3,7 +3,8 @@
 
 pub fn get_route_from_public_url(url: &str) -> Option<&'static str> {
     match url {
-        "/auth.v2.AuthService/AddAPIUser" => return Some("/auth.v2.AuthService/AddAPIUser"),
+        "/auth.v2.AuthService/APILogin" => return Some("/auth.v2.AuthService/APILogin"),
+"/auth.v2.AuthService/AddAPIUser" => return Some("/auth.v2.AuthService/AddAPIUser"),
 "/auth.v2.AuthService/AddPassword" => return Some("/auth.v2.AuthService/AddPassword"),
 "/auth.v2.AuthService/CreateUser" => return Some("/auth.v2.AuthService/CreateUser"),
 "/api/login" | "/auth.v2.AuthService/DiscordLogin" => return Some("/auth.v2.AuthService/DiscordLogin"),
@@ -14,11 +15,13 @@ pub fn get_route_from_public_url(url: &str) -> Option<&'static str> {
 "/auth.v2.AuthService/GetCSRFToken" => return Some("/auth.v2.AuthService/GetCSRFToken"),
 "/auth.v2.AuthService/GetDevToken" => return Some("/auth.v2.AuthService/GetDevToken"),
 "/auth.v2.AuthService/GetJWTPublicKey" => return Some("/auth.v2.AuthService/GetJWTPublicKey"),
+"/auth.v2.AuthService/ListAPIUsers" => return Some("/auth.v2.AuthService/ListAPIUsers"),
 "/auth.v2.AuthService/ListUsers" => return Some("/auth.v2.AuthService/ListUsers"),
 "/logout" | "/auth.v2.AuthService/Logout" => return Some("/auth.v2.AuthService/Logout"),
 "/auth.v2.AuthService/PasswordLogin" => return Some("/auth.v2.AuthService/PasswordLogin"),
 "/auth.v2.AuthService/RemoveAPIUser" => return Some("/auth.v2.AuthService/RemoveAPIUser"),
 "/auth.v2.AuthService/RemovePassword" => return Some("/auth.v2.AuthService/RemovePassword"),
+"/auth.v2.AuthService/RenewAPIUserToken" => return Some("/auth.v2.AuthService/RenewAPIUserToken"),
 "/auth.v2.AuthService/RenewJWT" => return Some("/auth.v2.AuthService/RenewJWT"),
 "/auth.v2.AuthService/UpdateUser" => return Some("/auth.v2.AuthService/UpdateUser"),
 _ => None,
@@ -80,24 +83,27 @@ pub struct CompiledPermissions {
 impl CompiledPermissions {
     pub fn get_by_route(&self, route: &str) -> Option<&MethodPermissions> {
         match route {
-				"/auth.v2.AuthService/AddAPIUser" => return Some(&self.permissions[0].1),
-				"/auth.v2.AuthService/AddPassword" => return Some(&self.permissions[1].1),
-				"/auth.v2.AuthService/CreateUser" => return Some(&self.permissions[2].1),
-				"/auth.v2.AuthService/DiscordLogin" => return Some(&self.permissions[3].1),
-				"/auth.v2.AuthService/DiscordLogin/api/discord_callback" => return Some(&self.permissions[4].1),
-				"/auth.v2.AuthService/FrontendIndex" => return Some(&self.permissions[5].1),
-				"/auth.v2.AuthService/FrontendIndex/dist/loginv2.bundle.css" => return Some(&self.permissions[6].1),
-				"/auth.v2.AuthService/FrontendIndex/dist/loginv2.bundle.js" => return Some(&self.permissions[7].1),
-				"/auth.v2.AuthService/GetCSRFToken" => return Some(&self.permissions[8].1),
-				"/auth.v2.AuthService/GetDevToken" => return Some(&self.permissions[9].1),
-				"/auth.v2.AuthService/GetJWTPublicKey" => return Some(&self.permissions[10].1),
-				"/auth.v2.AuthService/ListUsers" => return Some(&self.permissions[11].1),
-				"/auth.v2.AuthService/Logout" => return Some(&self.permissions[12].1),
-				"/auth.v2.AuthService/PasswordLogin" => return Some(&self.permissions[13].1),
-				"/auth.v2.AuthService/RemoveAPIUser" => return Some(&self.permissions[14].1),
-				"/auth.v2.AuthService/RemovePassword" => return Some(&self.permissions[15].1),
-				"/auth.v2.AuthService/RenewJWT" => return Some(&self.permissions[16].1),
-				"/auth.v2.AuthService/UpdateUser" => return Some(&self.permissions[17].1),
+				"/auth.v2.AuthService/APILogin" => return Some(&self.permissions[0].1),
+				"/auth.v2.AuthService/AddAPIUser" => return Some(&self.permissions[1].1),
+				"/auth.v2.AuthService/AddPassword" => return Some(&self.permissions[2].1),
+				"/auth.v2.AuthService/CreateUser" => return Some(&self.permissions[3].1),
+				"/auth.v2.AuthService/DiscordLogin" => return Some(&self.permissions[4].1),
+				"/auth.v2.AuthService/DiscordLogin/api/discord_callback" => return Some(&self.permissions[5].1),
+				"/auth.v2.AuthService/FrontendIndex" => return Some(&self.permissions[6].1),
+				"/auth.v2.AuthService/FrontendIndex/dist/loginv2.bundle.css" => return Some(&self.permissions[7].1),
+				"/auth.v2.AuthService/FrontendIndex/dist/loginv2.bundle.js" => return Some(&self.permissions[8].1),
+				"/auth.v2.AuthService/GetCSRFToken" => return Some(&self.permissions[9].1),
+				"/auth.v2.AuthService/GetDevToken" => return Some(&self.permissions[10].1),
+				"/auth.v2.AuthService/GetJWTPublicKey" => return Some(&self.permissions[11].1),
+				"/auth.v2.AuthService/ListAPIUsers" => return Some(&self.permissions[12].1),
+				"/auth.v2.AuthService/ListUsers" => return Some(&self.permissions[13].1),
+				"/auth.v2.AuthService/Logout" => return Some(&self.permissions[14].1),
+				"/auth.v2.AuthService/PasswordLogin" => return Some(&self.permissions[15].1),
+				"/auth.v2.AuthService/RemoveAPIUser" => return Some(&self.permissions[16].1),
+				"/auth.v2.AuthService/RemovePassword" => return Some(&self.permissions[17].1),
+				"/auth.v2.AuthService/RenewAPIUserToken" => return Some(&self.permissions[18].1),
+				"/auth.v2.AuthService/RenewJWT" => return Some(&self.permissions[19].1),
+				"/auth.v2.AuthService/UpdateUser" => return Some(&self.permissions[20].1),
             _ => None,
         }
     }
@@ -106,6 +112,20 @@ impl CompiledPermissions {
 pub fn get_compiled_permissions() -> &'static CompiledPermissions {
     static INSTANCE: CompiledPermissions = CompiledPermissions {
         permissions: &[
+            ("/auth.v2.AuthService/APILogin", MethodPermissions {
+                allow_roles: &[
+					Permission::PERMISSION_ADMIN,
+                ],
+                is_public: true,
+                public_url: None,
+                compiled_permissions_bitfield: 2,
+                csrf_token_header: Some("X-CSRF-Token"),
+                csrf_token_cookie: Some("csrf_token"),
+                response_cors_headers: None,
+                enforce_csrf: false,
+                is_frontend: false,
+                frontend_static_file: None,
+            }),
             ("/auth.v2.AuthService/AddAPIUser", MethodPermissions {
                 allow_roles: &[
 					Permission::PERMISSION_ADMIN,
@@ -264,6 +284,21 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 is_frontend: false,
                 frontend_static_file: None,
             }),
+            ("/auth.v2.AuthService/ListAPIUsers", MethodPermissions {
+                allow_roles: &[
+					Permission::PERMISSION_ADMIN,
+					Permission::PERMISSION_ADMIN,
+                ],
+                is_public: false,
+                public_url: None,
+                compiled_permissions_bitfield: 2,
+                csrf_token_header: Some("X-CSRF-Token"),
+                csrf_token_cookie: Some("csrf_token"),
+                response_cors_headers: None,
+                enforce_csrf: false,
+                is_frontend: false,
+                frontend_static_file: None,
+            }),
             ("/auth.v2.AuthService/ListUsers", MethodPermissions {
                 allow_roles: &[
 					Permission::PERMISSION_ADMIN,
@@ -330,6 +365,21 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 is_public: false,
                 public_url: None,
                 compiled_permissions_bitfield: 66,
+                csrf_token_header: Some("X-CSRF-Token"),
+                csrf_token_cookie: Some("csrf_token"),
+                response_cors_headers: None,
+                enforce_csrf: false,
+                is_frontend: false,
+                frontend_static_file: None,
+            }),
+            ("/auth.v2.AuthService/RenewAPIUserToken", MethodPermissions {
+                allow_roles: &[
+					Permission::PERMISSION_ADMIN,
+					Permission::PERMISSION_ADMIN,
+                ],
+                is_public: false,
+                public_url: None,
+                compiled_permissions_bitfield: 2,
                 csrf_token_header: Some("X-CSRF-Token"),
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,

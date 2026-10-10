@@ -201,10 +201,9 @@ pub struct DBUser {
     #[serde(
         rename = "discordId",
         alias = "discord_id",
-        with = "::buffa::json_helpers::proto_string",
-        skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_str"
+        skip_serializing_if = "::core::option::Option::is_none"
     )]
-    pub discord_id: ::buffa::alloc::string::String,
+    pub discord_id: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 6: `account_created_date`
     #[serde(
         rename = "accountCreatedDate",
@@ -293,6 +292,16 @@ impl DBUser {
         self.last_name = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::discord_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_discord_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.discord_id = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(DBUser);
 impl ::buffa_descriptor::reflect::ReflectMessage for DBUser {
@@ -321,7 +330,11 @@ impl ::buffa_descriptor::reflect::ReflectMessage for DBUser {
                     self.last_name.as_deref().unwrap_or(""),
                 )
             }
-            5u32 => ::buffa_descriptor::reflect::ValueRef::String(&self.discord_id),
+            5u32 => {
+                ::buffa_descriptor::reflect::ValueRef::String(
+                    self.discord_id.as_deref().unwrap_or(""),
+                )
+            }
             6u32 => {
                 ::buffa_descriptor::reflect::ValueRef::Message(
                     ::buffa_descriptor::reflect::Reflectable::reflect(
@@ -356,7 +369,7 @@ impl ::buffa_descriptor::reflect::ReflectMessage for DBUser {
             2u32 => !self.username.is_empty(),
             3u32 => !self.first_name.is_empty(),
             4u32 => self.last_name.is_some(),
-            5u32 => !self.discord_id.is_empty(),
+            5u32 => self.discord_id.is_some(),
             6u32 => self.account_created_date.is_set(),
             7u32 => self.account_modified_date.is_set(),
             8u32 => self.promotion != 0,
@@ -452,8 +465,8 @@ impl ::buffa::Message for DBUser {
         if let Some(ref v) = self.last_name {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
-        if !self.discord_id.is_empty() {
-            size += 1u64 + ::buffa::types::string_encoded_len(&self.discord_id) as u64;
+        if let Some(ref v) = self.discord_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         if self.account_created_date.is_set() {
             let __slot = __cache.reserve();
@@ -505,8 +518,8 @@ impl ::buffa::Message for DBUser {
         if let Some(ref v) = self.last_name {
             ::buffa::types::put_string_field(4u32, v, buf);
         }
-        if !self.discord_id.is_empty() {
-            ::buffa::types::put_string_field(5u32, &self.discord_id, buf);
+        if let Some(ref v) = self.discord_id {
+            ::buffa::types::put_string_field(5u32, v, buf);
         }
         if self.account_created_date.is_set() {
             ::buffa::types::put_len_delimited_header(
@@ -587,7 +600,12 @@ impl ::buffa::Message for DBUser {
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                ::buffa::types::merge_string(&mut self.discord_id, buf)?;
+                ::buffa::types::merge_string(
+                    self
+                        .discord_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
             }
             6u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -651,7 +669,7 @@ impl ::buffa::Message for DBUser {
         self.username.clear();
         self.first_name.clear();
         self.last_name = ::core::option::Option::None;
-        self.discord_id.clear();
+        self.discord_id = ::core::option::Option::None;
         self.account_created_date = ::buffa::MessageField::none();
         self.account_modified_date = ::buffa::MessageField::none();
         self.promotion = 0i32;

@@ -28,8 +28,10 @@ pub struct SmallDataView<'a> {
         'a,
         ::buffa::EnumValue<super::super::Attribute>,
     >,
-    /// Field 9: `is_api_token`
-    pub is_api_token: bool,
+    /// Field 9: `api_token_data`
+    pub api_token_data: ::buffa::MessageFieldView<
+        super::super::__buffa::view::small_data::APITokenDataView<'a>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for SmallDataView<'a> {
@@ -135,9 +137,23 @@ impl<'a> ::buffa::MessageView<'a> for SmallDataView<'a> {
             9u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::Varint,
+                    ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.is_api_token = ::buffa::types::decode_bool(&mut cur)?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.api_token_data.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.api_token_data = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::small_data::APITokenDataView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
             }
             8u32 => {
                 if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
@@ -238,7 +254,15 @@ impl<'a> ::buffa::MessageView<'a> for SmallDataView<'a> {
             roles: self.roles.to_vec(),
             attributes: self.attributes,
             attribute_list: self.attribute_list.to_vec(),
-            is_api_token: self.is_api_token,
+            api_token_data: match self.api_token_data.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::small_data::APITokenData,
+                        ::buffa::Inline<super::super::small_data::APITokenData>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -284,8 +308,13 @@ impl<'a> ::buffa::ViewEncode<'a> for SmallDataView<'a> {
                 .sum::<u64>();
             size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
         }
-        if self.is_api_token {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        if self.api_token_data.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.api_token_data.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
         if self.attributes != 0i64 {
             size += 1u64 + ::buffa::types::int64_encoded_len(self.attributes) as u64;
@@ -346,8 +375,13 @@ impl<'a> ::buffa::ViewEncode<'a> for SmallDataView<'a> {
                 ::buffa::types::encode_int32(v.to_i32(), buf);
             }
         }
-        if self.is_api_token {
-            ::buffa::types::put_bool_field(9u32, self.is_api_token, buf);
+        if self.api_token_data.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                9u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.api_token_data.write_to(__cache, buf);
         }
         if self.attributes != 0i64 {
             ::buffa::types::put_int64_field(10u32, self.attributes, buf);
@@ -440,8 +474,10 @@ impl<'__a> ::serde::Serialize for SmallDataView<'__a> {
                     &::buffa::json_helpers::EnumSeqJson(&self.attribute_list),
                 )?;
         }
-        if self.is_api_token {
-            __map.serialize_entry("isApiToken", &self.is_api_token)?;
+        {
+            if let ::core::option::Option::Some(__v) = self.api_token_data.as_option() {
+                __map.serialize_entry("apiTokenData", __v)?;
+            }
         }
         __map.end()
     }
@@ -592,10 +628,14 @@ impl SmallDataOwnedView {
     ) -> &::buffa::RepeatedView<'_, ::buffa::EnumValue<super::super::Attribute>> {
         &self.0.reborrow().attribute_list
     }
-    /// Field 9: `is_api_token`
+    /// Field 9: `api_token_data`
     #[must_use]
-    pub fn is_api_token(&self) -> bool {
-        self.0.reborrow().is_api_token
+    pub fn api_token_data(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::small_data::APITokenDataView<'_>,
+    > {
+        &self.0.reborrow().api_token_data
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<SmallDataView<'static>>>
@@ -661,7 +701,13 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for SmallDataView<'a> {
             8u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.roles),
             10u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.attributes),
             11u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.attribute_list),
-            9u32 => ::buffa_descriptor::reflect::ValueRef::Bool(self.is_api_token),
+            9u32 => {
+                ::buffa_descriptor::reflect::ValueRef::Message(
+                    ::buffa_descriptor::reflect::ReflectCow::Borrowed(
+                        &*self.api_token_data,
+                    ),
+                )
+            }
             _ => {
                 ::core::debug_assert!(
                     false,
@@ -684,7 +730,7 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for SmallDataView<'a> {
             8u32 => !::buffa::RepeatedView::is_empty(&self.roles),
             10u32 => self.attributes != 0,
             11u32 => !::buffa::RepeatedView::is_empty(&self.attribute_list),
-            9u32 => self.is_api_token,
+            9u32 => self.api_token_data.is_set(),
             _ => false,
         }
     }
@@ -748,6 +794,367 @@ impl<'a> SmallDataView<'a> {
                         "generated view type is registered in the embedded descriptor pool",
                     )
             })
+    }
+}
+pub mod small_data {
+    #[allow(unused_imports)]
+    use super::*;
+    #[derive(Clone, Debug, Default)]
+    pub struct APITokenDataView<'a> {
+        /// Field 1: `token_id`
+        pub token_id: i64,
+        pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+    }
+    impl<'a> ::buffa::MessageView<'a> for APITokenDataView<'a> {
+        type Owned = super::super::super::small_data::APITokenData;
+        fn decode_view(
+            buf: &'a [u8],
+        ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+            let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+            let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+            <Self as ::buffa::MessageView>::decode_view_ctx(
+                buf,
+                ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                    .with_element_memory(&__elem),
+            )
+        }
+        fn decode_view_with_ctx(
+            buf: &'a [u8],
+            ctx: ::buffa::DecodeContext<'_>,
+        ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+            <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+        }
+        #[inline]
+        fn merge_view_field(
+            &mut self,
+            tag: ::buffa::encoding::Tag,
+            cur: &'a [u8],
+            before_tag: &'a [u8],
+            ctx: ::buffa::DecodeContext<'_>,
+        ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+            let _ = ctx;
+            #[allow(unused_variables)]
+            let view = self;
+            let mut cur = cur;
+            match tag.field_number() {
+                1u32 => {
+                    ::buffa::encoding::check_wire_type(
+                        tag,
+                        ::buffa::encoding::WireType::Varint,
+                    )?;
+                    view.token_id = ::buffa::types::decode_int64(&mut cur)?;
+                }
+                _ => {
+                    ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                    let span_len = before_tag.len() - cur.len();
+                    view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+                }
+            }
+            ::core::result::Result::Ok(cur)
+        }
+        fn to_owned_message(
+            &self,
+        ) -> ::core::result::Result<
+            super::super::super::small_data::APITokenData,
+            ::buffa::DecodeError,
+        > {
+            self.to_owned_from_source(None)
+        }
+        #[allow(clippy::useless_conversion, clippy::needless_update)]
+        fn to_owned_from_source(
+            &self,
+            __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+        ) -> ::core::result::Result<
+            super::super::super::small_data::APITokenData,
+            ::buffa::DecodeError,
+        > {
+            #[allow(unused_imports)]
+            use ::buffa::alloc::string::ToString as _;
+            let _ = __buffa_src;
+            ::core::result::Result::Ok(super::super::super::small_data::APITokenData {
+                token_id: self.token_id,
+                __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+                ..::core::default::Default::default()
+            })
+        }
+    }
+    impl<'a> ::buffa::ViewEncode<'a> for APITokenDataView<'a> {
+        #[allow(clippy::needless_borrow, clippy::let_and_return)]
+        fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+            #[allow(unused_imports)]
+            use ::buffa::Enumeration as _;
+            let mut size = 0u64;
+            if self.token_id != 0i64 {
+                size += 1u64 + ::buffa::types::int64_encoded_len(self.token_id) as u64;
+            }
+            size += self.__buffa_unknown_fields.encoded_len() as u64;
+            ::buffa::saturate_size(size)
+        }
+        #[allow(clippy::needless_borrow)]
+        fn write_to(
+            &self,
+            _cache: &mut ::buffa::SizeCache,
+            buf: &mut impl ::buffa::EncodeSink,
+        ) {
+            #[allow(unused_imports)]
+            use ::buffa::Enumeration as _;
+            if self.token_id != 0i64 {
+                ::buffa::types::put_int64_field(1u32, self.token_id, buf);
+            }
+            self.__buffa_unknown_fields.write_to(buf);
+        }
+    }
+    /// Serializes this view as protobuf JSON.
+    ///
+    /// Implicit-presence fields with default values are omitted, `required`
+    /// fields are always emitted, explicit-presence (`optional`) fields are
+    /// emitted only when set, bytes fields are base64-encoded, and enum
+    /// values are their proto name strings.
+    ///
+    /// This impl uses `serialize_map(None)` because the number of emitted
+    /// fields depends on default-omission rules; serializers that require
+    /// known map lengths (e.g. `bincode`) will return a runtime error.
+    /// Use the owned message type for those formats.
+    impl<'__a> ::serde::Serialize for APITokenDataView<'__a> {
+        fn serialize<__S: ::serde::Serializer>(
+            &self,
+            __s: __S,
+        ) -> ::core::result::Result<__S::Ok, __S::Error> {
+            use ::serde::ser::SerializeMap as _;
+            let mut __map = __s.serialize_map(::core::option::Option::None)?;
+            if !::buffa::json_helpers::skip_if::is_zero_i64(&self.token_id) {
+                __map
+                    .serialize_entry(
+                        "tokenId",
+                        &::buffa::json_helpers::ProtoJson(&self.token_id),
+                    )?;
+            }
+            __map.end()
+        }
+    }
+    impl<'a> ::buffa::MessageName for APITokenDataView<'a> {
+        const PACKAGE: &'static str = "auth.v2";
+        const NAME: &'static str = "SmallData.APITokenData";
+        const FULL_NAME: &'static str = "auth.v2.SmallData.APITokenData";
+        const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.SmallData.APITokenData";
+    }
+    ::buffa::impl_default_view_instance!(APITokenDataView);
+    ::buffa::impl_view_reborrow!(APITokenDataView);
+    /** Self-contained, `'static` owned view of a `APITokenData` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`APITokenDataView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`APITokenDataView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+    #[derive(Clone, Debug)]
+    pub struct APITokenDataOwnedView(::buffa::OwnedView<APITokenDataView<'static>>);
+    impl APITokenDataOwnedView {
+        /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+        ///
+        /// The view borrows directly from the buffer's data; the buffer is
+        /// retained inside the returned handle.
+        ///
+        /// # Errors
+        ///
+        /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+        /// protobuf data.
+        pub fn decode(
+            bytes: ::buffa::bytes::Bytes,
+        ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+            ::core::result::Result::Ok(
+                APITokenDataOwnedView(::buffa::OwnedView::decode(bytes)?),
+            )
+        }
+        /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+        /// max message size).
+        ///
+        /// # Errors
+        ///
+        /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+        /// exceeds the configured limits.
+        pub fn decode_with_options(
+            bytes: ::buffa::bytes::Bytes,
+            opts: &::buffa::DecodeOptions,
+        ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+            ::core::result::Result::Ok(
+                APITokenDataOwnedView(
+                    ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+                ),
+            )
+        }
+        /// Build from an owned message via an encode → decode round-trip.
+        ///
+        /// # Errors
+        ///
+        /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+        /// message's encoded size exceeds the 2 GiB protobuf limit, or
+        /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+        /// somehow invalid (should not happen for well-formed messages).
+        pub fn from_owned(
+            msg: &super::super::super::small_data::APITokenData,
+        ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+            ::core::result::Result::Ok(
+                APITokenDataOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            )
+        }
+        /// Borrow the full [`APITokenDataView`] with its lifetime tied to `&self`.
+        #[must_use]
+        pub fn view(&self) -> &APITokenDataView<'_> {
+            self.0.reborrow()
+        }
+        /// Convert to the owned message type.
+        ///
+        /// Infallible: this type's constructors wire-decode their
+        /// buffer, and a view produced by wire decoding always
+        /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+        /// whose contract also governs handles converted from a raw
+        /// [`::buffa::OwnedView`].
+        #[must_use]
+        pub fn to_owned_message(&self) -> super::super::super::small_data::APITokenData {
+            self.0.to_owned_message()
+        }
+        /// The underlying bytes buffer.
+        #[must_use]
+        pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+            self.0.bytes()
+        }
+        /// Consume the handle, returning the underlying bytes buffer.
+        #[must_use]
+        pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+            self.0.into_bytes()
+        }
+        /// Field 1: `token_id`
+        #[must_use]
+        pub fn token_id(&self) -> i64 {
+            self.0.reborrow().token_id
+        }
+    }
+    impl ::core::convert::From<::buffa::OwnedView<APITokenDataView<'static>>>
+    for APITokenDataOwnedView {
+        fn from(inner: ::buffa::OwnedView<APITokenDataView<'static>>) -> Self {
+            APITokenDataOwnedView(inner)
+        }
+    }
+    impl ::core::convert::From<APITokenDataOwnedView>
+    for ::buffa::OwnedView<APITokenDataView<'static>> {
+        fn from(wrapper: APITokenDataOwnedView) -> Self {
+            wrapper.0
+        }
+    }
+    impl ::core::convert::AsRef<::buffa::OwnedView<APITokenDataView<'static>>>
+    for APITokenDataOwnedView {
+        fn as_ref(&self) -> &::buffa::OwnedView<APITokenDataView<'static>> {
+            &self.0
+        }
+    }
+    impl ::buffa::HasMessageView for super::super::super::small_data::APITokenData {
+        type View<'a> = APITokenDataView<'a>;
+        type ViewHandle = APITokenDataOwnedView;
+    }
+    impl ::serde::Serialize for APITokenDataOwnedView {
+        fn serialize<__S: ::serde::Serializer>(
+            &self,
+            __s: __S,
+        ) -> ::core::result::Result<__S::Ok, __S::Error> {
+            ::serde::Serialize::serialize(&self.0, __s)
+        }
+    }
+    impl<'a> ::buffa_descriptor::reflect::ReflectMessage for APITokenDataView<'a> {
+        fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
+            super::super::super::__buffa::reflect::descriptor_pool()
+                .message(Self::__buffa_reflect_message_index())
+        }
+        fn pool(
+            &self,
+        ) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
+            super::super::super::__buffa::reflect::descriptor_pool()
+        }
+        fn get(
+            &self,
+            field: &::buffa_descriptor::FieldDescriptor,
+        ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+            #[allow(unused_imports)]
+            use ::buffa::Enumeration as _;
+            match field.number() {
+                1u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.token_id),
+                _ => {
+                    ::core::debug_assert!(
+                        false,
+                        "field number {} is not a member of this view's reflect get()",
+                        field.number(),
+                    );
+                    ::buffa_descriptor::reflect::ValueRef::Bool(false)
+                }
+            }
+        }
+        fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
+            match field.number() {
+                1u32 => self.token_id != 0,
+                _ => false,
+            }
+        }
+        fn for_each_set(
+            &self,
+            f: &mut dyn ::core::ops::FnMut(
+                &::buffa_descriptor::FieldDescriptor,
+                ::buffa_descriptor::reflect::ValueRef<'_>,
+            ),
+        ) {
+            let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(
+                self,
+            );
+            for fd in md.fields() {
+                if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
+                    f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
+                }
+            }
+        }
+        fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
+            let bytes = ::buffa::ViewEncode::encode_to_vec(self);
+            let options = ::buffa::DecodeOptions::new()
+                .with_element_memory_limit(
+                    bytes
+                        .len()
+                        .saturating_mul(128)
+                        .max(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT),
+                )
+                .with_unknown_field_limit(
+                    bytes.len().max(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT),
+                );
+            ::buffa_descriptor::reflect::DynamicMessage::decode_with_options(
+                    ::buffa::alloc::sync::Arc::clone(
+                        super::super::super::__buffa::reflect::descriptor_pool(),
+                    ),
+                    Self::__buffa_reflect_message_index(),
+                    &bytes,
+                    &options,
+                )
+                .expect("view re-encodes to bytes decodable against its own descriptor")
+        }
+    }
+    impl<'a> ::buffa_descriptor::reflect::ReflectElement for APITokenDataView<'a> {
+        fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
+            ::buffa_descriptor::reflect::ValueRef::Message(
+                ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
+            )
+        }
+    }
+    impl<'a> APITokenDataView<'a> {
+        /// Memoized `MessageIndex` for this view's message type, resolved
+        /// once against the package's embedded descriptor pool. An inherent
+        /// associated fn (not a free fn) so sibling views in the same module
+        /// do not collide.
+        #[doc(hidden)]
+        fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
+            static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
+            *IDX
+                .get_or_init(|| {
+                    super::super::super::__buffa::reflect::descriptor_pool()
+                        .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
+                        .expect(
+                            "generated view type is registered in the embedded descriptor pool",
+                        )
+                })
+        }
     }
 }
 #[derive(Clone, Debug, Default)]
