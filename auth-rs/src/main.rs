@@ -60,7 +60,7 @@ async fn main() -> Result<()> {
 
     let discord_manager = DiscordLoginManager::new(login_manager.clone())?;
 
-    let api_login_manager = Arc::new(api_login::APILoginManager::new(login_manager.clone()));
+    let api_login_manager = Arc::new(api_login::APILoginManager::new(login_manager.clone()).await);
 
     let mut app = axum::Router::new()
         .merge(discord_manager.router())
@@ -82,14 +82,16 @@ async fn main() -> Result<()> {
         .fallback_service(connect.into_axum_service())
         .layer(
             ServiceBuilder::new()
-                .layer(axum::middleware::from_extractor::<RequireAuthMiddleware>())
+                .layer(axum::middleware::from_extractor_with_state::<
+                    RequireAuthMiddleware,
+                    _,
+                >(api_login_manager.clone()))
                 .layer(axum::middleware::from_fn(CsrfProtection::middleware))
                 .layer(TimeoutLayer::with_status_code(
                     http::StatusCode::REQUEST_TIMEOUT,
                     std::time::Duration::from_secs(5),
                 )),
         );
-
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", cfg.running_port))
         .await
         .context("bind TCP listener")?;

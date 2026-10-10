@@ -3,22 +3,71 @@ use hxi2_proto::{
     proto::auth::v2::{Attribute, Permission, small_data},
     utils::compile_bitfield,
 };
-use std::sync::Arc;
-use tracing::trace;
+use std::{
+    collections::HashSet,
+    sync::{Arc, RwLock},
+    time::Instant,
+};
+use tracing::instrument;
 
 use crate::{
     database::DbUserIdentifier,
     login_manager::{LoginManager, LoginResponse},
 };
 
-#[derive(Clone)]
-pub struct APILoginManager {
-    login_manager: Arc<LoginManager>,
+struct TokenCache {
+    valid_ids: HashSet<i64>,
+    last_update: Instant,
 }
 
+pub struct APILoginManager {
+    login_manager: Arc<LoginManager>,
+    cache: std::sync::RwLock<TokenCache>,
+}
+const VALID_IDS_REFRESH_INTERVAL: std::time::Duration = std::time::Duration::from_secs(60 * 5); // 5 minutes
+
 impl APILoginManager {
-    pub fn new(login_manager: Arc<LoginManager>) -> Self {
-        Self { login_manager }
+    pub async fn new(login_manager: Arc<LoginManager>) -> Self {
+        let r = Self {
+            login_manager,
+            cache: RwLock::new(TokenCache {
+                valid_ids: HashSet::new(),
+                last_update: Instant::now() - VALID_IDS_REFRESH_INTERVAL,
+            }),
+        };
+        r.refresh_valid_ids()
+            .await
+            .expect("Failed to refresh valid API token IDs");
+        r
+    }
+
+    #[instrument(skip(self), err)]
+    async fn refresh_valid_ids(&self) -> anyhow::Result<()> {
+        let db = crate::app_config::AppConfiguration::INSTANCE().db().await;
+        let valid_ids = db
+            .get_valid_api_token_ids()
+            .await
+            .context("Failed to fetch API user IDs")?;
+
+        let mut cache = self.cache.write().unwrap();
+        cache.valid_ids = valid_ids.into_iter().collect();
+        cache.last_update = Instant::now();
+
+        Ok(())
+    }
+
+    pub async fn check_valid_api_token_id(&self, id: i64) -> anyhow::Result<bool> {
+        {
+            let cache = self.cache.read().unwrap();
+            if cache.last_update.elapsed() <= VALID_IDS_REFRESH_INTERVAL {
+                return Ok(cache.valid_ids.contains(&id));
+            }
+        }
+
+        self.refresh_valid_ids().await?;
+
+        let cache = self.cache.read().unwrap();
+        Ok(cache.valid_ids.contains(&id))
     }
 
     pub async fn new_api_user(
@@ -84,6 +133,10 @@ impl APILoginManager {
             .await
             .context("Failed to insert/update API token")?;
 
+        self.refresh_valid_ids()
+            .await
+            .context("Failed to refresh valid API token IDs")?;
+
         Ok(new_token)
     }
 
@@ -128,6 +181,10 @@ impl APILoginManager {
         db.delete_api_token_by_user(user_identifier)
             .await
             .context("Failed to remove API token")?;
+
+        self.refresh_valid_ids()
+            .await
+            .context("Failed to refresh valid API token IDs")?;
 
         Ok(())
     }

@@ -456,6 +456,17 @@ impl DatabaseManager {
         Ok(())
     }
 
+    pub async fn get_valid_api_token_ids(&self) -> Result<Vec<i64>, DbError> {
+        let now = Utc::now();
+        let token_ids =
+            sqlx::query_scalar::<_, i64>("SELECT id FROM API_TOKENS WHERE expires_at > ?")
+                .bind(now)
+                .fetch_all(&self.pool)
+                .await
+                .map_err(DbError::Sqlx)?;
+        Ok(token_ids)
+    }
+
     pub async fn get_potential_api_token(
         &self,
         user_identifier: &DbUserIdentifier,

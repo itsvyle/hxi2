@@ -1,12 +1,15 @@
+use std::sync::Arc;
+
 use anyhow::Result;
 use axum_extra::extract::cookie::Cookie;
 use connectrpc::ConnectError;
 use http::header::ACCEPT;
 use hxi2_proto::proto::auth::v2::JwtClaims;
 
-use axum::extract::FromRequestParts;
+use axum::extract::{FromRef, FromRequestParts};
 use axum::response::{IntoResponse, Response};
 
+use crate::api_login;
 use crate::permissions_checking::{self, MethodPermissionsOptionExt};
 
 #[derive(Debug, Clone)]
@@ -79,12 +82,13 @@ pub struct RequireAuthMiddleware;
 impl<S> FromRequestParts<S> for RequireAuthMiddleware
 where
     S: Send + Sync,
+    Arc<api_login::APILoginManager>: FromRef<S>,
 {
     type Rejection = Response;
 
     async fn from_request_parts(
         parts: &mut http::request::Parts,
-        _: &S,
+        state: &S,
     ) -> Result<Self, Self::Rejection> {
         let route =
             permissions_checking::get_route_from_public_url(parts.uri.path()).ok_or_else(|| {
@@ -130,15 +134,27 @@ where
             None
         };
 
-        if !is_public
-            && let Some(ref c) = claims
-            && !perms.check_permissions(c.data.permissions)
-        {
-            return Err(to_http_error(
-                ConnectError::permission_denied("insufficient permissions"),
-                &parts.headers,
-                Some(perms),
-            ));
+        if !is_public && let Some(ref c) = claims {
+            if !perms.check_permissions(c.data.permissions) {
+                return Err(to_http_error(
+                    ConnectError::permission_denied("insufficient permissions"),
+                    &parts.headers,
+                    Some(perms),
+                ));
+            } else if c.data.api_token_data.is_set() {
+                let api_login_manager = Arc::<api_login::APILoginManager>::from_ref(state);
+                if !api_login_manager
+                    .check_valid_api_token_id(c.data.api_token_data.token_id)
+                    .await
+                    .unwrap_or(false)
+                {
+                    return Err(to_http_error(
+                        ConnectError::permission_denied("invalid API token"),
+                        &parts.headers,
+                        Some(perms),
+                    ));
+                }
+            }
         }
 
         parts.extensions.insert(ReqAuthState { claims });
