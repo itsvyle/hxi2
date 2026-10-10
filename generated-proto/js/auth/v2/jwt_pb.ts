@@ -8,13 +8,15 @@ import type { Timestamp } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
 import type { Permission } from "./permissions_pb";
 import { file_auth_v2_permissions } from "./permissions_pb";
+import type { Attribute } from "./auth_data_pb";
+import { file_auth_v2_auth_data } from "./auth_data_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file auth/v2/jwt.proto.
  */
 export const file_auth_v2_jwt: GenFile = /*@__PURE__*/
-  fileDesc("ChFhdXRoL3YyL2p3dC5wcm90bxIHYXV0aC52MiKOAgoJU21hbGxEYXRhEg8KB3VzZXJfaWQYASABKAMSEAoIdXNlcm5hbWUYAiABKAkSEgoKZmlyc3RfbmFtZRgDIAEoCRIWCglsYXN0X25hbWUYBCABKAlIAIgBARITCgtwZXJtaXNzaW9ucxgFIAEoAxIRCglwcm9tb3Rpb24YBiABKAUSMwoKZXhwaXJhdGlvbhgHIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBIAYgBARIiCgVyb2xlcxgIIAMoDjITLmF1dGgudjIuUGVybWlzc2lvbhIUCgxpc19hcGlfdG9rZW4YCSABKAhCDAoKX2xhc3RfbmFtZUINCgtfZXhwaXJhdGlvbiLdAQoJSnd0Q2xhaW1zEgsKA2lzcxgBIAEoCRILCgNzdWIYAiABKAkSCwoDYXVkGAMgASgJEgsKA2V4cBgEIAEoAxILCgNuYmYYBSABKAMSCwoDaWF0GAYgASgDEgsKA2p0aRgHIAEoCRIRCgl0ZW1wb3JhcnkYCCABKAgSJAoXdGVtcG9yYXJ5X3JlY2hlY2tfYWZ0ZXIYCSABKANIAIgBARIgCgRkYXRhGAogASgLMhIuYXV0aC52Mi5TbWFsbERhdGFCGgoYX3RlbXBvcmFyeV9yZWNoZWNrX2FmdGVyIhUKE0dldENTUkZUb2tlblJlcXVlc3QiFgoUR2V0Q1NSRlRva2VuUmVzcG9uc2ViBnByb3RvMw", [file_google_protobuf_timestamp, file_auth_v2_permissions]);
+  fileDesc("ChFhdXRoL3YyL2p3dC5wcm90bxIHYXV0aC52MiLOAgoJU21hbGxEYXRhEg8KB3VzZXJfaWQYASABKAMSEAoIdXNlcm5hbWUYAiABKAkSEgoKZmlyc3RfbmFtZRgDIAEoCRIWCglsYXN0X25hbWUYBCABKAlIAIgBARITCgtwZXJtaXNzaW9ucxgFIAEoAxIRCglwcm9tb3Rpb24YBiABKAUSMwoKZXhwaXJhdGlvbhgHIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBIAYgBARIiCgVyb2xlcxgIIAMoDjITLmF1dGgudjIuUGVybWlzc2lvbhISCgphdHRyaWJ1dGVzGAogASgDEioKDmF0dHJpYnV0ZV9saXN0GAsgAygOMhIuYXV0aC52Mi5BdHRyaWJ1dGUSFAoMaXNfYXBpX3Rva2VuGAkgASgIQgwKCl9sYXN0X25hbWVCDQoLX2V4cGlyYXRpb24i3QEKCUp3dENsYWltcxILCgNpc3MYASABKAkSCwoDc3ViGAIgASgJEgsKA2F1ZBgDIAEoCRILCgNleHAYBCABKAMSCwoDbmJmGAUgASgDEgsKA2lhdBgGIAEoAxILCgNqdGkYByABKAkSEQoJdGVtcG9yYXJ5GAggASgIEiQKF3RlbXBvcmFyeV9yZWNoZWNrX2FmdGVyGAkgASgDSACIAQESIAoEZGF0YRgKIAEoCzISLmF1dGgudjIuU21hbGxEYXRhQhoKGF90ZW1wb3JhcnlfcmVjaGVja19hZnRlciIVChNHZXRDU1JGVG9rZW5SZXF1ZXN0IhYKFEdldENTUkZUb2tlblJlc3BvbnNlYgZwcm90bzM", [file_google_protobuf_timestamp, file_auth_v2_permissions, file_auth_v2_auth_data]);
 
 /**
  * @generated from message auth.v2.SmallData
@@ -59,6 +61,16 @@ export type SmallData = Message<"auth.v2.SmallData"> & {
    * @generated from field: repeated auth.v2.Permission roles = 8;
    */
   roles: Permission[];
+
+  /**
+   * @generated from field: int64 attributes = 10;
+   */
+  attributes: bigint;
+
+  /**
+   * @generated from field: repeated auth.v2.Attribute attribute_list = 11;
+   */
+  attributeList: Attribute[];
 
   /**
    * @generated from field: bool is_api_token = 9;

@@ -106,6 +106,7 @@ pub struct DbUser {
     pub account_modified_date: DateTime<Utc>,
     pub promotion: i32,
     pub permissions: i64,
+    pub attributes: i64,
     pub is_api: bool,
 }
 
@@ -159,6 +160,7 @@ impl From<DbUser> for hxi2_proto::proto::auth::v2::DBUser {
             promotion: user.promotion,
             permissions: user.permissions,
             is_api: user.is_api,
+            attributes: user.attributes,
             __buffa_unknown_fields: Default::default(),
         }
     }
@@ -184,6 +186,7 @@ impl From<hxi2_proto::proto::auth::v2::DBUser> for DbUser {
                 .unwrap_or_default(),
             promotion: proto_user.promotion,
             permissions: proto_user.permissions,
+            attributes: proto_user.attributes,
             is_api: proto_user.is_api,
         }
     }
@@ -203,8 +206,8 @@ impl DatabaseManager {
 
         sqlx::query(
             r#"
-            INSERT INTO users (ID, username, first_name, last_name, discord_id, account_created_date, account_modified_date, promotion, permissions, is_api)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO users (ID, username, first_name, last_name, discord_id, account_created_date, account_modified_date, promotion, permissions, is_api, attributes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             "#,
         )
         .bind(user.id)
@@ -217,6 +220,7 @@ impl DatabaseManager {
         .bind(user.promotion)
         .bind(user.permissions)
         .bind(user.is_api)
+        .bind(user.attributes)
         .execute(&self.pool)
         .await?;
 
@@ -242,7 +246,7 @@ impl DatabaseManager {
         sqlx::query(
             r#"
             UPDATE users
-            SET first_name = ?, last_name = ?, discord_id = ?, account_modified_date = ?, promotion = ?, permissions = ?, username = ?, is_api = ?
+            SET first_name = ?, last_name = ?, discord_id = ?, account_modified_date = ?, promotion = ?, permissions = ?, username = ?, is_api = ?, attributes = ?
             WHERE ID = ?
             "#,
         )
@@ -255,6 +259,7 @@ impl DatabaseManager {
         .bind(&user.username)
         .bind(user.id)
         .bind(user.is_api)
+        .bind(user.attributes)
         .execute(&self.pool)
         .await?;
 

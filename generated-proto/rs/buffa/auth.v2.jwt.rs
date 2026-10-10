@@ -65,6 +65,21 @@ pub struct SmallData {
         skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_vec"
     )]
     pub roles: ::buffa::alloc::vec::Vec<::buffa::EnumValue<Permission>>,
+    /// Field 10: `attributes`
+    #[serde(
+        rename = "attributes",
+        with = "::buffa::json_helpers::int64",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_zero_i64"
+    )]
+    pub attributes: i64,
+    /// Field 11: `attribute_list`
+    #[serde(
+        rename = "attributeList",
+        alias = "attribute_list",
+        with = "::buffa::json_helpers::repeated_enum",
+        skip_serializing_if = "::buffa::json_helpers::skip_if::is_empty_vec"
+    )]
+    pub attribute_list: ::buffa::alloc::vec::Vec<::buffa::EnumValue<Attribute>>,
     /// Field 9: `is_api_token`
     #[serde(
         rename = "isApiToken",
@@ -88,6 +103,8 @@ impl ::core::fmt::Debug for SmallData {
             .field("promotion", &self.promotion)
             .field("expiration", &self.expiration)
             .field("roles", &self.roles)
+            .field("attributes", &self.attributes)
+            .field("attribute_list", &self.attribute_list)
             .field("is_api_token", &self.is_api_token)
             .finish()
     }
@@ -146,6 +163,8 @@ impl ::buffa_descriptor::reflect::ReflectMessage for SmallData {
                 )
             }
             8u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.roles),
+            10u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.attributes),
+            11u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.attribute_list),
             9u32 => ::buffa_descriptor::reflect::ValueRef::Bool(self.is_api_token),
             _ => {
                 ::core::debug_assert!(
@@ -167,6 +186,8 @@ impl ::buffa_descriptor::reflect::ReflectMessage for SmallData {
             6u32 => self.promotion != 0,
             7u32 => self.expiration.is_set(),
             8u32 => !self.roles.is_empty(),
+            10u32 => self.attributes != 0,
+            11u32 => !self.attribute_list.is_empty(),
             9u32 => self.is_api_token,
             _ => false,
         }
@@ -282,6 +303,17 @@ impl ::buffa::Message for SmallData {
         if self.is_api_token {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if self.attributes != 0i64 {
+            size += 1u64 + ::buffa::types::int64_encoded_len(self.attributes) as u64;
+        }
+        if !self.attribute_list.is_empty() {
+            let payload: u64 = self
+                .attribute_list
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -331,6 +363,20 @@ impl ::buffa::Message for SmallData {
         }
         if self.is_api_token {
             ::buffa::types::put_bool_field(9u32, self.is_api_token, buf);
+        }
+        if self.attributes != 0i64 {
+            ::buffa::types::put_int64_field(10u32, self.attributes, buf);
+        }
+        if !self.attribute_list.is_empty() {
+            let payload: u64 = self
+                .attribute_list
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            ::buffa::types::put_len_delimited_header(11u32, payload, buf);
+            for v in &self.attribute_list {
+                ::buffa::types::encode_int32(v.to_i32(), buf);
+            }
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -448,6 +494,51 @@ impl ::buffa::Message for SmallData {
                 )?;
                 self.is_api_token = ::buffa::types::decode_bool(buf)?;
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.attributes = ::buffa::types::decode_int64(buf)?;
+            }
+            11u32 => {
+                if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
+                    let len = ::buffa::encoding::decode_varint(buf)?;
+                    let len = usize::try_from(len)
+                        .map_err(|_| ::buffa::DecodeError::MessageTooLarge)?;
+                    if buf.remaining() < len {
+                        return ::core::result::Result::Err(
+                            ::buffa::DecodeError::UnexpectedEof,
+                        );
+                    }
+                    self.attribute_list.reserve(len);
+                    let mut limited = buf.take(len);
+                    while limited.has_remaining() {
+                        self.attribute_list
+                            .push(
+                                ::buffa::EnumValue::from(
+                                    ::buffa::types::decode_int32_packed(&mut limited)?,
+                                ),
+                            );
+                    }
+                    let leftover = limited.remaining();
+                    if leftover > 0 {
+                        limited.advance(leftover);
+                    }
+                } else if tag.wire_type() == ::buffa::encoding::WireType::Varint {
+                    self.attribute_list
+                        .push(
+                            ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                        );
+                } else {
+                    return ::core::result::Result::Err(
+                        ::buffa::encoding::wire_type_mismatch(
+                            tag,
+                            ::buffa::encoding::WireType::LengthDelimited,
+                        ),
+                    );
+                }
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -465,6 +556,8 @@ impl ::buffa::Message for SmallData {
         self.expiration = ::buffa::MessageField::none();
         self.roles.clear();
         self.is_api_token = false;
+        self.attributes = 0i64;
+        self.attribute_list.clear();
         self.__buffa_unknown_fields.clear();
     }
 }

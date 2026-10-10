@@ -33,6 +33,7 @@ impl APILoginManager {
             first_name: format!("API User {}", username),
             last_name: None,
             promotion: 0,
+            attributes: 0,
             account_created_date: chrono::Utc::now(),
             account_modified_date: chrono::Utc::now(),
         };

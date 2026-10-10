@@ -17,4 +17,13 @@ message DBUser {
     int32 promotion = 8;
     int64 permissions = 9;
     bool is_api = 10;
+    int64 attributes = 11;
+}
+
+enum Attribute {
+    ATTRIBUTE_UNSPECIFIED = 0;
+    ATTRIBUTE_CUBE = 1;
+    ATTRIBUTE_MPSI = 2;
+    ATTRIBUTE_PCSI = 3;
+    ATTRIBUTE_BCPST = 4;
 }

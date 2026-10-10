@@ -21,6 +21,13 @@ pub struct SmallDataView<'a> {
     >,
     /// Field 8: `roles`
     pub roles: ::buffa::RepeatedView<'a, ::buffa::EnumValue<super::super::Permission>>,
+    /// Field 10: `attributes`
+    pub attributes: i64,
+    /// Field 11: `attribute_list`
+    pub attribute_list: ::buffa::RepeatedView<
+        'a,
+        ::buffa::EnumValue<super::super::Attribute>,
+    >,
     /// Field 9: `is_api_token`
     pub is_api_token: bool,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
@@ -118,6 +125,13 @@ impl<'a> ::buffa::MessageView<'a> for SmallDataView<'a> {
                     }
                 }
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.attributes = ::buffa::types::decode_int64(&mut cur)?;
+            }
             9u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -140,6 +154,36 @@ impl<'a> ::buffa::MessageView<'a> for SmallDataView<'a> {
                     }
                 } else if tag.wire_type() == ::buffa::encoding::WireType::Varint {
                     view.roles
+                        .push(
+                            ::buffa::EnumValue::from(
+                                ::buffa::types::decode_int32(&mut cur)?,
+                            ),
+                        );
+                } else {
+                    return Err(
+                        ::buffa::encoding::wire_type_mismatch(
+                            tag,
+                            ::buffa::encoding::WireType::LengthDelimited,
+                        ),
+                    );
+                }
+            }
+            11u32 => {
+                if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
+                    let payload = ::buffa::types::borrow_bytes(&mut cur)?;
+                    view.attribute_list
+                        .reserve(::buffa::encoding::count_varints(payload));
+                    let mut pcur: &[u8] = payload;
+                    while !pcur.is_empty() {
+                        view.attribute_list
+                            .push(
+                                ::buffa::EnumValue::from(
+                                    ::buffa::types::decode_int32_packed(&mut pcur)?,
+                                ),
+                            );
+                    }
+                } else if tag.wire_type() == ::buffa::encoding::WireType::Varint {
+                    view.attribute_list
                         .push(
                             ::buffa::EnumValue::from(
                                 ::buffa::types::decode_int32(&mut cur)?,
@@ -192,6 +236,8 @@ impl<'a> ::buffa::MessageView<'a> for SmallDataView<'a> {
                 None => ::buffa::MessageField::none(),
             },
             roles: self.roles.to_vec(),
+            attributes: self.attributes,
+            attribute_list: self.attribute_list.to_vec(),
             is_api_token: self.is_api_token,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
@@ -240,6 +286,17 @@ impl<'a> ::buffa::ViewEncode<'a> for SmallDataView<'a> {
         }
         if self.is_api_token {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.attributes != 0i64 {
+            size += 1u64 + ::buffa::types::int64_encoded_len(self.attributes) as u64;
+        }
+        if !self.attribute_list.is_empty() {
+            let payload: u64 = self
+                .attribute_list
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -291,6 +348,20 @@ impl<'a> ::buffa::ViewEncode<'a> for SmallDataView<'a> {
         }
         if self.is_api_token {
             ::buffa::types::put_bool_field(9u32, self.is_api_token, buf);
+        }
+        if self.attributes != 0i64 {
+            ::buffa::types::put_int64_field(10u32, self.attributes, buf);
+        }
+        if !self.attribute_list.is_empty() {
+            let payload: u64 = self
+                .attribute_list
+                .iter()
+                .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
+                .sum::<u64>();
+            ::buffa::types::put_len_delimited_header(11u32, payload, buf);
+            for v in &self.attribute_list {
+                ::buffa::types::encode_int32(v.to_i32(), buf);
+            }
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -353,6 +424,20 @@ impl<'__a> ::serde::Serialize for SmallDataView<'__a> {
                 .serialize_entry(
                     "roles",
                     &::buffa::json_helpers::EnumSeqJson(&self.roles),
+                )?;
+        }
+        if !::buffa::json_helpers::skip_if::is_zero_i64(&self.attributes) {
+            __map
+                .serialize_entry(
+                    "attributes",
+                    &::buffa::json_helpers::ProtoJson(&self.attributes),
+                )?;
+        }
+        if !self.attribute_list.is_empty() {
+            __map
+                .serialize_entry(
+                    "attributeList",
+                    &::buffa::json_helpers::EnumSeqJson(&self.attribute_list),
                 )?;
         }
         if self.is_api_token {
@@ -495,6 +580,18 @@ impl SmallDataOwnedView {
     ) -> &::buffa::RepeatedView<'_, ::buffa::EnumValue<super::super::Permission>> {
         &self.0.reborrow().roles
     }
+    /// Field 10: `attributes`
+    #[must_use]
+    pub fn attributes(&self) -> i64 {
+        self.0.reborrow().attributes
+    }
+    /// Field 11: `attribute_list`
+    #[must_use]
+    pub fn attribute_list(
+        &self,
+    ) -> &::buffa::RepeatedView<'_, ::buffa::EnumValue<super::super::Attribute>> {
+        &self.0.reborrow().attribute_list
+    }
     /// Field 9: `is_api_token`
     #[must_use]
     pub fn is_api_token(&self) -> bool {
@@ -562,6 +659,8 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for SmallDataView<'a> {
                 )
             }
             8u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.roles),
+            10u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.attributes),
+            11u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.attribute_list),
             9u32 => ::buffa_descriptor::reflect::ValueRef::Bool(self.is_api_token),
             _ => {
                 ::core::debug_assert!(
@@ -583,6 +682,8 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for SmallDataView<'a> {
             6u32 => self.promotion != 0,
             7u32 => self.expiration.is_set(),
             8u32 => !::buffa::RepeatedView::is_empty(&self.roles),
+            10u32 => self.attributes != 0,
+            11u32 => !::buffa::RepeatedView::is_empty(&self.attribute_list),
             9u32 => self.is_api_token,
             _ => false,
         }

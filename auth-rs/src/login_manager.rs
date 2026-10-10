@@ -1,3 +1,4 @@
+use std::any::type_name;
 use std::sync::Arc;
 
 use anyhow::Context as _;
@@ -10,10 +11,10 @@ use axum_extra::extract::{
     cookie::{Cookie, SameSite},
 };
 use base64::prelude::*;
-use buffa::{Enumeration, MessageField};
+use buffa::MessageField;
 use buffa_types::Timestamp;
 use http::StatusCode;
-use hxi2_proto::proto::auth::v2::{Permission, SmallData};
+use hxi2_proto::proto::auth::v2::{Attribute, Permission, SmallData};
 use rand::RngExt;
 use tracing::{error, instrument, trace};
 
@@ -90,20 +91,26 @@ impl LoginManager {
         Self { signer, verifier }
     }
 
-    #[instrument(level = "trace", ret)]
-    pub fn roles_from_bitfield(bitfield: i64) -> Vec<Permission> {
-        let mut roles = Vec::new();
+    /// To move somewhere else, to be used more globally
+    #[instrument(level = "trace", fields(enum_type = %type_name::<T>()))]
+    pub fn retrieve_active_bitfields<T: buffa::Enumeration>(
+        bitfield: i64,
+    ) -> impl Iterator<Item = T> {
         let mut copy = bitfield;
-        while copy != 0 {
-            let index = copy.trailing_zeros();
-            if let Some(role) = Permission::from_i32(index as i32) {
-                roles.push(role);
-            } else {
-                trace!("Unknown role index {} in bitfield {}", index, bitfield);
+
+        std::iter::from_fn(move || {
+            while copy != 0 {
+                let index = copy.trailing_zeros();
+                copy &= copy - 1;
+
+                if let Some(role) = T::from_i32(index as i32) {
+                    return Some(role);
+                } else {
+                    trace!("Unknown index {} in bitfield {}", index, bitfield);
+                }
             }
-            copy &= copy - 1;
-        }
-        roles
+            None
+        })
     }
 
     fn small_data_from_user(&self, user: &DbUser) -> SmallData {
@@ -115,11 +122,14 @@ impl LoginManager {
             permissions: user.permissions,
             promotion: user.promotion,
             expiration: MessageField::none(),
-            roles: Self::roles_from_bitfield(user.permissions)
-                .iter()
-                .map(|p| (*p).into())
+            roles: Self::retrieve_active_bitfields::<Permission>(user.permissions)
+                .map(Into::into)
                 .collect(),
             is_api_token: user.is_api,
+            attributes: user.attributes,
+            attribute_list: Self::retrieve_active_bitfields::<Attribute>(user.attributes)
+                .map(Into::into)
+                .collect(),
             __buffa_unknown_fields: Default::default(),
         }
     }

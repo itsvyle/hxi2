@@ -2,8 +2,8 @@
 // @generated from file auth/v2/auth_data.proto (package auth.v2, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
 import type { Message } from "@bufbuild/protobuf";
@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file auth/v2/auth_data.proto.
  */
 export const file_auth_v2_auth_data: GenFile = /*@__PURE__*/
-  fileDesc("ChdhdXRoL3YyL2F1dGhfZGF0YS5wcm90bxIHYXV0aC52MiKhAgoGREJVc2VyEgoKAmlkGAEgASgDEhAKCHVzZXJuYW1lGAIgASgJEhIKCmZpcnN0X25hbWUYAyABKAkSFgoJbGFzdF9uYW1lGAQgASgJSACIAQESEgoKZGlzY29yZF9pZBgFIAEoCRI4ChRhY2NvdW50X2NyZWF0ZWRfZGF0ZRgGIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASOQoVYWNjb3VudF9tb2RpZmllZF9kYXRlGAcgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIRCglwcm9tb3Rpb24YCCABKAUSEwoLcGVybWlzc2lvbnMYCSABKAMSDgoGaXNfYXBpGAogASgIQgwKCl9sYXN0X25hbWViBnByb3RvMw", [file_google_protobuf_timestamp]);
+  fileDesc("ChdhdXRoL3YyL2F1dGhfZGF0YS5wcm90bxIHYXV0aC52MiK1AgoGREJVc2VyEgoKAmlkGAEgASgDEhAKCHVzZXJuYW1lGAIgASgJEhIKCmZpcnN0X25hbWUYAyABKAkSFgoJbGFzdF9uYW1lGAQgASgJSACIAQESEgoKZGlzY29yZF9pZBgFIAEoCRI4ChRhY2NvdW50X2NyZWF0ZWRfZGF0ZRgGIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASOQoVYWNjb3VudF9tb2RpZmllZF9kYXRlGAcgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIRCglwcm9tb3Rpb24YCCABKAUSEwoLcGVybWlzc2lvbnMYCSABKAMSDgoGaXNfYXBpGAogASgIEhIKCmF0dHJpYnV0ZXMYCyABKANCDAoKX2xhc3RfbmFtZSp3CglBdHRyaWJ1dGUSGQoVQVRUUklCVVRFX1VOU1BFQ0lGSUVEEAASEgoOQVRUUklCVVRFX0NVQkUQARISCg5BVFRSSUJVVEVfTVBTSRACEhIKDkFUVFJJQlVURV9QQ1NJEAMSEwoPQVRUUklCVVRFX0JDUFNUEARiBnByb3RvMw", [file_google_protobuf_timestamp]);
 
 /**
  * @generated from message auth.v2.DBUser
@@ -67,6 +67,11 @@ export type DBUser = Message<"auth.v2.DBUser"> & {
    * @generated from field: bool is_api = 10;
    */
   isApi: boolean;
+
+  /**
+   * @generated from field: int64 attributes = 11;
+   */
+  attributes: bigint;
 };
 
 /**
@@ -75,4 +80,40 @@ export type DBUser = Message<"auth.v2.DBUser"> & {
  */
 export const DBUserSchema: GenMessage<DBUser> = /*@__PURE__*/
   messageDesc(file_auth_v2_auth_data, 0);
+
+/**
+ * @generated from enum auth.v2.Attribute
+ */
+export enum Attribute {
+  /**
+   * @generated from enum value: ATTRIBUTE_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: ATTRIBUTE_CUBE = 1;
+   */
+  CUBE = 1,
+
+  /**
+   * @generated from enum value: ATTRIBUTE_MPSI = 2;
+   */
+  MPSI = 2,
+
+  /**
+   * @generated from enum value: ATTRIBUTE_PCSI = 3;
+   */
+  PCSI = 3,
+
+  /**
+   * @generated from enum value: ATTRIBUTE_BCPST = 4;
+   */
+  BCPST = 4,
+}
+
+/**
+ * Describes the enum auth.v2.Attribute.
+ */
+export const AttributeSchema: GenEnum<Attribute> = /*@__PURE__*/
+  enumDesc(file_auth_v2_auth_data, 0);
 

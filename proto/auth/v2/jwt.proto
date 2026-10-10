@@ -3,6 +3,7 @@ package auth.v2;
 
 import "google/protobuf/timestamp.proto";
 import "auth/v2/permissions.proto";
+import "auth/v2/auth_data.proto";
 
 message SmallData {
     int64 user_id = 1;
@@ -13,6 +14,8 @@ message SmallData {
     int32 promotion = 6;
     optional google.protobuf.Timestamp expiration = 7;
     repeated Permission roles = 8;
+    int64 attributes = 10;
+    repeated Attribute attribute_list = 11;
     bool is_api_token = 9;
 }
 

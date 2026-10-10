@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS USERS (
     account_modified_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     promotion SMALLINT DEFAULT 0, --first year of mp2i,
     permissions INTEGER DEFAULT 0,
+    attributes INTEGER DEFAULT 0,
     is_api BOOLEAN DEFAULT FALSE
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON USERS (username);

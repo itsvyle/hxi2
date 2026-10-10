@@ -27,6 +27,8 @@ pub struct DBUserView<'a> {
     pub permissions: i64,
     /// Field 10: `is_api`
     pub is_api: bool,
+    /// Field 11: `attributes`
+    pub attributes: i64,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for DBUserView<'a> {
@@ -157,6 +159,13 @@ impl<'a> ::buffa::MessageView<'a> for DBUserView<'a> {
                 )?;
                 view.is_api = ::buffa::types::decode_bool(&mut cur)?;
             }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.attributes = ::buffa::types::decode_int64(&mut cur)?;
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -205,6 +214,7 @@ impl<'a> ::buffa::MessageView<'a> for DBUserView<'a> {
             promotion: self.promotion,
             permissions: self.permissions,
             is_api: self.is_api,
+            attributes: self.attributes,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -256,6 +266,9 @@ impl<'a> ::buffa::ViewEncode<'a> for DBUserView<'a> {
         if self.is_api {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if self.attributes != 0i64 {
+            size += 1u64 + ::buffa::types::int64_encoded_len(self.attributes) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -306,6 +319,9 @@ impl<'a> ::buffa::ViewEncode<'a> for DBUserView<'a> {
         }
         if self.is_api {
             ::buffa::types::put_bool_field(10u32, self.is_api, buf);
+        }
+        if self.attributes != 0i64 {
+            ::buffa::types::put_int64_field(11u32, self.attributes, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -375,6 +391,13 @@ impl<'__a> ::serde::Serialize for DBUserView<'__a> {
         }
         if self.is_api {
             __map.serialize_entry("isApi", &self.is_api)?;
+        }
+        if !::buffa::json_helpers::skip_if::is_zero_i64(&self.attributes) {
+            __map
+                .serialize_entry(
+                    "attributes",
+                    &::buffa::json_helpers::ProtoJson(&self.attributes),
+                )?;
         }
         __map.end()
     }
@@ -521,6 +544,11 @@ impl DBUserOwnedView {
     pub fn is_api(&self) -> bool {
         self.0.reborrow().is_api
     }
+    /// Field 11: `attributes`
+    #[must_use]
+    pub fn attributes(&self) -> i64 {
+        self.0.reborrow().attributes
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<DBUserView<'static>>> for DBUserOwnedView {
     fn from(inner: ::buffa::OwnedView<DBUserView<'static>>) -> Self {
@@ -591,6 +619,7 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for DBUserView<'a> {
             8u32 => ::buffa_descriptor::reflect::ValueRef::I32(self.promotion),
             9u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.permissions),
             10u32 => ::buffa_descriptor::reflect::ValueRef::Bool(self.is_api),
+            11u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.attributes),
             _ => {
                 ::core::debug_assert!(
                     false,
@@ -613,6 +642,7 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for DBUserView<'a> {
             8u32 => self.promotion != 0,
             9u32 => self.permissions != 0,
             10u32 => self.is_api,
+            11u32 => self.attributes != 0,
             _ => false,
         }
     }
