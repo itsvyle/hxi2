@@ -1053,9 +1053,9 @@ pub struct RenewJWTResponseView<'a> {
     pub refresh_token_max_age: i64,
     /// Field 5: `jwt_max_age`
     pub jwt_max_age: i64,
-    /// Field 4: `small_data`
-    pub small_data: ::buffa::MessageFieldView<
-        super::super::__buffa::view::SmallDataView<'a>,
+    /// Field 4: `claims`
+    pub claims: ::buffa::MessageFieldView<
+        super::super::__buffa::view::JwtClaimsView<'a>,
     >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
@@ -1124,13 +1124,13 @@ impl<'a> ::buffa::MessageView<'a> for RenewJWTResponseView<'a> {
                 )?;
                 let __sub_ctx = ctx.descend()?;
                 let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.small_data.as_mut() {
+                match view.claims.as_mut() {
                     Some(existing) => {
                         ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
                     }
                     None => {
-                        view.small_data = ::buffa::MessageFieldView::set(
-                            <super::super::__buffa::view::SmallDataView as ::buffa::MessageView>::decode_view_ctx(
+                        view.claims = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::JwtClaimsView as ::buffa::MessageView>::decode_view_ctx(
                                 sub,
                                 __sub_ctx,
                             )?,
@@ -1164,11 +1164,11 @@ impl<'a> ::buffa::MessageView<'a> for RenewJWTResponseView<'a> {
             refresh_token: self.refresh_token.to_string(),
             refresh_token_max_age: self.refresh_token_max_age,
             jwt_max_age: self.jwt_max_age,
-            small_data: match self.small_data.as_option() {
+            claims: match self.claims.as_option() {
                 Some(v) => {
                     ::buffa::MessageField::<
-                        super::super::SmallData,
-                        ::buffa::Inline<super::super::SmallData>,
+                        super::super::JwtClaims,
+                        ::buffa::Inline<super::super::JwtClaims>,
                     >::some(v.to_owned_from_source(__buffa_src)?)
                 }
                 None => ::buffa::MessageField::none(),
@@ -1197,9 +1197,9 @@ impl<'a> ::buffa::ViewEncode<'a> for RenewJWTResponseView<'a> {
                     + ::buffa::types::int64_encoded_len(self.refresh_token_max_age)
                         as u64;
         }
-        if self.small_data.is_set() {
+        if self.claims.is_set() {
             let __slot = __cache.reserve();
-            let inner_size = self.small_data.compute_size(__cache);
+            let inner_size = self.claims.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
@@ -1228,13 +1228,13 @@ impl<'a> ::buffa::ViewEncode<'a> for RenewJWTResponseView<'a> {
         if self.refresh_token_max_age != 0i64 {
             ::buffa::types::put_int64_field(3u32, self.refresh_token_max_age, buf);
         }
-        if self.small_data.is_set() {
+        if self.claims.is_set() {
             ::buffa::types::put_len_delimited_header(
                 4u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
-            self.small_data.write_to(__cache, buf);
+            self.claims.write_to(__cache, buf);
         }
         if self.jwt_max_age != 0i64 {
             ::buffa::types::put_int64_field(5u32, self.jwt_max_age, buf);
@@ -1281,8 +1281,8 @@ impl<'__a> ::serde::Serialize for RenewJWTResponseView<'__a> {
                 )?;
         }
         {
-            if let ::core::option::Option::Some(__v) = self.small_data.as_option() {
-                __map.serialize_entry("smallData", __v)?;
+            if let ::core::option::Option::Some(__v) = self.claims.as_option() {
+                __map.serialize_entry("claims", __v)?;
             }
         }
         __map.end()
@@ -1398,12 +1398,12 @@ impl RenewJWTResponseOwnedView {
     pub fn jwt_max_age(&self) -> i64 {
         self.0.reborrow().jwt_max_age
     }
-    /// Field 4: `small_data`
+    /// Field 4: `claims`
     #[must_use]
-    pub fn small_data(
+    pub fn claims(
         &self,
-    ) -> &::buffa::MessageFieldView<super::super::__buffa::view::SmallDataView<'_>> {
-        &self.0.reborrow().small_data
+    ) -> &::buffa::MessageFieldView<super::super::__buffa::view::JwtClaimsView<'_>> {
+        &self.0.reborrow().claims
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<RenewJWTResponseView<'static>>>
@@ -1459,7 +1459,7 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for RenewJWTResponseView<'a
             5u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.jwt_max_age),
             4u32 => {
                 ::buffa_descriptor::reflect::ValueRef::Message(
-                    ::buffa_descriptor::reflect::ReflectCow::Borrowed(&*self.small_data),
+                    ::buffa_descriptor::reflect::ReflectCow::Borrowed(&*self.claims),
                 )
             }
             _ => {
@@ -1478,7 +1478,7 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for RenewJWTResponseView<'a
             2u32 => !self.refresh_token.is_empty(),
             3u32 => self.refresh_token_max_age != 0,
             5u32 => self.jwt_max_age != 0,
-            4u32 => self.small_data.is_set(),
+            4u32 => self.claims.is_set(),
             _ => false,
         }
     }

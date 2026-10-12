@@ -686,13 +686,12 @@ pub struct RenewJWTResponse {
         skip_serializing_if = "::buffa::json_helpers::skip_if::is_zero_i64"
     )]
     pub jwt_max_age: i64,
-    /// Field 4: `small_data`
+    /// Field 4: `claims`
     #[serde(
-        rename = "smallData",
-        alias = "small_data",
+        rename = "claims",
         skip_serializing_if = "::buffa::json_helpers::skip_if::is_unset_message_field"
     )]
-    pub small_data: ::buffa::MessageField<SmallData, ::buffa::Inline<SmallData>>,
+    pub claims: ::buffa::MessageField<JwtClaims, ::buffa::Inline<JwtClaims>>,
     #[serde(skip)]
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
@@ -704,7 +703,7 @@ impl ::core::fmt::Debug for RenewJWTResponse {
             .field("refresh_token", &self.refresh_token)
             .field("refresh_token_max_age", &self.refresh_token_max_age)
             .field("jwt_max_age", &self.jwt_max_age)
-            .field("small_data", &self.small_data)
+            .field("claims", &self.claims)
             .finish()
     }
 }
@@ -742,7 +741,7 @@ impl ::buffa_descriptor::reflect::ReflectMessage for RenewJWTResponse {
             5u32 => ::buffa_descriptor::reflect::ValueRef::I64(self.jwt_max_age),
             4u32 => {
                 ::buffa_descriptor::reflect::ValueRef::Message(
-                    ::buffa_descriptor::reflect::Reflectable::reflect(&*self.small_data),
+                    ::buffa_descriptor::reflect::Reflectable::reflect(&*self.claims),
                 )
             }
             _ => {
@@ -761,7 +760,7 @@ impl ::buffa_descriptor::reflect::ReflectMessage for RenewJWTResponse {
             2u32 => !self.refresh_token.is_empty(),
             3u32 => self.refresh_token_max_age != 0,
             5u32 => self.jwt_max_age != 0,
-            4u32 => self.small_data.is_set(),
+            4u32 => self.claims.is_set(),
             _ => false,
         }
     }
@@ -852,9 +851,9 @@ impl ::buffa::Message for RenewJWTResponse {
                     + ::buffa::types::int64_encoded_len(self.refresh_token_max_age)
                         as u64;
         }
-        if self.small_data.is_set() {
+        if self.claims.is_set() {
             let __slot = __cache.reserve();
-            let inner_size = self.small_data.compute_size(__cache);
+            let inner_size = self.claims.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
@@ -882,13 +881,13 @@ impl ::buffa::Message for RenewJWTResponse {
         if self.refresh_token_max_age != 0i64 {
             ::buffa::types::put_int64_field(3u32, self.refresh_token_max_age, buf);
         }
-        if self.small_data.is_set() {
+        if self.claims.is_set() {
             ::buffa::types::put_len_delimited_header(
                 4u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
-            self.small_data.write_to(__cache, buf);
+            self.claims.write_to(__cache, buf);
         }
         if self.jwt_max_age != 0i64 {
             ::buffa::types::put_int64_field(5u32, self.jwt_max_age, buf);
@@ -933,7 +932,7 @@ impl ::buffa::Message for RenewJWTResponse {
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
                 ::buffa::Message::merge_length_delimited(
-                    self.small_data.get_or_insert_default(),
+                    self.claims.get_or_insert_default(),
                     buf,
                     ctx,
                 )?;
@@ -956,7 +955,7 @@ impl ::buffa::Message for RenewJWTResponse {
         self.jwt.clear();
         self.refresh_token.clear();
         self.refresh_token_max_age = 0i64;
-        self.small_data = ::buffa::MessageField::none();
+        self.claims = ::buffa::MessageField::none();
         self.jwt_max_age = 0i64;
         self.__buffa_unknown_fields.clear();
     }

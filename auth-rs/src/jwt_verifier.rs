@@ -19,19 +19,23 @@ pub static GLOBAL_JWT_VERIFIER: LazyLock<JWTVerifier> = LazyLock::new(|| {
 });
 
 impl JWTVerifier {
-    pub fn verify_token(&self, token: &str) -> Result<JwtClaims> {
-        let token_data = decode::<JwtClaims>(token, &self.public_key, &self.validation_settings)
-            .context("verifying token")?;
+    pub fn verify_token(
+        &self,
+        token: &str,
+    ) -> std::result::Result<JwtClaims, jsonwebtoken::errors::Error> {
+        let token_data = decode::<JwtClaims>(token, &self.public_key, &self.validation_settings)?;
         Ok(token_data.claims)
     }
 
     #[instrument(skip(self), err)]
-    pub fn verify_token_ignore_expiry(&self, token: &str) -> Result<JwtClaims> {
+    pub fn verify_token_ignore_expiry(
+        &self,
+        token: &str,
+    ) -> std::result::Result<JwtClaims, jsonwebtoken::errors::Error> {
         let mut validation = self.validation_settings.clone();
         validation.validate_exp = false;
         validation.validate_nbf = false;
-        let token_data = decode::<JwtClaims>(token, &self.public_key, &validation)
-            .context("verifying token (ignoring expiry)")?;
+        let token_data = decode::<JwtClaims>(token, &self.public_key, &validation)?;
         Ok(token_data.claims)
     }
 }

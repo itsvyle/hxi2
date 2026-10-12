@@ -3,7 +3,7 @@ use std::sync::Arc;
 use anyhow::Context as _;
 use axum::{
     extract::State,
-    response::{IntoResponse, Redirect},
+    response::{IntoResponse, Redirect, Response},
 };
 use axum_extra::extract::{
     CookieJar,
@@ -41,10 +41,6 @@ pub enum RenewTokenData {
 }
 
 impl RenewTokenData {
-    pub fn from_claims(claims: JwtClaims) -> Self {
-        Self::OldClaims(Box::new(claims))
-    }
-
     pub fn resolve(self, verifier: &crate::jwt_verifier::JWTVerifier) -> anyhow::Result<JwtClaims> {
         match self {
             RenewTokenData::OldToken(token) => verifier
@@ -61,7 +57,7 @@ pub struct LoginResponse {
     pub token_max_age: i64,
     pub refresh_token: String,
     pub refresh_token_max_age: i64,
-    pub small_data: SmallData,
+    pub claims: JwtClaims,
 }
 
 impl LoginResponse {
@@ -85,7 +81,7 @@ impl LoginResponse {
         LoginManager::apply_secure_cookie_options(&mut refresh_token_cookie);
 
         // Small Data Cookie
-        let small_data_json = serde_json::to_string(&self.small_data).map_err(|e| {
+        let small_data_json = serde_json::to_string(&self.claims.data).map_err(|e| {
             error!(error = %e, "Failed to serialize small_data to JSON.");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -219,9 +215,7 @@ impl LoginManager {
                 cfg.JWT_REFRESH_TOKEN_VALIDITY.num_seconds()
             },
             refresh_token,
-            small_data: claims
-                .data
-                .ok_or_else(|| anyhow::anyhow!("claims.data should be present"))?,
+            claims,
         })
     }
 
@@ -324,14 +318,21 @@ impl LoginManager {
     pub async fn extract_claims_from_request(
         &self,
         headers: &http::HeaderMap,
-    ) -> Result<(Option<JwtClaims>, Option<LoginResponse>), impl IntoResponse> {
+        is_frontend: Option<bool>,
+    ) -> Result<(Option<JwtClaims>, Option<LoginResponse>), Box<Response>> {
         let (token, refresh_token) = headers
             .get(http::header::AUTHORIZATION)
             .and_then(|v| v.to_str().ok())
             .and_then(|s| s.strip_prefix("Bearer "))
             .map(|s| (Some(s.to_string()), None))
             .or_else(|| Some(extract_auth_cookies(headers)))
-            .expect("unreachable: extract_auth_cookies always returns Some");
+            .ok_or_else(|| {
+                Box::new(to_http_error(
+                    ConnectError::unauthenticated("UNREACHABLE: No token found"),
+                    headers,
+                    is_frontend,
+                ))
+            })?;
 
         if token.is_none() {
             return Ok((None, None));
@@ -339,12 +340,52 @@ impl LoginManager {
         let token = token.unwrap();
 
         let initial_verification = self.verifier.verify_token(&token);
+        if let Ok(claims) = initial_verification {
+            return Ok((Some(claims), None));
+        }
 
-        Err(to_http_error(
-            ConnectError::unauthenticated("No valid token found"),
-            headers,
-            None,
-        ))
+        let error_kind = initial_verification.unwrap_err();
+        if matches!(
+            error_kind.kind(),
+            &jsonwebtoken::errors::ErrorKind::ExpiredSignature
+        ) {
+            // Attempt to refresh the token
+            let claims = Box::new(self.verifier.verify_token_ignore_expiry(&token).map_err(
+                |e| {
+                    error!(error = %e, "Failed to verify expired token");
+                    Box::new(to_http_error(
+                        ConnectError::unauthenticated("Failed to verify expired token".to_string()),
+                        headers,
+                        is_frontend,
+                    ))
+                },
+            )?);
+            let refresh_token = refresh_token.ok_or_else(|| {
+                Box::new(to_http_error(
+                    ConnectError::unauthenticated("No refresh token provided".to_string()),
+                    headers,
+                    is_frontend,
+                ))
+            })?;
+            let new_login = self
+                .renew_authentication(RenewTokenData::OldClaims(claims), &refresh_token)
+                .await
+                .map_err(|e| {
+                    error!(error = %e, "Failed to renew authentication");
+                    Box::new(to_http_error(
+                        ConnectError::unauthenticated("Failed to renew authentication".to_string()),
+                        headers,
+                        is_frontend,
+                    ))
+                });
+            if let Err(_e) = new_login {
+                return Ok((None, None));
+            }
+            let new_login = new_login.unwrap();
+            return Ok((Some(new_login.claims.clone()), Some(new_login)));
+        }
+
+        Ok((None, None))
     }
 }
 

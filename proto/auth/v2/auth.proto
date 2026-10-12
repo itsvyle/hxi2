@@ -138,7 +138,7 @@ message RenewJWTResponse {
     string refresh_token = 2;
     int64 refresh_token_max_age = 3;
     int64 jwt_max_age = 5;
-    optional SmallData small_data = 4;
+    optional JwtClaims claims = 4;
 }
 
 message ListUsersRequest {}

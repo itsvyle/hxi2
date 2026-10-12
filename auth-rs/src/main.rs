@@ -85,7 +85,10 @@ async fn main() -> Result<()> {
                 .layer(axum::middleware::from_extractor_with_state::<
                     RequireAuthMiddleware,
                     _,
-                >(api_login_manager.clone()))
+                >((
+                    api_login_manager.clone(),
+                    login_manager.clone(),
+                )))
                 .layer(axum::middleware::from_fn(CsrfProtection::middleware))
                 .layer(TimeoutLayer::with_status_code(
                     http::StatusCode::REQUEST_TIMEOUT,

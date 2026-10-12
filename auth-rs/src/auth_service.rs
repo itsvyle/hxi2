@@ -211,7 +211,7 @@ impl AuthService for AuthServiceImpl {
             refresh_token: r.refresh_token,
             refresh_token_max_age: r.refresh_token_max_age,
             jwt_max_age: r.token_max_age,
-            small_data: r.small_data.into(),
+            claims: r.claims.into(),
             __buffa_unknown_fields: Default::default(),
         })
     }
