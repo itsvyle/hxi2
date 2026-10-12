@@ -31,7 +31,7 @@ use crate::app_config::AppConfiguration;
 use crate::auth_middleware::ReqAuthState;
 use crate::connect_result::ToConnectError;
 use crate::database::DbUserIdentifier;
-use crate::login_manager::LoginManager;
+use crate::login_manager::{LoginManager, RenewTokenData};
 use crate::password_login::PasswordLoginManager;
 use crate::permissions_checking;
 
@@ -198,7 +198,10 @@ impl AuthService for AuthServiceImpl {
     ) -> ServiceResult<RenewJWTResponse> {
         let r = self
             .login_manager
-            .renew_authentication(request.jwt, request.refresh_token)
+            .renew_authentication(
+                RenewTokenData::OldToken(request.jwt.to_owned()),
+                request.refresh_token,
+            )
             .await
             .obfuscate()
             .to_connect_permission_denied()?;

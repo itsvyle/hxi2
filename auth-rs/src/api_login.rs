@@ -1,4 +1,5 @@
-use anyhow::Context as _;
+use anyhow::{Context as _, anyhow};
+use argon2::{Argon2, PasswordHash, PasswordHasher as _, PasswordVerifier as _};
 use hxi2_proto::{
     proto::auth::v2::{Attribute, Permission, small_data},
     utils::compile_bitfield,
@@ -126,7 +127,19 @@ impl APILoginManager {
         let db = crate::app_config::AppConfiguration::INSTANCE().db().await;
 
         let new_token = self.generate_api_token();
-        let new_token_hash = db.hash_token(&new_token);
+
+        let password = new_token.clone();
+
+        let new_token_hash = tokio::task::spawn_blocking(move || {
+            let argon2 = Argon2::default();
+            argon2
+                .hash_password(password.as_bytes())
+                .map(|hash| hash.to_string())
+                .map_err(|e| anyhow!("Failed to hash password: {e}"))
+        })
+        .await
+        .map_err(|e| anyhow!("Join error: {e}"))??;
+
         let expires_at =
             chrono::Utc::now() + crate::app_config::AppConfiguration::INSTANCE().API_TOKEN_VALIDITY;
         db.insert_update_api_token(user_identifier, &new_token_hash, expires_at)
@@ -157,8 +170,14 @@ impl APILoginManager {
         }
 
         let db_token = db_token.unwrap();
-        let token_hash = db.hash_token(token);
-        if db_token.token_hash != token_hash {
+
+        let argon2 = Argon2::default();
+        let parsed_hash = PasswordHash::new(&db_token.token_hash)?;
+
+        let is_password_valid = argon2
+            .verify_password(token.as_bytes(), &parsed_hash)
+            .is_ok();
+        if !is_password_valid {
             anyhow::bail!("Invalid API token");
         }
 

@@ -12,9 +12,10 @@ use axum_extra::extract::{
 use base64::prelude::*;
 use buffa::MessageField;
 use buffa_types::Timestamp;
+use connectrpc::ConnectError;
 use http::StatusCode;
 use hxi2_proto::{
-    proto::auth::v2::{Attribute, Permission, SmallData, small_data::APITokenData},
+    proto::auth::v2::{Attribute, JwtClaims, Permission, SmallData, small_data::APITokenData},
     utils::retrieve_active_bitfields,
 };
 use rand::RngExt;
@@ -22,6 +23,7 @@ use tracing::{error, instrument, trace};
 
 use crate::{
     app_config::AppConfiguration,
+    auth_middleware::to_http_error,
     database::{DbError, DbUser, DbUserIdentifier},
     jwt_signer::JWTSignerOptions,
 };
@@ -30,6 +32,27 @@ pub struct LoginManager {
     pub signer: &'static crate::jwt_signer::JWTSigner,
     #[allow(unused)]
     pub verifier: &'static crate::jwt_verifier::JWTVerifier,
+}
+
+#[derive(Debug, Clone)]
+pub enum RenewTokenData {
+    OldToken(String),
+    OldClaims(Box<JwtClaims>),
+}
+
+impl RenewTokenData {
+    pub fn from_claims(claims: JwtClaims) -> Self {
+        Self::OldClaims(Box::new(claims))
+    }
+
+    pub fn resolve(self, verifier: &crate::jwt_verifier::JWTVerifier) -> anyhow::Result<JwtClaims> {
+        match self {
+            RenewTokenData::OldToken(token) => verifier
+                .verify_token_ignore_expiry(&token)
+                .context("verifying old token"),
+            RenewTokenData::OldClaims(claims) => Ok(*claims),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -205,14 +228,11 @@ impl LoginManager {
     #[cfg_attr(debug_assertions, instrument(skip(self), level = "trace", ret))]
     pub async fn renew_authentication(
         &self,
-        old_token: &str,
+        old_data: RenewTokenData,
         refresh_token: &str,
     ) -> anyhow::Result<LoginResponse> {
         let db = crate::app_config::AppConfiguration::INSTANCE().db().await;
-        let claims = self
-            .verifier
-            .verify_token_ignore_expiry(old_token)
-            .context("verifying old token")?;
+        let claims = old_data.resolve(self.verifier)?;
 
         if claims.data.api_token_data.is_set() {
             anyhow::bail!("API tokens cannot be renewed");
@@ -299,4 +319,60 @@ impl LoginManager {
             Redirect::to(&redirect_url),
         ))
     }
+
+    // handles getting the claims on a request, and potentially renewing the token if it is expired and a valid refresh token is present
+    pub async fn extract_claims_from_request(
+        &self,
+        headers: &http::HeaderMap,
+    ) -> Result<(Option<JwtClaims>, Option<LoginResponse>), impl IntoResponse> {
+        let (token, refresh_token) = headers
+            .get(http::header::AUTHORIZATION)
+            .and_then(|v| v.to_str().ok())
+            .and_then(|s| s.strip_prefix("Bearer "))
+            .map(|s| (Some(s.to_string()), None))
+            .or_else(|| Some(extract_auth_cookies(headers)))
+            .expect("unreachable: extract_auth_cookies always returns Some");
+
+        if token.is_none() {
+            return Ok((None, None));
+        }
+        let token = token.unwrap();
+
+        let initial_verification = self.verifier.verify_token(&token);
+
+        Err(to_http_error(
+            ConnectError::unauthenticated("No valid token found"),
+            headers,
+            None,
+        ))
+    }
+}
+
+fn extract_auth_cookies(headers: &http::HeaderMap) -> (Option<String>, Option<String>) {
+    let cookies = headers
+        .get_all(http::header::COOKIE)
+        .into_iter()
+        .filter_map(|value| value.to_str().ok())
+        .flat_map(|value| value.split(';'))
+        .filter_map(|cookie| Cookie::parse_encoded(cookie.to_owned()).ok());
+    let mut jwt_token = None;
+    let mut refresh_token = None;
+
+    for cookie in cookies {
+        match cookie.name() {
+            name if name
+                == crate::app_config::AppConfiguration::INSTANCE().COOKIE_JWT_TOKEN_NAME =>
+            {
+                jwt_token = Some(cookie.value().to_string());
+            }
+            name if name
+                == crate::app_config::AppConfiguration::INSTANCE().COOKIE_REFRESH_TOKEN_NAME =>
+            {
+                refresh_token = Some(cookie.value().to_string());
+            }
+            _ => {}
+        }
+    }
+
+    (jwt_token, refresh_token)
 }

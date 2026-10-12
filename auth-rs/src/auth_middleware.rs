@@ -17,36 +17,7 @@ pub struct ReqAuthState {
     pub claims: Option<JwtClaims>,
 }
 
-fn extract_auth_cookies(headers: &http::HeaderMap) -> (Option<String>, Option<String>) {
-    let cookies = headers
-        .get_all(http::header::COOKIE)
-        .into_iter()
-        .filter_map(|value| value.to_str().ok())
-        .flat_map(|value| value.split(';'))
-        .filter_map(|cookie| Cookie::parse_encoded(cookie.to_owned()).ok());
-    let mut jwt_token = None;
-    let mut refresh_token = None;
-
-    for cookie in cookies {
-        match cookie.name() {
-            name if name
-                == crate::app_config::AppConfiguration::INSTANCE().COOKIE_JWT_TOKEN_NAME =>
-            {
-                jwt_token = Some(cookie.value().to_string());
-            }
-            name if name
-                == crate::app_config::AppConfiguration::INSTANCE().COOKIE_REFRESH_TOKEN_NAME =>
-            {
-                refresh_token = Some(cookie.value().to_string());
-            }
-            _ => {}
-        }
-    }
-
-    (jwt_token, refresh_token)
-}
-
-fn to_http_error(
+pub fn to_http_error(
     e: ConnectError,
     headers: &http::HeaderMap,
     perms: Option<&permissions_checking::MethodPermissions>,
@@ -114,6 +85,26 @@ where
             match crate::jwt_verifier::GLOBAL_JWT_VERIFIER.verify_token(&t) {
                 Ok(c) => Some(c),
                 Err(e) => {
+                    let decoded_claims =
+                        crate::jwt_verifier::GLOBAL_JWT_VERIFIER.verify_token_ignore_expiry(&t);
+                    if !decoded_claims.is_ok() && !is_public {
+                        return Err(to_http_error(
+                            ConnectError::unauthenticated(format!("completely invalid token: {e}")),
+                            &parts.headers,
+                            Some(perms),
+                        ));
+                    }
+                    if decoded_claims.is_ok() {
+                        let decoded_claims = decoded_claims.unwrap();
+                        if decoded_claims.exp < chrono::Utc::now().timestamp() {
+                            return Err(to_http_error(
+                                ConnectError::unauthenticated(format!("expired token: {e}")),
+                                &parts.headers,
+                                Some(perms),
+                            ));
+                        }
+                    }
+
                     if !is_public {
                         return Err(to_http_error(
                             ConnectError::unauthenticated(format!("invalid token: {e}")),
