@@ -319,14 +319,13 @@ impl LoginManager {
     pub async fn extract_claims_from_request(
         &self,
         headers: &http::HeaderMap,
-        is_frontend: Option<bool>,
     ) -> Result<
         (
             Option<JwtClaims>,
             Option<LoginResponse>,
-            Option<Box<Response>>,
+            Option<ConnectError>,
         ),
-        Box<Response>,
+        ConnectError,
     > {
         let (token, refresh_token) = headers
             .get(http::header::AUTHORIZATION)
@@ -334,23 +333,13 @@ impl LoginManager {
             .and_then(|s| s.strip_prefix("Bearer "))
             .map(|s| (Some(s.to_string()), None))
             .or_else(|| Some(extract_auth_cookies(headers)))
-            .ok_or_else(|| {
-                Box::new(to_http_error(
-                    ConnectError::unauthenticated("UNREACHABLE: No token found"),
-                    headers,
-                    is_frontend,
-                ))
-            })?;
+            .ok_or_else(|| ConnectError::unauthenticated("UNREACHABLE: No token found"))?;
 
         if token.is_none() {
             return Ok((
                 None,
                 None,
-                Some(Box::new(to_http_error(
-                    ConnectError::unauthenticated("No token found"),
-                    headers,
-                    is_frontend,
-                ))),
+                Some(ConnectError::unauthenticated("No token found")),
             ));
         }
         let token = token.unwrap();
@@ -369,22 +358,16 @@ impl LoginManager {
             let claims = Box::new(self.verifier.verify_token_ignore_expiry(&token).map_err(
                 |e| {
                     error!(error = %e, "Failed to verify expired token");
-                    Box::new(to_http_error(
-                        ConnectError::unauthenticated("Failed to verify expired token".to_string()),
-                        headers,
-                        is_frontend,
-                    ))
+                    ConnectError::unauthenticated("Failed to verify expired token")
                 },
             )?);
             if refresh_token.is_none() {
                 return Ok((
                     None,
                     None,
-                    Some(Box::new(to_http_error(
-                        ConnectError::unauthenticated("Couldn't refresh your expired authentication token: no refresh token provided".to_string()),
-                        headers,
-                        is_frontend,
-                    ))),
+                    Some(ConnectError::unauthenticated(
+                        "Couldn't refresh your expired authentication token: no refresh token provided",
+                    )),
                 ));
             }
             let refresh_token = refresh_token.unwrap();
@@ -393,11 +376,7 @@ impl LoginManager {
                 .await
                 .map_err(|e| {
                     error!(error = %e, "Failed to renew authentication");
-                    Box::new(to_http_error(
-                        ConnectError::unauthenticated("Failed to renew authentication".to_string()),
-                        headers,
-                        is_frontend,
-                    ))
+                    ConnectError::unauthenticated("Failed to renew authentication")
                 });
             if let Err(e) = new_login {
                 return Ok((None, None, Some(e)));
@@ -409,13 +388,9 @@ impl LoginManager {
         Ok((
             None,
             None,
-            Some(Box::new(to_http_error(
-                ConnectError::unauthenticated(format!(
-                    "Failed to verify token: {}",
-                    error_kind.to_string()
-                )),
-                headers,
-                is_frontend,
+            Some(ConnectError::unauthenticated(format!(
+                "Failed to verify token: {}",
+                error_kind
             ))),
         ))
     }

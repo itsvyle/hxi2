@@ -128,14 +128,14 @@ where
         let (api_login_manager, login_manager) =
             <(Arc<api_login::APILoginManager>, Arc<LoginManager>)>::from_ref(state);
         let (claims, _login_response, getting_claims_error) = login_manager
-            .extract_claims_from_request(&parts.headers, Some(perms.is_frontend))
+            .extract_claims_from_request(&parts.headers)
             .await
             .map_err(|e| e.into_response())?;
 
         // TODO: apply login_response to the response, so that the token is automagically refreshed if needed, and the cookies are set.
 
         if !is_public && let Some(e) = getting_claims_error {
-            return Err(*e);
+            return Err(to_http_error(e, &parts.headers, Some(perms.is_frontend)));
         }
 
         if !is_public && let Some(ref c) = claims {
