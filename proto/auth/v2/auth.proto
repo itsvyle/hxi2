@@ -88,6 +88,10 @@ service AuthService {
         option (permission_level).allow_role = PERMISSION_ADMIN;
     }
 
+    rpc RevokeAPIToken(RevokeAPITokenRequest) returns (google.protobuf.Empty) {
+        option (permission_level).allow_role = PERMISSION_ANY_AUTHENTICATED;
+    }
+
     rpc ListAPIUsers(google.protobuf.Empty) returns (ListAPIUsersResponse) {
         option (permission_level).allow_role = PERMISSION_ADMIN;
     }
@@ -152,6 +156,9 @@ message GetDevTokenRequest {
     repeated Permission roles = 2;
     optional int64 validity_seconds = 3;
     repeated Attribute attributes = 4;
+    optional string first_name = 5;
+    optional string last_name = 6;
+    bool insert_to_database = 7;
 }
 
 message GetDevTokenResponse {
@@ -250,4 +257,12 @@ message APILoginRequest {
 message APILoginResponse {
     string jwt = 1;
     google.protobuf.Duration jwt_max_age = 2;
+}
+
+message RevokeAPITokenRequest {
+    // optionally, for admins: specify what user to revoke the token from
+    oneof user_identifier {
+        int64 user_id = 1;
+        string username = 2;
+    }
 }

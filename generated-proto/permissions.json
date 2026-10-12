@@ -305,6 +305,21 @@
       "is_frontend": false,
       "frontend_static_file": null
     },
+    "/auth.v2.AuthService/RevokeAPIToken": {
+      "allow_roles": [
+        1,
+        6
+      ],
+      "is_public": false,
+      "public_url": null,
+      "compiled_permissions_bitfield": 66,
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": false,
+      "is_frontend": false,
+      "frontend_static_file": null
+    },
     "/auth.v2.AuthService/UpdateUser": {
       "allow_roles": [
         1,

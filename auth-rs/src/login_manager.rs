@@ -314,12 +314,20 @@ impl LoginManager {
         ))
     }
 
-    // handles getting the claims on a request, and potentially renewing the token if it is expired and a valid refresh token is present
+    /// handles getting the claims on a request, and potentially renewing the token if it is expired and a valid refresh token is present
+    /// Returns: (claims, login_response, error_response of getting token to use if the route required authentication), or a major error
     pub async fn extract_claims_from_request(
         &self,
         headers: &http::HeaderMap,
         is_frontend: Option<bool>,
-    ) -> Result<(Option<JwtClaims>, Option<LoginResponse>), Box<Response>> {
+    ) -> Result<
+        (
+            Option<JwtClaims>,
+            Option<LoginResponse>,
+            Option<Box<Response>>,
+        ),
+        Box<Response>,
+    > {
         let (token, refresh_token) = headers
             .get(http::header::AUTHORIZATION)
             .and_then(|v| v.to_str().ok())
@@ -335,13 +343,21 @@ impl LoginManager {
             })?;
 
         if token.is_none() {
-            return Ok((None, None));
+            return Ok((
+                None,
+                None,
+                Some(Box::new(to_http_error(
+                    ConnectError::unauthenticated("No token found"),
+                    headers,
+                    is_frontend,
+                ))),
+            ));
         }
         let token = token.unwrap();
 
         let initial_verification = self.verifier.verify_token(&token);
         if let Ok(claims) = initial_verification {
-            return Ok((Some(claims), None));
+            return Ok((Some(claims), None, None));
         }
 
         let error_kind = initial_verification.unwrap_err();
@@ -360,13 +376,18 @@ impl LoginManager {
                     ))
                 },
             )?);
-            let refresh_token = refresh_token.ok_or_else(|| {
-                Box::new(to_http_error(
-                    ConnectError::unauthenticated("No refresh token provided".to_string()),
-                    headers,
-                    is_frontend,
-                ))
-            })?;
+            if refresh_token.is_none() {
+                return Ok((
+                    None,
+                    None,
+                    Some(Box::new(to_http_error(
+                        ConnectError::unauthenticated("Couldn't refresh your expired authentication token: no refresh token provided".to_string()),
+                        headers,
+                        is_frontend,
+                    ))),
+                ));
+            }
+            let refresh_token = refresh_token.unwrap();
             let new_login = self
                 .renew_authentication(RenewTokenData::OldClaims(claims), &refresh_token)
                 .await
@@ -378,14 +399,25 @@ impl LoginManager {
                         is_frontend,
                     ))
                 });
-            if let Err(_e) = new_login {
-                return Ok((None, None));
+            if let Err(e) = new_login {
+                return Ok((None, None, Some(e)));
             }
             let new_login = new_login.unwrap();
-            return Ok((Some(new_login.claims.clone()), Some(new_login)));
+            return Ok((Some(new_login.claims.clone()), Some(new_login), None));
         }
 
-        Ok((None, None))
+        Ok((
+            None,
+            None,
+            Some(Box::new(to_http_error(
+                ConnectError::unauthenticated(format!(
+                    "Failed to verify token: {}",
+                    error_kind.to_string()
+                )),
+                headers,
+                is_frontend,
+            ))),
+        ))
     }
 }
 

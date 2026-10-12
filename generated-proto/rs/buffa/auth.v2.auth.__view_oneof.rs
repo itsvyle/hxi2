@@ -46,3 +46,12 @@ pub mod api_login_request {
         Username(&'a str),
     }
 }
+pub mod revoke_api_token_request {
+    #[allow(unused_imports)]
+    use super::*;
+    #[derive(Clone, Debug)]
+    pub enum UserIdentifier<'a> {
+        UserId(i64),
+        Username(&'a str),
+    }
+}

@@ -23,6 +23,7 @@ pub fn get_route_from_public_url(url: &str) -> Option<&'static str> {
 "/auth.v2.AuthService/RemovePassword" => return Some("/auth.v2.AuthService/RemovePassword"),
 "/auth.v2.AuthService/RenewAPIUserToken" => return Some("/auth.v2.AuthService/RenewAPIUserToken"),
 "/auth.v2.AuthService/RenewJWT" => return Some("/auth.v2.AuthService/RenewJWT"),
+"/auth.v2.AuthService/RevokeAPIToken" => return Some("/auth.v2.AuthService/RevokeAPIToken"),
 "/auth.v2.AuthService/UpdateUser" => return Some("/auth.v2.AuthService/UpdateUser"),
 _ => None,
     }
@@ -103,7 +104,8 @@ impl CompiledPermissions {
 				"/auth.v2.AuthService/RemovePassword" => return Some(&self.permissions[17].1),
 				"/auth.v2.AuthService/RenewAPIUserToken" => return Some(&self.permissions[18].1),
 				"/auth.v2.AuthService/RenewJWT" => return Some(&self.permissions[19].1),
-				"/auth.v2.AuthService/UpdateUser" => return Some(&self.permissions[20].1),
+				"/auth.v2.AuthService/RevokeAPIToken" => return Some(&self.permissions[20].1),
+				"/auth.v2.AuthService/UpdateUser" => return Some(&self.permissions[21].1),
             _ => None,
         }
     }
@@ -395,6 +397,21 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 is_public: false,
                 public_url: None,
                 compiled_permissions_bitfield: 18,
+                csrf_token_header: Some("X-CSRF-Token"),
+                csrf_token_cookie: Some("csrf_token"),
+                response_cors_headers: None,
+                enforce_csrf: false,
+                is_frontend: false,
+                frontend_static_file: None,
+            }),
+            ("/auth.v2.AuthService/RevokeAPIToken", MethodPermissions {
+                allow_roles: &[
+					Permission::PERMISSION_ADMIN,
+					Permission::PERMISSION_ANY_AUTHENTICATED,
+                ],
+                is_public: false,
+                public_url: None,
+                compiled_permissions_bitfield: 66,
                 csrf_token_header: Some("X-CSRF-Token"),
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,

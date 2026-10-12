@@ -17,7 +17,7 @@ use hxi2_proto::proto::auth::v2::{
     GetJWTPublicKeyRequest, GetJWTPublicKeyResponse, ListAPIUsersResponse, ListUsersRequest,
     ListUsersResponse, PasswordLoginRequest, PasswordLoginResponse, Permission,
     RemoveAPIUserRequest, RemovePasswordRequest, RenewAPIUserTokenRequest,
-    RenewAPIUserTokenResponse, RenewJWTRequest, RenewJWTResponse, SmallData,
+    RenewAPIUserTokenResponse, RenewJWTRequest, RenewJWTResponse, RevokeAPITokenRequest, SmallData,
 };
 use hxi2_proto::utils::compile_bitfield;
 use hxi2_proto::{
@@ -593,6 +593,56 @@ impl AuthService for AuthServiceImpl {
         Response::ok(APILoginResponse {
             jwt: res.token,
             jwt_max_age: Duration::from_secs(res.token_max_age).into(),
+            ..Default::default()
+        })
+    }
+
+    async fn revoke_api_token(
+        &self,
+        ctx: RequestContext,
+        req: ServiceRequest<'_, RevokeAPITokenRequest>,
+    ) -> ServiceResult<Empty> {
+        let auth_state = ctx.extensions().get::<ReqAuthState>().ok_or_else(|| {
+            ConnectError::permission_denied("ReqAuthState not found in request extensions")
+        })?;
+
+        let current_user = &auth_state
+            .claims
+            .as_ref()
+            .ok_or_else(|| ConnectError::permission_denied("Claims not found in ReqAuthState"))?
+            .data;
+
+        let user_identifier =
+            if (current_user.permissions & (1 << Permission::PERMISSION_ADMIN as i64) != 0)
+                && let Some(target_user_identifier) = req.user_identifier.as_ref()
+            {
+                use hxi2_proto::proto::auth::v2::revoke_api_token_request::UserIdentifierView;
+                match target_user_identifier {
+                    UserIdentifierView::UserId(user_id) => DbUserIdentifier::Id(*user_id),
+                    UserIdentifierView::Username(username) => {
+                        DbUserIdentifier::Username(username.to_string())
+                    }
+                }
+            } else if req.user_identifier.is_some() {
+                return Err(ConnectError::permission_denied(
+                    "You do not have permission to remove a password for another user",
+                ));
+            } else {
+                if current_user.api_token_data.is_unset() {
+                    return Err(ConnectError::permission_denied(
+                        "Only API users can call this method on themselves",
+                    ));
+                }
+                DbUserIdentifier::Id(current_user.user_id)
+            };
+
+        self.api_login_manager
+            .delete_api_token(&user_identifier)
+            .await
+            .obfuscate()
+            .to_connect_internal()?;
+
+        Response::ok(Empty {
             ..Default::default()
         })
     }

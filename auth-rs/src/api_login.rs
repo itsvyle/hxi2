@@ -45,16 +45,24 @@ impl APILoginManager {
     #[instrument(skip(self), err)]
     async fn refresh_valid_ids(&self) -> anyhow::Result<()> {
         let db = crate::app_config::AppConfiguration::INSTANCE().db().await;
-        let valid_ids = db
+        match db
             .get_valid_api_token_ids()
             .await
-            .context("Failed to fetch API user IDs")?;
+            .context("Failed to fetch API user IDs")
+        {
+            Ok(valid_ids) => {
+                let mut cache = self.cache.write().unwrap();
+                cache.valid_ids = valid_ids.into_iter().collect();
+                cache.last_update = Instant::now();
 
-        let mut cache = self.cache.write().unwrap();
-        cache.valid_ids = valid_ids.into_iter().collect();
-        cache.last_update = Instant::now();
-
-        Ok(())
+                Ok(())
+            }
+            Err(e) => {
+                let mut cache = self.cache.write().unwrap();
+                cache.valid_ids.clear();
+                Err(e)
+            }
+        }
     }
 
     pub async fn check_valid_api_token_id(&self, id: i64) -> anyhow::Result<bool> {

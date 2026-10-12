@@ -90,6 +90,10 @@ pub type OwnedRenewApiUserTokenRequestView = ::buffa::view::OwnedView<
 pub type OwnedRenewApiUserTokenResponseView = ::buffa::view::OwnedView<
     crate::proto::auth::v2::__buffa::view::RenewAPIUserTokenResponseView<'static>,
 >;
+///Shorthand for `OwnedView<RevokeApiTokenRequestView<'static>>`.
+pub type OwnedRevokeApiTokenRequestView = ::buffa::view::OwnedView<
+    crate::proto::auth::v2::__buffa::view::RevokeAPITokenRequestView<'static>,
+>;
 ///Shorthand for `OwnedView<ListApiUsersResponseView<'static>>`.
 pub type OwnedListApiUsersResponseView = ::buffa::view::OwnedView<
     crate::proto::auth::v2::__buffa::view::ListAPIUsersResponseView<'static>,
@@ -596,6 +600,12 @@ pub const AUTH_SERVICE_RENEW_API_USER_TOKEN_SPEC: ::connectrpc::Spec = ::connect
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `RevokeAPIToken` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_REVOKE_API_TOKEN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/auth.v2.AuthService/RevokeAPIToken",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// Static [`Spec`](::connectrpc::Spec) for the `ListAPIUsers` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_LIST_API_USERS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/auth.v2.AuthService/ListAPIUsers",
@@ -986,6 +996,29 @@ pub trait AuthService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::auth::v2::RenewAPIUserTokenResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// Handle the RevokeAPIToken RPC.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn revoke_api_token<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::auth::v2::RevokeAPITokenRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                ::buffa_types::google::protobuf::Empty,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1496,6 +1529,33 @@ impl<S: AuthService> AuthServiceExt for S {
             .with_spec(AUTH_SERVICE_RENEW_API_USER_TOKEN_SPEC)
             .route_view(
                 AUTH_SERVICE_SERVICE_NAME,
+                "RevokeAPIToken",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::auth::v2::__buffa::view::RevokeAPITokenRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::auth::v2::RevokeAPITokenRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.revoke_api_token(ctx, sreq)
+                                .await?
+                                .encode::<::buffa_types::google::protobuf::Empty>(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_REVOKE_API_TOKEN_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
                 "ListAPIUsers",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -1740,6 +1800,12 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(AUTH_SERVICE_RENEW_API_USER_TOKEN_SPEC),
+                )
+            }
+            "RevokeAPIToken" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_REVOKE_API_TOKEN_SPEC),
                 )
             }
             "ListAPIUsers" => {
@@ -2061,6 +2127,26 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         .encode::<
                             crate::proto::auth::v2::RenewAPIUserTokenResponse,
                         >(format)
+                })
+            }
+            "RevokeAPIToken" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::auth::v2::RevokeAPITokenRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::auth::v2::__buffa::view::RevokeAPITokenRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::auth::v2::RevokeAPITokenRequest,
+                    >::from_parts(&req, &body);
+                    svc.revoke_api_token(ctx, req)
+                        .await?
+                        .encode::<::buffa_types::google::protobuf::Empty>(format)
                 })
             }
             "ListAPIUsers" => {
@@ -2847,6 +2933,47 @@ where
                 &self.transport,
                 &self.config,
                 AUTH_SERVICE_RENEW_API_USER_TOKEN_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the RevokeAPIToken RPC. Sends a request to /auth.v2.AuthService/RevokeAPIToken.
+    pub async fn revoke_api_token(
+        &self,
+        request: crate::proto::auth::v2::RevokeAPITokenRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                ::buffa_types::google::protobuf::__buffa::view::EmptyView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.revoke_api_token_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the RevokeAPIToken RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn revoke_api_token_with_options(
+        &self,
+        request: crate::proto::auth::v2::RevokeAPITokenRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                ::buffa_types::google::protobuf::__buffa::view::EmptyView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_REVOKE_API_TOKEN_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
