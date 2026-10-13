@@ -3,7 +3,7 @@ use std::sync::Arc;
 use anyhow::Context as _;
 use axum::{
     extract::State,
-    response::{IntoResponse, Redirect, Response},
+    response::{IntoResponse, Redirect},
 };
 use axum_extra::extract::{
     CookieJar,
@@ -23,7 +23,6 @@ use tracing::{error, instrument, trace};
 
 use crate::{
     app_config::AppConfiguration,
-    auth_middleware::to_http_error,
     database::{DbError, DbUser, DbUserIdentifier},
     jwt_signer::JWTSignerOptions,
 };

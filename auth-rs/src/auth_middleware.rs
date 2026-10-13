@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use axum_extra::extract::cookie::Cookie;
 use connectrpc::ConnectError;
 use http::header::ACCEPT;
 use hxi2_proto::proto::auth::v2::JwtClaims;
@@ -74,57 +73,6 @@ where
             .expect("impossible: route can't be non empty, and not be in the permissions list");
         let is_public = perms.is_public;
 
-        // let token = parts
-        //     .headers
-        //     .get(http::header::AUTHORIZATION)
-        //     .and_then(|v| v.to_str().ok())
-        //     .and_then(|s| s.strip_prefix("Bearer "))
-        //     .map(String::from)
-        //     .or_else(|| extract_auth_cookies(&parts.headers).0);
-
-        // let claims = if let Some(t) = token {
-        //     match crate::jwt_verifier::GLOBAL_JWT_VERIFIER.verify_token(&t) {
-        //         Ok(c) => Some(c),
-        //         Err(e) => {
-        //             let decoded_claims =
-        //                 crate::jwt_verifier::GLOBAL_JWT_VERIFIER.verify_token_ignore_expiry(&t);
-        //             if !decoded_claims.is_ok() && !is_public {
-        //                 return Err(to_http_error(
-        //                     ConnectError::unauthenticated(format!("completely invalid token: {e}")),
-        //                     &parts.headers,
-        //                     Some(perms),
-        //                 ));
-        //             }
-        //             if decoded_claims.is_ok() {
-        //                 let decoded_claims = decoded_claims.unwrap();
-        //                 if decoded_claims.exp < chrono::Utc::now().timestamp() {
-        //                     return Err(to_http_error(
-        //                         ConnectError::unauthenticated(format!("expired token: {e}")),
-        //                         &parts.headers,
-        //                         Some(perms),
-        //                     ));
-        //                 }
-        //             }
-
-        //             if !is_public {
-        //                 return Err(to_http_error(
-        //                     ConnectError::unauthenticated(format!("invalid token: {e}")),
-        //                     &parts.headers,
-        //                     Some(perms),
-        //                 ));
-        //             }
-        //             None
-        //         }
-        //     }
-        // } else if !is_public {
-        //     return Err(to_http_error(
-        //         ConnectError::unauthenticated("missing Bearer token"),
-        //         &parts.headers,
-        //         Some(perms),
-        //     ));
-        // } else {
-        //     None
-        // };
         let (api_login_manager, login_manager) =
             <(Arc<api_login::APILoginManager>, Arc<LoginManager>)>::from_ref(state);
         let (claims, _login_response, getting_claims_error) = login_manager
