@@ -18,8 +18,12 @@ FROM bufbuild/buf:latest AS buf-image
 # ==========================================
 FROM node:20-alpine AS final
 
+ENV HOME=/tmp
+ENV CARGO_HOME=/tmp/.cargo
+ENV RUSTUP_HOME=/tmp/.rustup
+
 # Install minimal OS requirements for Rust-compiled binaries or native modules if needed
-RUN apk add --no-cache libgcc libstdc++ git
+RUN apk add --no-cache libgcc libstdc++ git rust cargo
 
 # 1. Steal Buf binary from Stage 2
 COPY --from=buf-image /usr/local/bin/buf /usr/local/bin/buf
@@ -38,9 +42,15 @@ COPY --from=ghcr.io/casey/just:latest /just /usr/local/bin/
 WORKDIR /app
 
 # Copy dependency manifests first to leverage Docker layer caching
+WORKDIR /app/generated-proto/js
 COPY generated-proto/js/package.json generated-proto/js/pnpm-lock.yaml ./
-RUN cd generated-proto/js && pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
+WORKDIR /app
 
 COPY . .
 
-RUN ["just", "compile-proto"]
+RUN chmod -R 777 /tmp
+RUN chmod -R 777 /app
+
+ENTRYPOINT ["just"]
+CMD ["compile-proto", "is_docker=true"]
