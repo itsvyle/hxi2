@@ -20,7 +20,7 @@ use crate::{
 };
 
 pub struct AuthUpdateUserServiceImpl {
-    pub login_manager: Arc<LoginManager>,
+    pub _login_manager: Arc<LoginManager>,
     pub password_login_manager: Arc<PasswordLoginManager>,
 }
 

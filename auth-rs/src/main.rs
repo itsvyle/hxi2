@@ -78,7 +78,7 @@ async fn main() -> Result<()> {
     });
 
     let update_service = Arc::new(AuthUpdateUserServiceImpl {
-        login_manager: login_manager.clone(),
+        _login_manager: login_manager.clone(),
         password_login_manager: password_login_manager.clone(),
     });
 
