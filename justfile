@@ -28,7 +28,7 @@ compile-proto:
 docker-compile-proto:
     docker build -f ./Dockerfile.compile-proto -t hxi2-proto-builder .
     docker run --rm \
-        -v "$(pwd):/app" \
+        -v "$(pwd)/generated-proto:/app/generated-proto" \
         hxi2-proto-builder
 
 grpcui url="0.0.0.0:8080":
