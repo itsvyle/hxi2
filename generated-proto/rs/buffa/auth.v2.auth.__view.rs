@@ -2242,6 +2242,12 @@ pub struct GetDevTokenRequestView<'a> {
         'a,
         ::buffa::EnumValue<super::super::Attribute>,
     >,
+    /// Field 5: `first_name`
+    pub first_name: ::core::option::Option<&'a str>,
+    /// Field 6: `last_name`
+    pub last_name: ::core::option::Option<&'a str>,
+    /// Field 7: `insert_to_database`
+    pub insert_to_database: bool,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for GetDevTokenRequestView<'a> {
@@ -2287,6 +2293,27 @@ impl<'a> ::buffa::MessageView<'a> for GetDevTokenRequestView<'a> {
                     ::buffa::encoding::WireType::Varint,
                 )?;
                 view.validity_seconds = Some(::buffa::types::decode_int64(&mut cur)?);
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.first_name = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.last_name = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.insert_to_database = ::buffa::types::decode_bool(&mut cur)?;
             }
             2u32 => {
                 if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
@@ -2372,6 +2399,9 @@ impl<'a> ::buffa::MessageView<'a> for GetDevTokenRequestView<'a> {
             roles: self.roles.to_vec(),
             validity_seconds: self.validity_seconds,
             attributes: self.attributes.to_vec(),
+            first_name: self.first_name.map(|s| s.to_string()),
+            last_name: self.last_name.map(|s| s.to_string()),
+            insert_to_database: self.insert_to_database,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -2404,6 +2434,15 @@ impl<'a> ::buffa::ViewEncode<'a> for GetDevTokenRequestView<'a> {
                 .map(|v| ::buffa::types::int32_encoded_len(v.to_i32()) as u64)
                 .sum::<u64>();
             size += 1u64 + ::buffa::encoding::varint_len(payload) as u64 + payload;
+        }
+        if let Some(ref v) = self.first_name {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.last_name {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.insert_to_database {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -2443,6 +2482,15 @@ impl<'a> ::buffa::ViewEncode<'a> for GetDevTokenRequestView<'a> {
             for v in &self.attributes {
                 ::buffa::types::encode_int32(v.to_i32(), buf);
             }
+        }
+        if let Some(ref v) = self.first_name {
+            ::buffa::types::put_string_field(5u32, v, buf);
+        }
+        if let Some(ref v) = self.last_name {
+            ::buffa::types::put_string_field(6u32, v, buf);
+        }
+        if self.insert_to_database {
+            ::buffa::types::put_bool_field(7u32, self.insert_to_database, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2488,6 +2536,15 @@ impl<'__a> ::serde::Serialize for GetDevTokenRequestView<'__a> {
                     "attributes",
                     &::buffa::json_helpers::EnumSeqJson(&self.attributes),
                 )?;
+        }
+        if let ::core::option::Option::Some(__v) = self.first_name {
+            __map.serialize_entry("firstName", __v)?;
+        }
+        if let ::core::option::Option::Some(__v) = self.last_name {
+            __map.serialize_entry("lastName", __v)?;
+        }
+        if self.insert_to_database {
+            __map.serialize_entry("insertToDatabase", &self.insert_to_database)?;
         }
         __map.end()
     }
@@ -2608,6 +2665,21 @@ impl GetDevTokenRequestOwnedView {
     ) -> &::buffa::RepeatedView<'_, ::buffa::EnumValue<super::super::Attribute>> {
         &self.0.reborrow().attributes
     }
+    /// Field 5: `first_name`
+    #[must_use]
+    pub fn first_name(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().first_name
+    }
+    /// Field 6: `last_name`
+    #[must_use]
+    pub fn last_name(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().last_name
+    }
+    /// Field 7: `insert_to_database`
+    #[must_use]
+    pub fn insert_to_database(&self) -> bool {
+        self.0.reborrow().insert_to_database
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<GetDevTokenRequestView<'static>>>
 for GetDevTokenRequestOwnedView {
@@ -2662,6 +2734,17 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for GetDevTokenRequestView<
                 )
             }
             4u32 => ::buffa_descriptor::reflect::ValueRef::List(&self.attributes),
+            5u32 => {
+                ::buffa_descriptor::reflect::ValueRef::String(
+                    self.first_name.unwrap_or(""),
+                )
+            }
+            6u32 => {
+                ::buffa_descriptor::reflect::ValueRef::String(
+                    self.last_name.unwrap_or(""),
+                )
+            }
+            7u32 => ::buffa_descriptor::reflect::ValueRef::Bool(self.insert_to_database),
             _ => {
                 ::core::debug_assert!(
                     false,
@@ -2678,6 +2761,9 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for GetDevTokenRequestView<
             2u32 => !::buffa::RepeatedView::is_empty(&self.roles),
             3u32 => self.validity_seconds.is_some(),
             4u32 => !::buffa::RepeatedView::is_empty(&self.attributes),
+            5u32 => self.first_name.is_some(),
+            6u32 => self.last_name.is_some(),
+            7u32 => self.insert_to_database,
             _ => false,
         }
     }
@@ -3943,934 +4029,6 @@ impl<'a> ::buffa_descriptor::reflect::ReflectElement for CreateUserResponseView<
     }
 }
 impl<'a> CreateUserResponseView<'a> {
-    /// Memoized `MessageIndex` for this view's message type, resolved
-    /// once against the package's embedded descriptor pool. An inherent
-    /// associated fn (not a free fn) so sibling views in the same module
-    /// do not collide.
-    #[doc(hidden)]
-    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
-        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
-        *IDX
-            .get_or_init(|| {
-                super::super::__buffa::reflect::descriptor_pool()
-                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
-                    .expect(
-                        "generated view type is registered in the embedded descriptor pool",
-                    )
-            })
-    }
-}
-#[derive(Clone, Debug, Default)]
-pub struct AddPasswordRequestView<'a> {
-    /// Field 1: `password`
-    pub password: &'a str,
-    pub user_identifier: ::core::option::Option<
-        super::super::__buffa::view::oneof::add_password_request::UserIdentifier<'a>,
-    >,
-    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
-}
-impl<'a> ::buffa::MessageView<'a> for AddPasswordRequestView<'a> {
-    type Owned = super::super::AddPasswordRequest;
-    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
-        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
-        <Self as ::buffa::MessageView>::decode_view_ctx(
-            buf,
-            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
-                .with_element_memory(&__elem),
-        )
-    }
-    fn decode_view_with_ctx(
-        buf: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
-    }
-    #[inline]
-    fn merge_view_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        cur: &'a [u8],
-        before_tag: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
-        let _ = ctx;
-        #[allow(unused_variables)]
-        let view = self;
-        let mut cur = cur;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.password = ::buffa::types::borrow_str(&mut cur)?;
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.user_identifier = Some(
-                    super::super::__buffa::view::oneof::add_password_request::UserIdentifier::UserId(
-                        ::buffa::types::decode_int64(&mut cur)?,
-                    ),
-                );
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.user_identifier = Some(
-                    super::super::__buffa::view::oneof::add_password_request::UserIdentifier::Username(
-                        ::buffa::types::borrow_str(&mut cur)?,
-                    ),
-                );
-            }
-            _ => {
-                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
-                let span_len = before_tag.len() - cur.len();
-                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
-            }
-        }
-        ::core::result::Result::Ok(cur)
-    }
-    fn to_owned_message(
-        &self,
-    ) -> ::core::result::Result<super::super::AddPasswordRequest, ::buffa::DecodeError> {
-        self.to_owned_from_source(None)
-    }
-    #[allow(clippy::useless_conversion, clippy::needless_update)]
-    fn to_owned_from_source(
-        &self,
-        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<super::super::AddPasswordRequest, ::buffa::DecodeError> {
-        #[allow(unused_imports)]
-        use ::buffa::alloc::string::ToString as _;
-        let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::AddPasswordRequest {
-            password: self.password.to_string(),
-            user_identifier: self
-                .user_identifier
-                .as_ref()
-                .map(|v| match v {
-                    super::super::__buffa::view::oneof::add_password_request::UserIdentifier::UserId(
-                        v,
-                    ) => {
-                        super::super::__buffa::oneof::add_password_request::UserIdentifier::UserId(
-                            *v,
-                        )
-                    }
-                    super::super::__buffa::view::oneof::add_password_request::UserIdentifier::Username(
-                        v,
-                    ) => {
-                        super::super::__buffa::oneof::add_password_request::UserIdentifier::Username(
-                            v.to_string(),
-                        )
-                    }
-                }),
-            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
-            ..::core::default::Default::default()
-        })
-    }
-}
-impl<'a> ::buffa::ViewEncode<'a> for AddPasswordRequestView<'a> {
-    #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if !self.password.is_empty() {
-            size += 1u64 + ::buffa::types::string_encoded_len(&self.password) as u64;
-        }
-        if let ::core::option::Option::Some(ref v) = self.user_identifier {
-            match v {
-                super::super::__buffa::view::oneof::add_password_request::UserIdentifier::UserId(
-                    v,
-                ) => {
-                    size += 1u64 + ::buffa::types::int64_encoded_len(*v) as u64;
-                }
-                super::super::__buffa::view::oneof::add_password_request::UserIdentifier::Username(
-                    x,
-                ) => {
-                    size += 1u64 + ::buffa::types::string_encoded_len(x) as u64;
-                }
-            }
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    #[allow(clippy::needless_borrow)]
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if !self.password.is_empty() {
-            ::buffa::types::put_string_field(1u32, &self.password, buf);
-        }
-        if let ::core::option::Option::Some(ref v) = self.user_identifier {
-            match v {
-                super::super::__buffa::view::oneof::add_password_request::UserIdentifier::UserId(
-                    x,
-                ) => {
-                    ::buffa::types::put_int64_field(2u32, *x, buf);
-                }
-                super::super::__buffa::view::oneof::add_password_request::UserIdentifier::Username(
-                    x,
-                ) => {
-                    ::buffa::types::put_string_field(3u32, x, buf);
-                }
-            }
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-}
-/// Serializes this view as protobuf JSON.
-///
-/// Implicit-presence fields with default values are omitted, `required`
-/// fields are always emitted, explicit-presence (`optional`) fields are
-/// emitted only when set, bytes fields are base64-encoded, and enum
-/// values are their proto name strings.
-///
-/// This impl uses `serialize_map(None)` because the number of emitted
-/// fields depends on default-omission rules; serializers that require
-/// known map lengths (e.g. `bincode`) will return a runtime error.
-/// Use the owned message type for those formats.
-impl<'__a> ::serde::Serialize for AddPasswordRequestView<'__a> {
-    fn serialize<__S: ::serde::Serializer>(
-        &self,
-        __s: __S,
-    ) -> ::core::result::Result<__S::Ok, __S::Error> {
-        use ::serde::ser::SerializeMap as _;
-        let mut __map = __s.serialize_map(::core::option::Option::None)?;
-        if !::buffa::json_helpers::skip_if::is_empty_str(self.password) {
-            __map.serialize_entry("password", self.password)?;
-        }
-        if let ::core::option::Option::Some(ref __ov) = self.user_identifier {
-            match __ov {
-                super::super::__buffa::view::oneof::add_password_request::UserIdentifier::UserId(
-                    v,
-                ) => {
-                    __map
-                        .serialize_entry(
-                            "userId",
-                            &::buffa::json_helpers::ProtoJson(v),
-                        )?;
-                }
-                super::super::__buffa::view::oneof::add_password_request::UserIdentifier::Username(
-                    v,
-                ) => {
-                    __map.serialize_entry("username", v)?;
-                }
-            }
-        }
-        __map.end()
-    }
-}
-impl<'a> ::buffa::MessageName for AddPasswordRequestView<'a> {
-    const PACKAGE: &'static str = "auth.v2";
-    const NAME: &'static str = "AddPasswordRequest";
-    const FULL_NAME: &'static str = "auth.v2.AddPasswordRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.AddPasswordRequest";
-}
-::buffa::impl_default_view_instance!(AddPasswordRequestView);
-::buffa::impl_view_reborrow!(AddPasswordRequestView);
-/** Self-contained, `'static` owned view of a `AddPasswordRequest` message.
-
- Wraps [`::buffa::OwnedView`]`<`[`AddPasswordRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
-
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`AddPasswordRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
-#[derive(Clone, Debug)]
-pub struct AddPasswordRequestOwnedView(
-    ::buffa::OwnedView<AddPasswordRequestView<'static>>,
-);
-impl AddPasswordRequestOwnedView {
-    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
-    ///
-    /// The view borrows directly from the buffer's data; the buffer is
-    /// retained inside the returned handle.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
-    /// protobuf data.
-    pub fn decode(
-        bytes: ::buffa::bytes::Bytes,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            AddPasswordRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
-        )
-    }
-    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
-    /// max message size).
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
-    /// exceeds the configured limits.
-    pub fn decode_with_options(
-        bytes: ::buffa::bytes::Bytes,
-        opts: &::buffa::DecodeOptions,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            AddPasswordRequestOwnedView(
-                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
-            ),
-        )
-    }
-    /// Build from an owned message via an encode → decode round-trip.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
-    /// message's encoded size exceeds the 2 GiB protobuf limit, or
-    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
-    /// somehow invalid (should not happen for well-formed messages).
-    pub fn from_owned(
-        msg: &super::super::AddPasswordRequest,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            AddPasswordRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
-        )
-    }
-    /// Borrow the full [`AddPasswordRequestView`] with its lifetime tied to `&self`.
-    #[must_use]
-    pub fn view(&self) -> &AddPasswordRequestView<'_> {
-        self.0.reborrow()
-    }
-    /// Convert to the owned message type.
-    ///
-    /// Infallible: this type's constructors wire-decode their
-    /// buffer, and a view produced by wire decoding always
-    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
-    /// whose contract also governs handles converted from a raw
-    /// [`::buffa::OwnedView`].
-    #[must_use]
-    pub fn to_owned_message(&self) -> super::super::AddPasswordRequest {
-        self.0.to_owned_message()
-    }
-    /// The underlying bytes buffer.
-    #[must_use]
-    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
-        self.0.bytes()
-    }
-    /// Consume the handle, returning the underlying bytes buffer.
-    #[must_use]
-    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
-        self.0.into_bytes()
-    }
-    /// Field 1: `password`
-    #[must_use]
-    pub fn password(&self) -> &'_ str {
-        self.0.reborrow().password
-    }
-    /// Oneof `user_identifier`.
-    #[must_use]
-    pub fn user_identifier(
-        &self,
-    ) -> ::core::option::Option<
-        &super::super::__buffa::view::oneof::add_password_request::UserIdentifier<'_>,
-    > {
-        self.0.reborrow().user_identifier.as_ref()
-    }
-}
-impl ::core::convert::From<::buffa::OwnedView<AddPasswordRequestView<'static>>>
-for AddPasswordRequestOwnedView {
-    fn from(inner: ::buffa::OwnedView<AddPasswordRequestView<'static>>) -> Self {
-        AddPasswordRequestOwnedView(inner)
-    }
-}
-impl ::core::convert::From<AddPasswordRequestOwnedView>
-for ::buffa::OwnedView<AddPasswordRequestView<'static>> {
-    fn from(wrapper: AddPasswordRequestOwnedView) -> Self {
-        wrapper.0
-    }
-}
-impl ::core::convert::AsRef<::buffa::OwnedView<AddPasswordRequestView<'static>>>
-for AddPasswordRequestOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<AddPasswordRequestView<'static>> {
-        &self.0
-    }
-}
-impl ::buffa::HasMessageView for super::super::AddPasswordRequest {
-    type View<'a> = AddPasswordRequestView<'a>;
-    type ViewHandle = AddPasswordRequestOwnedView;
-}
-impl ::serde::Serialize for AddPasswordRequestOwnedView {
-    fn serialize<__S: ::serde::Serializer>(
-        &self,
-        __s: __S,
-    ) -> ::core::result::Result<__S::Ok, __S::Error> {
-        ::serde::Serialize::serialize(&self.0, __s)
-    }
-}
-impl<'a> ::buffa_descriptor::reflect::ReflectMessage for AddPasswordRequestView<'a> {
-    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
-        super::super::__buffa::reflect::descriptor_pool()
-            .message(Self::__buffa_reflect_message_index())
-    }
-    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
-        super::super::__buffa::reflect::descriptor_pool()
-    }
-    fn get(
-        &self,
-        field: &::buffa_descriptor::FieldDescriptor,
-    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        match field.number() {
-            1u32 => ::buffa_descriptor::reflect::ValueRef::String(self.password),
-            2u32 => {
-                match &self.user_identifier {
-                    ::core::option::Option::Some(
-                        super::super::__buffa::view::oneof::add_password_request::UserIdentifier::UserId(
-                            v,
-                        ),
-                    ) => ::buffa_descriptor::reflect::ValueRef::I64(*v),
-                    _ => ::buffa_descriptor::reflect::ValueRef::I64(0),
-                }
-            }
-            3u32 => {
-                match &self.user_identifier {
-                    ::core::option::Option::Some(
-                        super::super::__buffa::view::oneof::add_password_request::UserIdentifier::Username(
-                            v,
-                        ),
-                    ) => ::buffa_descriptor::reflect::ValueRef::String(v),
-                    _ => ::buffa_descriptor::reflect::ValueRef::String(""),
-                }
-            }
-            _ => {
-                ::core::debug_assert!(
-                    false,
-                    "field number {} is not a member of this view's reflect get()", field
-                    .number(),
-                );
-                ::buffa_descriptor::reflect::ValueRef::Bool(false)
-            }
-        }
-    }
-    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
-        match field.number() {
-            1u32 => !self.password.is_empty(),
-            2u32 => {
-                ::core::matches!(
-                    & self.user_identifier,
-                    ::core::option::Option::Some(super::super::__buffa::view::oneof::add_password_request::UserIdentifier::UserId(_))
-                )
-            }
-            3u32 => {
-                ::core::matches!(
-                    & self.user_identifier,
-                    ::core::option::Option::Some(super::super::__buffa::view::oneof::add_password_request::UserIdentifier::Username(_))
-                )
-            }
-            _ => false,
-        }
-    }
-    fn for_each_set(
-        &self,
-        f: &mut dyn ::core::ops::FnMut(
-            &::buffa_descriptor::FieldDescriptor,
-            ::buffa_descriptor::reflect::ValueRef<'_>,
-        ),
-    ) {
-        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
-        for fd in md.fields() {
-            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
-                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
-            }
-        }
-    }
-    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
-        let bytes = ::buffa::ViewEncode::encode_to_vec(self);
-        let options = ::buffa::DecodeOptions::new()
-            .with_element_memory_limit(
-                bytes
-                    .len()
-                    .saturating_mul(128)
-                    .max(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT),
-            )
-            .with_unknown_field_limit(
-                bytes.len().max(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT),
-            );
-        ::buffa_descriptor::reflect::DynamicMessage::decode_with_options(
-                ::buffa::alloc::sync::Arc::clone(
-                    super::super::__buffa::reflect::descriptor_pool(),
-                ),
-                Self::__buffa_reflect_message_index(),
-                &bytes,
-                &options,
-            )
-            .expect("view re-encodes to bytes decodable against its own descriptor")
-    }
-}
-impl<'a> ::buffa_descriptor::reflect::ReflectElement for AddPasswordRequestView<'a> {
-    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
-        ::buffa_descriptor::reflect::ValueRef::Message(
-            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
-        )
-    }
-}
-impl<'a> AddPasswordRequestView<'a> {
-    /// Memoized `MessageIndex` for this view's message type, resolved
-    /// once against the package's embedded descriptor pool. An inherent
-    /// associated fn (not a free fn) so sibling views in the same module
-    /// do not collide.
-    #[doc(hidden)]
-    fn __buffa_reflect_message_index() -> ::buffa_descriptor::MessageIndex {
-        static IDX: ::std::sync::OnceLock<::buffa_descriptor::MessageIndex> = ::std::sync::OnceLock::new();
-        *IDX
-            .get_or_init(|| {
-                super::super::__buffa::reflect::descriptor_pool()
-                    .message_index(<Self as ::buffa::MessageName>::FULL_NAME)
-                    .expect(
-                        "generated view type is registered in the embedded descriptor pool",
-                    )
-            })
-    }
-}
-#[derive(Clone, Debug, Default)]
-pub struct RemovePasswordRequestView<'a> {
-    pub user_identifier: ::core::option::Option<
-        super::super::__buffa::view::oneof::remove_password_request::UserIdentifier<'a>,
-    >,
-    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
-}
-impl<'a> ::buffa::MessageView<'a> for RemovePasswordRequestView<'a> {
-    type Owned = super::super::RemovePasswordRequest;
-    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
-        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
-        <Self as ::buffa::MessageView>::decode_view_ctx(
-            buf,
-            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
-                .with_element_memory(&__elem),
-        )
-    }
-    fn decode_view_with_ctx(
-        buf: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
-    }
-    #[inline]
-    fn merge_view_field(
-        &mut self,
-        tag: ::buffa::encoding::Tag,
-        cur: &'a [u8],
-        before_tag: &'a [u8],
-        ctx: ::buffa::DecodeContext<'_>,
-    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
-        let _ = ctx;
-        #[allow(unused_variables)]
-        let view = self;
-        let mut cur = cur;
-        match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.user_identifier = Some(
-                    super::super::__buffa::view::oneof::remove_password_request::UserIdentifier::UserId(
-                        ::buffa::types::decode_int64(&mut cur)?,
-                    ),
-                );
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.user_identifier = Some(
-                    super::super::__buffa::view::oneof::remove_password_request::UserIdentifier::Username(
-                        ::buffa::types::borrow_str(&mut cur)?,
-                    ),
-                );
-            }
-            _ => {
-                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
-                let span_len = before_tag.len() - cur.len();
-                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
-            }
-        }
-        ::core::result::Result::Ok(cur)
-    }
-    fn to_owned_message(
-        &self,
-    ) -> ::core::result::Result<
-        super::super::RemovePasswordRequest,
-        ::buffa::DecodeError,
-    > {
-        self.to_owned_from_source(None)
-    }
-    #[allow(clippy::useless_conversion, clippy::needless_update)]
-    fn to_owned_from_source(
-        &self,
-        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<
-        super::super::RemovePasswordRequest,
-        ::buffa::DecodeError,
-    > {
-        #[allow(unused_imports)]
-        use ::buffa::alloc::string::ToString as _;
-        let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::RemovePasswordRequest {
-            user_identifier: self
-                .user_identifier
-                .as_ref()
-                .map(|v| match v {
-                    super::super::__buffa::view::oneof::remove_password_request::UserIdentifier::UserId(
-                        v,
-                    ) => {
-                        super::super::__buffa::oneof::remove_password_request::UserIdentifier::UserId(
-                            *v,
-                        )
-                    }
-                    super::super::__buffa::view::oneof::remove_password_request::UserIdentifier::Username(
-                        v,
-                    ) => {
-                        super::super::__buffa::oneof::remove_password_request::UserIdentifier::Username(
-                            v.to_string(),
-                        )
-                    }
-                }),
-            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
-            ..::core::default::Default::default()
-        })
-    }
-}
-impl<'a> ::buffa::ViewEncode<'a> for RemovePasswordRequestView<'a> {
-    #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        let mut size = 0u64;
-        if let ::core::option::Option::Some(ref v) = self.user_identifier {
-            match v {
-                super::super::__buffa::view::oneof::remove_password_request::UserIdentifier::UserId(
-                    v,
-                ) => {
-                    size += 1u64 + ::buffa::types::int64_encoded_len(*v) as u64;
-                }
-                super::super::__buffa::view::oneof::remove_password_request::UserIdentifier::Username(
-                    x,
-                ) => {
-                    size += 1u64 + ::buffa::types::string_encoded_len(x) as u64;
-                }
-            }
-        }
-        size += self.__buffa_unknown_fields.encoded_len() as u64;
-        ::buffa::saturate_size(size)
-    }
-    #[allow(clippy::needless_borrow)]
-    fn write_to(
-        &self,
-        _cache: &mut ::buffa::SizeCache,
-        buf: &mut impl ::buffa::EncodeSink,
-    ) {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        if let ::core::option::Option::Some(ref v) = self.user_identifier {
-            match v {
-                super::super::__buffa::view::oneof::remove_password_request::UserIdentifier::UserId(
-                    x,
-                ) => {
-                    ::buffa::types::put_int64_field(1u32, *x, buf);
-                }
-                super::super::__buffa::view::oneof::remove_password_request::UserIdentifier::Username(
-                    x,
-                ) => {
-                    ::buffa::types::put_string_field(2u32, x, buf);
-                }
-            }
-        }
-        self.__buffa_unknown_fields.write_to(buf);
-    }
-}
-/// Serializes this view as protobuf JSON.
-///
-/// Implicit-presence fields with default values are omitted, `required`
-/// fields are always emitted, explicit-presence (`optional`) fields are
-/// emitted only when set, bytes fields are base64-encoded, and enum
-/// values are their proto name strings.
-///
-/// This impl uses `serialize_map(None)` because the number of emitted
-/// fields depends on default-omission rules; serializers that require
-/// known map lengths (e.g. `bincode`) will return a runtime error.
-/// Use the owned message type for those formats.
-impl<'__a> ::serde::Serialize for RemovePasswordRequestView<'__a> {
-    fn serialize<__S: ::serde::Serializer>(
-        &self,
-        __s: __S,
-    ) -> ::core::result::Result<__S::Ok, __S::Error> {
-        use ::serde::ser::SerializeMap as _;
-        let mut __map = __s.serialize_map(::core::option::Option::None)?;
-        if let ::core::option::Option::Some(ref __ov) = self.user_identifier {
-            match __ov {
-                super::super::__buffa::view::oneof::remove_password_request::UserIdentifier::UserId(
-                    v,
-                ) => {
-                    __map
-                        .serialize_entry(
-                            "userId",
-                            &::buffa::json_helpers::ProtoJson(v),
-                        )?;
-                }
-                super::super::__buffa::view::oneof::remove_password_request::UserIdentifier::Username(
-                    v,
-                ) => {
-                    __map.serialize_entry("username", v)?;
-                }
-            }
-        }
-        __map.end()
-    }
-}
-impl<'a> ::buffa::MessageName for RemovePasswordRequestView<'a> {
-    const PACKAGE: &'static str = "auth.v2";
-    const NAME: &'static str = "RemovePasswordRequest";
-    const FULL_NAME: &'static str = "auth.v2.RemovePasswordRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/auth.v2.RemovePasswordRequest";
-}
-::buffa::impl_default_view_instance!(RemovePasswordRequestView);
-::buffa::impl_view_reborrow!(RemovePasswordRequestView);
-/** Self-contained, `'static` owned view of a `RemovePasswordRequest` message.
-
- Wraps [`::buffa::OwnedView`]`<`[`RemovePasswordRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
-
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`RemovePasswordRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
-#[derive(Clone, Debug)]
-pub struct RemovePasswordRequestOwnedView(
-    ::buffa::OwnedView<RemovePasswordRequestView<'static>>,
-);
-impl RemovePasswordRequestOwnedView {
-    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
-    ///
-    /// The view borrows directly from the buffer's data; the buffer is
-    /// retained inside the returned handle.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
-    /// protobuf data.
-    pub fn decode(
-        bytes: ::buffa::bytes::Bytes,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            RemovePasswordRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
-        )
-    }
-    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
-    /// max message size).
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
-    /// exceeds the configured limits.
-    pub fn decode_with_options(
-        bytes: ::buffa::bytes::Bytes,
-        opts: &::buffa::DecodeOptions,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            RemovePasswordRequestOwnedView(
-                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
-            ),
-        )
-    }
-    /// Build from an owned message via an encode → decode round-trip.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
-    /// message's encoded size exceeds the 2 GiB protobuf limit, or
-    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
-    /// somehow invalid (should not happen for well-formed messages).
-    pub fn from_owned(
-        msg: &super::super::RemovePasswordRequest,
-    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
-        ::core::result::Result::Ok(
-            RemovePasswordRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
-        )
-    }
-    /// Borrow the full [`RemovePasswordRequestView`] with its lifetime tied to `&self`.
-    #[must_use]
-    pub fn view(&self) -> &RemovePasswordRequestView<'_> {
-        self.0.reborrow()
-    }
-    /// Convert to the owned message type.
-    ///
-    /// Infallible: this type's constructors wire-decode their
-    /// buffer, and a view produced by wire decoding always
-    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
-    /// whose contract also governs handles converted from a raw
-    /// [`::buffa::OwnedView`].
-    #[must_use]
-    pub fn to_owned_message(&self) -> super::super::RemovePasswordRequest {
-        self.0.to_owned_message()
-    }
-    /// The underlying bytes buffer.
-    #[must_use]
-    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
-        self.0.bytes()
-    }
-    /// Consume the handle, returning the underlying bytes buffer.
-    #[must_use]
-    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
-        self.0.into_bytes()
-    }
-    /// Oneof `user_identifier`.
-    #[must_use]
-    pub fn user_identifier(
-        &self,
-    ) -> ::core::option::Option<
-        &super::super::__buffa::view::oneof::remove_password_request::UserIdentifier<'_>,
-    > {
-        self.0.reborrow().user_identifier.as_ref()
-    }
-}
-impl ::core::convert::From<::buffa::OwnedView<RemovePasswordRequestView<'static>>>
-for RemovePasswordRequestOwnedView {
-    fn from(inner: ::buffa::OwnedView<RemovePasswordRequestView<'static>>) -> Self {
-        RemovePasswordRequestOwnedView(inner)
-    }
-}
-impl ::core::convert::From<RemovePasswordRequestOwnedView>
-for ::buffa::OwnedView<RemovePasswordRequestView<'static>> {
-    fn from(wrapper: RemovePasswordRequestOwnedView) -> Self {
-        wrapper.0
-    }
-}
-impl ::core::convert::AsRef<::buffa::OwnedView<RemovePasswordRequestView<'static>>>
-for RemovePasswordRequestOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<RemovePasswordRequestView<'static>> {
-        &self.0
-    }
-}
-impl ::buffa::HasMessageView for super::super::RemovePasswordRequest {
-    type View<'a> = RemovePasswordRequestView<'a>;
-    type ViewHandle = RemovePasswordRequestOwnedView;
-}
-impl ::serde::Serialize for RemovePasswordRequestOwnedView {
-    fn serialize<__S: ::serde::Serializer>(
-        &self,
-        __s: __S,
-    ) -> ::core::result::Result<__S::Ok, __S::Error> {
-        ::serde::Serialize::serialize(&self.0, __s)
-    }
-}
-impl<'a> ::buffa_descriptor::reflect::ReflectMessage for RemovePasswordRequestView<'a> {
-    fn message_descriptor(&self) -> &::buffa_descriptor::MessageDescriptor {
-        super::super::__buffa::reflect::descriptor_pool()
-            .message(Self::__buffa_reflect_message_index())
-    }
-    fn pool(&self) -> &::buffa::alloc::sync::Arc<::buffa_descriptor::DescriptorPool> {
-        super::super::__buffa::reflect::descriptor_pool()
-    }
-    fn get(
-        &self,
-        field: &::buffa_descriptor::FieldDescriptor,
-    ) -> ::buffa_descriptor::reflect::ValueRef<'_> {
-        #[allow(unused_imports)]
-        use ::buffa::Enumeration as _;
-        match field.number() {
-            1u32 => {
-                match &self.user_identifier {
-                    ::core::option::Option::Some(
-                        super::super::__buffa::view::oneof::remove_password_request::UserIdentifier::UserId(
-                            v,
-                        ),
-                    ) => ::buffa_descriptor::reflect::ValueRef::I64(*v),
-                    _ => ::buffa_descriptor::reflect::ValueRef::I64(0),
-                }
-            }
-            2u32 => {
-                match &self.user_identifier {
-                    ::core::option::Option::Some(
-                        super::super::__buffa::view::oneof::remove_password_request::UserIdentifier::Username(
-                            v,
-                        ),
-                    ) => ::buffa_descriptor::reflect::ValueRef::String(v),
-                    _ => ::buffa_descriptor::reflect::ValueRef::String(""),
-                }
-            }
-            _ => {
-                ::core::debug_assert!(
-                    false,
-                    "field number {} is not a member of this view's reflect get()", field
-                    .number(),
-                );
-                ::buffa_descriptor::reflect::ValueRef::Bool(false)
-            }
-        }
-    }
-    fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
-        match field.number() {
-            1u32 => {
-                ::core::matches!(
-                    & self.user_identifier,
-                    ::core::option::Option::Some(super::super::__buffa::view::oneof::remove_password_request::UserIdentifier::UserId(_))
-                )
-            }
-            2u32 => {
-                ::core::matches!(
-                    & self.user_identifier,
-                    ::core::option::Option::Some(super::super::__buffa::view::oneof::remove_password_request::UserIdentifier::Username(_))
-                )
-            }
-            _ => false,
-        }
-    }
-    fn for_each_set(
-        &self,
-        f: &mut dyn ::core::ops::FnMut(
-            &::buffa_descriptor::FieldDescriptor,
-            ::buffa_descriptor::reflect::ValueRef<'_>,
-        ),
-    ) {
-        let md = ::buffa_descriptor::reflect::ReflectMessage::message_descriptor(self);
-        for fd in md.fields() {
-            if ::buffa_descriptor::reflect::ReflectMessage::has(self, fd) {
-                f(fd, ::buffa_descriptor::reflect::ReflectMessage::get(self, fd));
-            }
-        }
-    }
-    fn to_dynamic(&self) -> ::buffa_descriptor::reflect::DynamicMessage {
-        let bytes = ::buffa::ViewEncode::encode_to_vec(self);
-        let options = ::buffa::DecodeOptions::new()
-            .with_element_memory_limit(
-                bytes
-                    .len()
-                    .saturating_mul(128)
-                    .max(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT),
-            )
-            .with_unknown_field_limit(
-                bytes.len().max(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT),
-            );
-        ::buffa_descriptor::reflect::DynamicMessage::decode_with_options(
-                ::buffa::alloc::sync::Arc::clone(
-                    super::super::__buffa::reflect::descriptor_pool(),
-                ),
-                Self::__buffa_reflect_message_index(),
-                &bytes,
-                &options,
-            )
-            .expect("view re-encodes to bytes decodable against its own descriptor")
-    }
-}
-impl<'a> ::buffa_descriptor::reflect::ReflectElement for RemovePasswordRequestView<'a> {
-    fn as_value_ref(&self) -> ::buffa_descriptor::reflect::ValueRef<'_> {
-        ::buffa_descriptor::reflect::ValueRef::Message(
-            ::buffa_descriptor::reflect::ReflectCow::Borrowed(self),
-        )
-    }
-}
-impl<'a> RemovePasswordRequestView<'a> {
     /// Memoized `MessageIndex` for this view's message type, resolved
     /// once against the package's embedded descriptor pool. An inherent
     /// associated fn (not a free fn) so sibling views in the same module
@@ -6527,8 +5685,9 @@ impl<'a> AddAPIUserResponseView<'a> {
 }
 #[derive(Clone, Debug, Default)]
 pub struct RemoveAPIUserRequestView<'a> {
-    pub user_identifier: ::core::option::Option<
-        super::super::__buffa::view::oneof::remove_api_user_request::UserIdentifier<'a>,
+    /// Field 3: `user_identifier`
+    pub user_identifier: ::buffa::MessageFieldView<
+        super::super::__buffa::view::UserIdentifierView<'a>,
     >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
@@ -6562,27 +5721,26 @@ impl<'a> ::buffa::MessageView<'a> for RemoveAPIUserRequestView<'a> {
         let view = self;
         let mut cur = cur;
         match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.user_identifier = Some(
-                    super::super::__buffa::view::oneof::remove_api_user_request::UserIdentifier::UserId(
-                        ::buffa::types::decode_int64(&mut cur)?,
-                    ),
-                );
-            }
-            2u32 => {
+            3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.user_identifier = Some(
-                    super::super::__buffa::view::oneof::remove_api_user_request::UserIdentifier::Username(
-                        ::buffa::types::borrow_str(&mut cur)?,
-                    ),
-                );
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.user_identifier.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.user_identifier = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::UserIdentifierView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
             }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
@@ -6612,25 +5770,15 @@ impl<'a> ::buffa::MessageView<'a> for RemoveAPIUserRequestView<'a> {
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
         ::core::result::Result::Ok(super::super::RemoveAPIUserRequest {
-            user_identifier: self
-                .user_identifier
-                .as_ref()
-                .map(|v| match v {
-                    super::super::__buffa::view::oneof::remove_api_user_request::UserIdentifier::UserId(
-                        v,
-                    ) => {
-                        super::super::__buffa::oneof::remove_api_user_request::UserIdentifier::UserId(
-                            *v,
-                        )
-                    }
-                    super::super::__buffa::view::oneof::remove_api_user_request::UserIdentifier::Username(
-                        v,
-                    ) => {
-                        super::super::__buffa::oneof::remove_api_user_request::UserIdentifier::Username(
-                            v.to_string(),
-                        )
-                    }
-                }),
+            user_identifier: match self.user_identifier.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::UserIdentifier,
+                        ::buffa::Inline<super::super::UserIdentifier>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -6638,23 +5786,17 @@ impl<'a> ::buffa::MessageView<'a> for RemoveAPIUserRequestView<'a> {
 }
 impl<'a> ::buffa::ViewEncode<'a> for RemoveAPIUserRequestView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if let ::core::option::Option::Some(ref v) = self.user_identifier {
-            match v {
-                super::super::__buffa::view::oneof::remove_api_user_request::UserIdentifier::UserId(
-                    v,
-                ) => {
-                    size += 1u64 + ::buffa::types::int64_encoded_len(*v) as u64;
-                }
-                super::super::__buffa::view::oneof::remove_api_user_request::UserIdentifier::Username(
-                    x,
-                ) => {
-                    size += 1u64 + ::buffa::types::string_encoded_len(x) as u64;
-                }
-            }
+        if self.user_identifier.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.user_identifier.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -6662,24 +5804,18 @@ impl<'a> ::buffa::ViewEncode<'a> for RemoveAPIUserRequestView<'a> {
     #[allow(clippy::needless_borrow)]
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if let ::core::option::Option::Some(ref v) = self.user_identifier {
-            match v {
-                super::super::__buffa::view::oneof::remove_api_user_request::UserIdentifier::UserId(
-                    x,
-                ) => {
-                    ::buffa::types::put_int64_field(1u32, *x, buf);
-                }
-                super::super::__buffa::view::oneof::remove_api_user_request::UserIdentifier::Username(
-                    x,
-                ) => {
-                    ::buffa::types::put_string_field(2u32, x, buf);
-                }
-            }
+        if self.user_identifier.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                3u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.user_identifier.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -6702,22 +5838,9 @@ impl<'__a> ::serde::Serialize for RemoveAPIUserRequestView<'__a> {
     ) -> ::core::result::Result<__S::Ok, __S::Error> {
         use ::serde::ser::SerializeMap as _;
         let mut __map = __s.serialize_map(::core::option::Option::None)?;
-        if let ::core::option::Option::Some(ref __ov) = self.user_identifier {
-            match __ov {
-                super::super::__buffa::view::oneof::remove_api_user_request::UserIdentifier::UserId(
-                    v,
-                ) => {
-                    __map
-                        .serialize_entry(
-                            "userId",
-                            &::buffa::json_helpers::ProtoJson(v),
-                        )?;
-                }
-                super::super::__buffa::view::oneof::remove_api_user_request::UserIdentifier::Username(
-                    v,
-                ) => {
-                    __map.serialize_entry("username", v)?;
-                }
+        {
+            if let ::core::option::Option::Some(__v) = self.user_identifier.as_option() {
+                __map.serialize_entry("userIdentifier", __v)?;
             }
         }
         __map.end()
@@ -6815,14 +5938,14 @@ impl RemoveAPIUserRequestOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Oneof `user_identifier`.
+    /// Field 3: `user_identifier`
     #[must_use]
     pub fn user_identifier(
         &self,
-    ) -> ::core::option::Option<
-        &super::super::__buffa::view::oneof::remove_api_user_request::UserIdentifier<'_>,
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::UserIdentifierView<'_>,
     > {
-        self.0.reborrow().user_identifier.as_ref()
+        &self.0.reborrow().user_identifier
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<RemoveAPIUserRequestView<'static>>>
@@ -6870,25 +5993,12 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for RemoveAPIUserRequestVie
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         match field.number() {
-            1u32 => {
-                match &self.user_identifier {
-                    ::core::option::Option::Some(
-                        super::super::__buffa::view::oneof::remove_api_user_request::UserIdentifier::UserId(
-                            v,
-                        ),
-                    ) => ::buffa_descriptor::reflect::ValueRef::I64(*v),
-                    _ => ::buffa_descriptor::reflect::ValueRef::I64(0),
-                }
-            }
-            2u32 => {
-                match &self.user_identifier {
-                    ::core::option::Option::Some(
-                        super::super::__buffa::view::oneof::remove_api_user_request::UserIdentifier::Username(
-                            v,
-                        ),
-                    ) => ::buffa_descriptor::reflect::ValueRef::String(v),
-                    _ => ::buffa_descriptor::reflect::ValueRef::String(""),
-                }
+            3u32 => {
+                ::buffa_descriptor::reflect::ValueRef::Message(
+                    ::buffa_descriptor::reflect::ReflectCow::Borrowed(
+                        &*self.user_identifier,
+                    ),
+                )
             }
             _ => {
                 ::core::debug_assert!(
@@ -6902,18 +6012,7 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for RemoveAPIUserRequestVie
     }
     fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
         match field.number() {
-            1u32 => {
-                ::core::matches!(
-                    & self.user_identifier,
-                    ::core::option::Option::Some(super::super::__buffa::view::oneof::remove_api_user_request::UserIdentifier::UserId(_))
-                )
-            }
-            2u32 => {
-                ::core::matches!(
-                    & self.user_identifier,
-                    ::core::option::Option::Some(super::super::__buffa::view::oneof::remove_api_user_request::UserIdentifier::Username(_))
-                )
-            }
+            3u32 => self.user_identifier.is_set(),
             _ => false,
         }
     }
@@ -6981,10 +6080,9 @@ impl<'a> RemoveAPIUserRequestView<'a> {
 }
 #[derive(Clone, Debug, Default)]
 pub struct RenewAPIUserTokenRequestView<'a> {
-    pub user_identifier: ::core::option::Option<
-        super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier<
-            'a,
-        >,
+    /// Field 3: `user_identifier`
+    pub user_identifier: ::buffa::MessageFieldView<
+        super::super::__buffa::view::UserIdentifierView<'a>,
     >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
@@ -7018,27 +6116,26 @@ impl<'a> ::buffa::MessageView<'a> for RenewAPIUserTokenRequestView<'a> {
         let view = self;
         let mut cur = cur;
         match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.user_identifier = Some(
-                    super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::UserId(
-                        ::buffa::types::decode_int64(&mut cur)?,
-                    ),
-                );
-            }
-            2u32 => {
+            3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.user_identifier = Some(
-                    super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::Username(
-                        ::buffa::types::borrow_str(&mut cur)?,
-                    ),
-                );
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.user_identifier.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.user_identifier = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::UserIdentifierView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
             }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
@@ -7068,25 +6165,15 @@ impl<'a> ::buffa::MessageView<'a> for RenewAPIUserTokenRequestView<'a> {
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
         ::core::result::Result::Ok(super::super::RenewAPIUserTokenRequest {
-            user_identifier: self
-                .user_identifier
-                .as_ref()
-                .map(|v| match v {
-                    super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::UserId(
-                        v,
-                    ) => {
-                        super::super::__buffa::oneof::renew_api_user_token_request::UserIdentifier::UserId(
-                            *v,
-                        )
-                    }
-                    super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::Username(
-                        v,
-                    ) => {
-                        super::super::__buffa::oneof::renew_api_user_token_request::UserIdentifier::Username(
-                            v.to_string(),
-                        )
-                    }
-                }),
+            user_identifier: match self.user_identifier.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::UserIdentifier,
+                        ::buffa::Inline<super::super::UserIdentifier>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -7094,23 +6181,17 @@ impl<'a> ::buffa::MessageView<'a> for RenewAPIUserTokenRequestView<'a> {
 }
 impl<'a> ::buffa::ViewEncode<'a> for RenewAPIUserTokenRequestView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if let ::core::option::Option::Some(ref v) = self.user_identifier {
-            match v {
-                super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::UserId(
-                    v,
-                ) => {
-                    size += 1u64 + ::buffa::types::int64_encoded_len(*v) as u64;
-                }
-                super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::Username(
-                    x,
-                ) => {
-                    size += 1u64 + ::buffa::types::string_encoded_len(x) as u64;
-                }
-            }
+        if self.user_identifier.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.user_identifier.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -7118,24 +6199,18 @@ impl<'a> ::buffa::ViewEncode<'a> for RenewAPIUserTokenRequestView<'a> {
     #[allow(clippy::needless_borrow)]
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if let ::core::option::Option::Some(ref v) = self.user_identifier {
-            match v {
-                super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::UserId(
-                    x,
-                ) => {
-                    ::buffa::types::put_int64_field(1u32, *x, buf);
-                }
-                super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::Username(
-                    x,
-                ) => {
-                    ::buffa::types::put_string_field(2u32, x, buf);
-                }
-            }
+        if self.user_identifier.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                3u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.user_identifier.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -7158,22 +6233,9 @@ impl<'__a> ::serde::Serialize for RenewAPIUserTokenRequestView<'__a> {
     ) -> ::core::result::Result<__S::Ok, __S::Error> {
         use ::serde::ser::SerializeMap as _;
         let mut __map = __s.serialize_map(::core::option::Option::None)?;
-        if let ::core::option::Option::Some(ref __ov) = self.user_identifier {
-            match __ov {
-                super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::UserId(
-                    v,
-                ) => {
-                    __map
-                        .serialize_entry(
-                            "userId",
-                            &::buffa::json_helpers::ProtoJson(v),
-                        )?;
-                }
-                super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::Username(
-                    v,
-                ) => {
-                    __map.serialize_entry("username", v)?;
-                }
+        {
+            if let ::core::option::Option::Some(__v) = self.user_identifier.as_option() {
+                __map.serialize_entry("userIdentifier", __v)?;
             }
         }
         __map.end()
@@ -7271,16 +6333,14 @@ impl RenewAPIUserTokenRequestOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Oneof `user_identifier`.
+    /// Field 3: `user_identifier`
     #[must_use]
     pub fn user_identifier(
         &self,
-    ) -> ::core::option::Option<
-        &super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier<
-            '_,
-        >,
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::UserIdentifierView<'_>,
     > {
-        self.0.reborrow().user_identifier.as_ref()
+        &self.0.reborrow().user_identifier
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<RenewAPIUserTokenRequestView<'static>>>
@@ -7329,25 +6389,12 @@ for RenewAPIUserTokenRequestView<'a> {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         match field.number() {
-            1u32 => {
-                match &self.user_identifier {
-                    ::core::option::Option::Some(
-                        super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::UserId(
-                            v,
-                        ),
-                    ) => ::buffa_descriptor::reflect::ValueRef::I64(*v),
-                    _ => ::buffa_descriptor::reflect::ValueRef::I64(0),
-                }
-            }
-            2u32 => {
-                match &self.user_identifier {
-                    ::core::option::Option::Some(
-                        super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::Username(
-                            v,
-                        ),
-                    ) => ::buffa_descriptor::reflect::ValueRef::String(v),
-                    _ => ::buffa_descriptor::reflect::ValueRef::String(""),
-                }
+            3u32 => {
+                ::buffa_descriptor::reflect::ValueRef::Message(
+                    ::buffa_descriptor::reflect::ReflectCow::Borrowed(
+                        &*self.user_identifier,
+                    ),
+                )
             }
             _ => {
                 ::core::debug_assert!(
@@ -7361,18 +6408,7 @@ for RenewAPIUserTokenRequestView<'a> {
     }
     fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
         match field.number() {
-            1u32 => {
-                ::core::matches!(
-                    & self.user_identifier,
-                    ::core::option::Option::Some(super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::UserId(_))
-                )
-            }
-            2u32 => {
-                ::core::matches!(
-                    & self.user_identifier,
-                    ::core::option::Option::Some(super::super::__buffa::view::oneof::renew_api_user_token_request::UserIdentifier::Username(_))
-                )
-            }
+            3u32 => self.user_identifier.is_set(),
             _ => false,
         }
     }
@@ -8929,11 +7965,12 @@ pub mod list_api_users_response {
 }
 #[derive(Clone, Debug, Default)]
 pub struct APILoginRequestView<'a> {
+    /// Field 4: `user_identifier`
+    pub user_identifier: ::buffa::MessageFieldView<
+        super::super::__buffa::view::UserIdentifierView<'a>,
+    >,
     /// Field 3: `api_token`
     pub api_token: &'a str,
-    pub user_identifier: ::core::option::Option<
-        super::super::__buffa::view::oneof::api_login_request::UserIdentifier<'a>,
-    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for APILoginRequestView<'a> {
@@ -8966,34 +8003,33 @@ impl<'a> ::buffa::MessageView<'a> for APILoginRequestView<'a> {
         let view = self;
         let mut cur = cur;
         match tag.field_number() {
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.user_identifier.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.user_identifier = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::UserIdentifierView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
             3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
                 view.api_token = ::buffa::types::borrow_str(&mut cur)?;
-            }
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.user_identifier = Some(
-                    super::super::__buffa::view::oneof::api_login_request::UserIdentifier::UserId(
-                        ::buffa::types::decode_int64(&mut cur)?,
-                    ),
-                );
-            }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.user_identifier = Some(
-                    super::super::__buffa::view::oneof::api_login_request::UserIdentifier::Username(
-                        ::buffa::types::borrow_str(&mut cur)?,
-                    ),
-                );
             }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
@@ -9017,26 +8053,16 @@ impl<'a> ::buffa::MessageView<'a> for APILoginRequestView<'a> {
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
         ::core::result::Result::Ok(super::super::APILoginRequest {
+            user_identifier: match self.user_identifier.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::UserIdentifier,
+                        ::buffa::Inline<super::super::UserIdentifier>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
             api_token: self.api_token.to_string(),
-            user_identifier: self
-                .user_identifier
-                .as_ref()
-                .map(|v| match v {
-                    super::super::__buffa::view::oneof::api_login_request::UserIdentifier::UserId(
-                        v,
-                    ) => {
-                        super::super::__buffa::oneof::api_login_request::UserIdentifier::UserId(
-                            *v,
-                        )
-                    }
-                    super::super::__buffa::view::oneof::api_login_request::UserIdentifier::Username(
-                        v,
-                    ) => {
-                        super::super::__buffa::oneof::api_login_request::UserIdentifier::Username(
-                            v.to_string(),
-                        )
-                    }
-                }),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -9044,26 +8070,20 @@ impl<'a> ::buffa::MessageView<'a> for APILoginRequestView<'a> {
 }
 impl<'a> ::buffa::ViewEncode<'a> for APILoginRequestView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if let ::core::option::Option::Some(ref v) = self.user_identifier {
-            match v {
-                super::super::__buffa::view::oneof::api_login_request::UserIdentifier::UserId(
-                    v,
-                ) => {
-                    size += 1u64 + ::buffa::types::int64_encoded_len(*v) as u64;
-                }
-                super::super::__buffa::view::oneof::api_login_request::UserIdentifier::Username(
-                    x,
-                ) => {
-                    size += 1u64 + ::buffa::types::string_encoded_len(x) as u64;
-                }
-            }
-        }
         if !self.api_token.is_empty() {
             size += 1u64 + ::buffa::types::string_encoded_len(&self.api_token) as u64;
+        }
+        if self.user_identifier.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.user_identifier.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -9071,27 +8091,21 @@ impl<'a> ::buffa::ViewEncode<'a> for APILoginRequestView<'a> {
     #[allow(clippy::needless_borrow)]
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if let ::core::option::Option::Some(ref v) = self.user_identifier {
-            match v {
-                super::super::__buffa::view::oneof::api_login_request::UserIdentifier::UserId(
-                    x,
-                ) => {
-                    ::buffa::types::put_int64_field(1u32, *x, buf);
-                }
-                super::super::__buffa::view::oneof::api_login_request::UserIdentifier::Username(
-                    x,
-                ) => {
-                    ::buffa::types::put_string_field(2u32, x, buf);
-                }
-            }
-        }
         if !self.api_token.is_empty() {
             ::buffa::types::put_string_field(3u32, &self.api_token, buf);
+        }
+        if self.user_identifier.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                4u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.user_identifier.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -9114,26 +8128,13 @@ impl<'__a> ::serde::Serialize for APILoginRequestView<'__a> {
     ) -> ::core::result::Result<__S::Ok, __S::Error> {
         use ::serde::ser::SerializeMap as _;
         let mut __map = __s.serialize_map(::core::option::Option::None)?;
+        {
+            if let ::core::option::Option::Some(__v) = self.user_identifier.as_option() {
+                __map.serialize_entry("userIdentifier", __v)?;
+            }
+        }
         if !::buffa::json_helpers::skip_if::is_empty_str(self.api_token) {
             __map.serialize_entry("apiToken", self.api_token)?;
-        }
-        if let ::core::option::Option::Some(ref __ov) = self.user_identifier {
-            match __ov {
-                super::super::__buffa::view::oneof::api_login_request::UserIdentifier::UserId(
-                    v,
-                ) => {
-                    __map
-                        .serialize_entry(
-                            "userId",
-                            &::buffa::json_helpers::ProtoJson(v),
-                        )?;
-                }
-                super::super::__buffa::view::oneof::api_login_request::UserIdentifier::Username(
-                    v,
-                ) => {
-                    __map.serialize_entry("username", v)?;
-                }
-            }
         }
         __map.end()
     }
@@ -9228,19 +8229,19 @@ impl APILoginRequestOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
+    /// Field 4: `user_identifier`
+    #[must_use]
+    pub fn user_identifier(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::UserIdentifierView<'_>,
+    > {
+        &self.0.reborrow().user_identifier
+    }
     /// Field 3: `api_token`
     #[must_use]
     pub fn api_token(&self) -> &'_ str {
         self.0.reborrow().api_token
-    }
-    /// Oneof `user_identifier`.
-    #[must_use]
-    pub fn user_identifier(
-        &self,
-    ) -> ::core::option::Option<
-        &super::super::__buffa::view::oneof::api_login_request::UserIdentifier<'_>,
-    > {
-        self.0.reborrow().user_identifier.as_ref()
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<APILoginRequestView<'static>>>
@@ -9288,27 +8289,14 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for APILoginRequestView<'a>
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         match field.number() {
+            4u32 => {
+                ::buffa_descriptor::reflect::ValueRef::Message(
+                    ::buffa_descriptor::reflect::ReflectCow::Borrowed(
+                        &*self.user_identifier,
+                    ),
+                )
+            }
             3u32 => ::buffa_descriptor::reflect::ValueRef::String(self.api_token),
-            1u32 => {
-                match &self.user_identifier {
-                    ::core::option::Option::Some(
-                        super::super::__buffa::view::oneof::api_login_request::UserIdentifier::UserId(
-                            v,
-                        ),
-                    ) => ::buffa_descriptor::reflect::ValueRef::I64(*v),
-                    _ => ::buffa_descriptor::reflect::ValueRef::I64(0),
-                }
-            }
-            2u32 => {
-                match &self.user_identifier {
-                    ::core::option::Option::Some(
-                        super::super::__buffa::view::oneof::api_login_request::UserIdentifier::Username(
-                            v,
-                        ),
-                    ) => ::buffa_descriptor::reflect::ValueRef::String(v),
-                    _ => ::buffa_descriptor::reflect::ValueRef::String(""),
-                }
-            }
             _ => {
                 ::core::debug_assert!(
                     false,
@@ -9321,19 +8309,8 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for APILoginRequestView<'a>
     }
     fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
         match field.number() {
+            4u32 => self.user_identifier.is_set(),
             3u32 => !self.api_token.is_empty(),
-            1u32 => {
-                ::core::matches!(
-                    & self.user_identifier,
-                    ::core::option::Option::Some(super::super::__buffa::view::oneof::api_login_request::UserIdentifier::UserId(_))
-                )
-            }
-            2u32 => {
-                ::core::matches!(
-                    & self.user_identifier,
-                    ::core::option::Option::Some(super::super::__buffa::view::oneof::api_login_request::UserIdentifier::Username(_))
-                )
-            }
             _ => false,
         }
     }
@@ -9812,8 +8789,11 @@ impl<'a> APILoginResponseView<'a> {
 }
 #[derive(Clone, Debug, Default)]
 pub struct RevokeAPITokenRequestView<'a> {
-    pub user_identifier: ::core::option::Option<
-        super::super::__buffa::view::oneof::revoke_api_token_request::UserIdentifier<'a>,
+    /// optionally, for admins: specify what user to revoke the token from
+    ///
+    /// Field 3: `user_identifier`
+    pub user_identifier: ::buffa::MessageFieldView<
+        super::super::__buffa::view::UserIdentifierView<'a>,
     >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
@@ -9847,27 +8827,26 @@ impl<'a> ::buffa::MessageView<'a> for RevokeAPITokenRequestView<'a> {
         let view = self;
         let mut cur = cur;
         match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.user_identifier = Some(
-                    super::super::__buffa::view::oneof::revoke_api_token_request::UserIdentifier::UserId(
-                        ::buffa::types::decode_int64(&mut cur)?,
-                    ),
-                );
-            }
-            2u32 => {
+            3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.user_identifier = Some(
-                    super::super::__buffa::view::oneof::revoke_api_token_request::UserIdentifier::Username(
-                        ::buffa::types::borrow_str(&mut cur)?,
-                    ),
-                );
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.user_identifier.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.user_identifier = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::UserIdentifierView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
             }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
@@ -9897,25 +8876,15 @@ impl<'a> ::buffa::MessageView<'a> for RevokeAPITokenRequestView<'a> {
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
         ::core::result::Result::Ok(super::super::RevokeAPITokenRequest {
-            user_identifier: self
-                .user_identifier
-                .as_ref()
-                .map(|v| match v {
-                    super::super::__buffa::view::oneof::revoke_api_token_request::UserIdentifier::UserId(
-                        v,
-                    ) => {
-                        super::super::__buffa::oneof::revoke_api_token_request::UserIdentifier::UserId(
-                            *v,
-                        )
-                    }
-                    super::super::__buffa::view::oneof::revoke_api_token_request::UserIdentifier::Username(
-                        v,
-                    ) => {
-                        super::super::__buffa::oneof::revoke_api_token_request::UserIdentifier::Username(
-                            v.to_string(),
-                        )
-                    }
-                }),
+            user_identifier: match self.user_identifier.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::UserIdentifier,
+                        ::buffa::Inline<super::super::UserIdentifier>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -9923,23 +8892,17 @@ impl<'a> ::buffa::MessageView<'a> for RevokeAPITokenRequestView<'a> {
 }
 impl<'a> ::buffa::ViewEncode<'a> for RevokeAPITokenRequestView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if let ::core::option::Option::Some(ref v) = self.user_identifier {
-            match v {
-                super::super::__buffa::view::oneof::revoke_api_token_request::UserIdentifier::UserId(
-                    v,
-                ) => {
-                    size += 1u64 + ::buffa::types::int64_encoded_len(*v) as u64;
-                }
-                super::super::__buffa::view::oneof::revoke_api_token_request::UserIdentifier::Username(
-                    x,
-                ) => {
-                    size += 1u64 + ::buffa::types::string_encoded_len(x) as u64;
-                }
-            }
+        if self.user_identifier.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.user_identifier.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -9947,24 +8910,18 @@ impl<'a> ::buffa::ViewEncode<'a> for RevokeAPITokenRequestView<'a> {
     #[allow(clippy::needless_borrow)]
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if let ::core::option::Option::Some(ref v) = self.user_identifier {
-            match v {
-                super::super::__buffa::view::oneof::revoke_api_token_request::UserIdentifier::UserId(
-                    x,
-                ) => {
-                    ::buffa::types::put_int64_field(1u32, *x, buf);
-                }
-                super::super::__buffa::view::oneof::revoke_api_token_request::UserIdentifier::Username(
-                    x,
-                ) => {
-                    ::buffa::types::put_string_field(2u32, x, buf);
-                }
-            }
+        if self.user_identifier.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                3u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.user_identifier.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -9987,22 +8944,9 @@ impl<'__a> ::serde::Serialize for RevokeAPITokenRequestView<'__a> {
     ) -> ::core::result::Result<__S::Ok, __S::Error> {
         use ::serde::ser::SerializeMap as _;
         let mut __map = __s.serialize_map(::core::option::Option::None)?;
-        if let ::core::option::Option::Some(ref __ov) = self.user_identifier {
-            match __ov {
-                super::super::__buffa::view::oneof::revoke_api_token_request::UserIdentifier::UserId(
-                    v,
-                ) => {
-                    __map
-                        .serialize_entry(
-                            "userId",
-                            &::buffa::json_helpers::ProtoJson(v),
-                        )?;
-                }
-                super::super::__buffa::view::oneof::revoke_api_token_request::UserIdentifier::Username(
-                    v,
-                ) => {
-                    __map.serialize_entry("username", v)?;
-                }
+        {
+            if let ::core::option::Option::Some(__v) = self.user_identifier.as_option() {
+                __map.serialize_entry("userIdentifier", __v)?;
             }
         }
         __map.end()
@@ -10100,14 +9044,16 @@ impl RevokeAPITokenRequestOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Oneof `user_identifier`.
+    /// optionally, for admins: specify what user to revoke the token from
+    ///
+    /// Field 3: `user_identifier`
     #[must_use]
     pub fn user_identifier(
         &self,
-    ) -> ::core::option::Option<
-        &super::super::__buffa::view::oneof::revoke_api_token_request::UserIdentifier<'_>,
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::UserIdentifierView<'_>,
     > {
-        self.0.reborrow().user_identifier.as_ref()
+        &self.0.reborrow().user_identifier
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<RevokeAPITokenRequestView<'static>>>
@@ -10155,25 +9101,12 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for RevokeAPITokenRequestVi
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         match field.number() {
-            1u32 => {
-                match &self.user_identifier {
-                    ::core::option::Option::Some(
-                        super::super::__buffa::view::oneof::revoke_api_token_request::UserIdentifier::UserId(
-                            v,
-                        ),
-                    ) => ::buffa_descriptor::reflect::ValueRef::I64(*v),
-                    _ => ::buffa_descriptor::reflect::ValueRef::I64(0),
-                }
-            }
-            2u32 => {
-                match &self.user_identifier {
-                    ::core::option::Option::Some(
-                        super::super::__buffa::view::oneof::revoke_api_token_request::UserIdentifier::Username(
-                            v,
-                        ),
-                    ) => ::buffa_descriptor::reflect::ValueRef::String(v),
-                    _ => ::buffa_descriptor::reflect::ValueRef::String(""),
-                }
+            3u32 => {
+                ::buffa_descriptor::reflect::ValueRef::Message(
+                    ::buffa_descriptor::reflect::ReflectCow::Borrowed(
+                        &*self.user_identifier,
+                    ),
+                )
             }
             _ => {
                 ::core::debug_assert!(
@@ -10187,18 +9120,7 @@ impl<'a> ::buffa_descriptor::reflect::ReflectMessage for RevokeAPITokenRequestVi
     }
     fn has(&self, field: &::buffa_descriptor::FieldDescriptor) -> bool {
         match field.number() {
-            1u32 => {
-                ::core::matches!(
-                    & self.user_identifier,
-                    ::core::option::Option::Some(super::super::__buffa::view::oneof::revoke_api_token_request::UserIdentifier::UserId(_))
-                )
-            }
-            2u32 => {
-                ::core::matches!(
-                    & self.user_identifier,
-                    ::core::option::Option::Some(super::super::__buffa::view::oneof::revoke_api_token_request::UserIdentifier::Username(_))
-                )
-            }
+            3u32 => self.user_identifier.is_set(),
             _ => false,
         }
     }

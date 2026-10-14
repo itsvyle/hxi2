@@ -30,21 +30,6 @@
       "is_frontend": false,
       "frontend_static_file": null
     },
-    "/auth.v2.AuthService/AddPassword": {
-      "allow_roles": [
-        1,
-        6
-      ],
-      "is_public": false,
-      "public_url": null,
-      "compiled_permissions_bitfield": 66,
-      "csrf_token_header": "X-CSRF-Token",
-      "csrf_token_cookie": "csrf_token",
-      "response_cors_headers": null,
-      "enforce_csrf": false,
-      "is_frontend": false,
-      "frontend_static_file": null
-    },
     "/auth.v2.AuthService/CreateUser": {
       "allow_roles": [
         1,
@@ -260,21 +245,6 @@
       "is_frontend": false,
       "frontend_static_file": null
     },
-    "/auth.v2.AuthService/RemovePassword": {
-      "allow_roles": [
-        1,
-        6
-      ],
-      "is_public": false,
-      "public_url": null,
-      "compiled_permissions_bitfield": 66,
-      "csrf_token_header": "X-CSRF-Token",
-      "csrf_token_cookie": "csrf_token",
-      "response_cors_headers": null,
-      "enforce_csrf": false,
-      "is_frontend": false,
-      "frontend_static_file": null
-    },
     "/auth.v2.AuthService/RenewAPIUserToken": {
       "allow_roles": [
         1,
@@ -334,10 +304,68 @@
       "enforce_csrf": false,
       "is_frontend": false,
       "frontend_static_file": null
+    },
+    "/auth.v2.AuthUpdateUserService/AddPassword": {
+      "allow_roles": [
+        6
+      ],
+      "is_public": false,
+      "public_url": null,
+      "compiled_permissions_bitfield": 64,
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": false,
+      "is_frontend": false,
+      "frontend_static_file": null
+    },
+    "/auth.v2.AuthUpdateUserService/RemovePassword": {
+      "allow_roles": [
+        6
+      ],
+      "is_public": false,
+      "public_url": null,
+      "compiled_permissions_bitfield": 64,
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": false,
+      "is_frontend": false,
+      "frontend_static_file": null
+    },
+    "/auth.v2.AuthUpdateUserService/UpdateDiscordID": {
+      "allow_roles": [
+        6,
+        1
+      ],
+      "is_public": false,
+      "public_url": null,
+      "compiled_permissions_bitfield": 66,
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": true,
+      "is_frontend": false,
+      "frontend_static_file": null
+    },
+    "/auth.v2.AuthUpdateUserService/UpdateUsername": {
+      "allow_roles": [
+        6
+      ],
+      "is_public": false,
+      "public_url": null,
+      "compiled_permissions_bitfield": 64,
+      "csrf_token_header": "X-CSRF-Token",
+      "csrf_token_cookie": "csrf_token",
+      "response_cors_headers": null,
+      "enforce_csrf": true,
+      "is_frontend": false,
+      "frontend_static_file": null
     }
   },
   "roles": {
     "PERMISSION_ADMIN": 1,
+    "PERMISSION_ANY_API_AUTHENTICATED": 7,
     "PERMISSION_ANY_AUTHENTICATED": 6,
     "PERMISSION_API_JWT": 4,
     "PERMISSION_API_LIST_USERS": 5,

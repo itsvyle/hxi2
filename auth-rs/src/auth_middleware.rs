@@ -87,7 +87,7 @@ where
         }
 
         if !is_public && let Some(ref c) = claims {
-            if !perms.check_permissions(c.data.permissions) {
+            if !perms.check_small_data_permissions(c.data.as_option()) {
                 return Err(to_http_error(
                     ConnectError::permission_denied("insufficient permissions"),
                     &parts.headers,
@@ -106,6 +106,16 @@ where
                         Some(perms.is_frontend),
                     ));
                 }
+            }
+        }
+
+        if !is_public && let Some(ref c) = claims {
+            if !c.data.is_set() {
+                return Err(to_http_error(
+                    ConnectError::internal("claims data is not set"),
+                    &parts.headers,
+                    Some(perms.is_frontend),
+                ));
             }
         }
 

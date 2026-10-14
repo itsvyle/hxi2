@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file auth/v2/auth_data.proto.
  */
 export const file_auth_v2_auth_data: GenFile = /*@__PURE__*/
-  fileDesc("ChdhdXRoL3YyL2F1dGhfZGF0YS5wcm90bxIHYXV0aC52MiLJAgoGREJVc2VyEgoKAmlkGAEgASgDEhAKCHVzZXJuYW1lGAIgASgJEhIKCmZpcnN0X25hbWUYAyABKAkSFgoJbGFzdF9uYW1lGAQgASgJSACIAQESFwoKZGlzY29yZF9pZBgFIAEoCUgBiAEBEjgKFGFjY291bnRfY3JlYXRlZF9kYXRlGAYgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBI5ChVhY2NvdW50X21vZGlmaWVkX2RhdGUYByABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhEKCXByb21vdGlvbhgIIAEoBRITCgtwZXJtaXNzaW9ucxgJIAEoAxIOCgZpc19hcGkYCiABKAgSEgoKYXR0cmlidXRlcxgLIAEoA0IMCgpfbGFzdF9uYW1lQg0KC19kaXNjb3JkX2lkKncKCUF0dHJpYnV0ZRIZChVBVFRSSUJVVEVfVU5TUEVDSUZJRUQQABISCg5BVFRSSUJVVEVfQ1VCRRABEhIKDkFUVFJJQlVURV9NUFNJEAISEgoOQVRUUklCVVRFX1BDU0kQAxITCg9BVFRSSUJVVEVfQkNQU1QQBGIGcHJvdG8z", [file_google_protobuf_timestamp]);
+  fileDesc("ChdhdXRoL3YyL2F1dGhfZGF0YS5wcm90bxIHYXV0aC52MiLJAgoGREJVc2VyEgoKAmlkGAEgASgDEhAKCHVzZXJuYW1lGAIgASgJEhIKCmZpcnN0X25hbWUYAyABKAkSFgoJbGFzdF9uYW1lGAQgASgJSACIAQESFwoKZGlzY29yZF9pZBgFIAEoCUgBiAEBEjgKFGFjY291bnRfY3JlYXRlZF9kYXRlGAYgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBI5ChVhY2NvdW50X21vZGlmaWVkX2RhdGUYByABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhEKCXByb21vdGlvbhgIIAEoBRITCgtwZXJtaXNzaW9ucxgJIAEoAxIOCgZpc19hcGkYCiABKAgSEgoKYXR0cmlidXRlcxgLIAEoA0IMCgpfbGFzdF9uYW1lQg0KC19kaXNjb3JkX2lkIkoKDlVzZXJJZGVudGlmaWVyEhEKB3VzZXJfaWQYASABKANIABISCgh1c2VybmFtZRgCIAEoCUgAQhEKD3VzZXJfaWRlbnRpZmllcip3CglBdHRyaWJ1dGUSGQoVQVRUUklCVVRFX1VOU1BFQ0lGSUVEEAASEgoOQVRUUklCVVRFX0NVQkUQARISCg5BVFRSSUJVVEVfTVBTSRACEhIKDkFUVFJJQlVURV9QQ1NJEAMSEwoPQVRUUklCVVRFX0JDUFNUEARiBnByb3RvMw", [file_google_protobuf_timestamp]);
 
 /**
  * @generated from message auth.v2.DBUser
@@ -80,6 +80,35 @@ export type DBUser = Message<"auth.v2.DBUser"> & {
  */
 export const DBUserSchema: GenMessage<DBUser> = /*@__PURE__*/
   messageDesc(file_auth_v2_auth_data, 0);
+
+/**
+ * @generated from message auth.v2.UserIdentifier
+ */
+export type UserIdentifier = Message<"auth.v2.UserIdentifier"> & {
+  /**
+   * @generated from oneof auth.v2.UserIdentifier.user_identifier
+   */
+  userIdentifier: {
+    /**
+     * @generated from field: int64 user_id = 1;
+     */
+    value: bigint;
+    case: "userId";
+  } | {
+    /**
+     * @generated from field: string username = 2;
+     */
+    value: string;
+    case: "username";
+  } | { case: undefined; value?: undefined };
+};
+
+/**
+ * Describes the message auth.v2.UserIdentifier.
+ * Use `create(UserIdentifierSchema)` to create a new message.
+ */
+export const UserIdentifierSchema: GenMessage<UserIdentifier> = /*@__PURE__*/
+  messageDesc(file_auth_v2_auth_data, 1);
 
 /**
  * @generated from enum auth.v2.Attribute

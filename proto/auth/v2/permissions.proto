@@ -39,5 +39,7 @@ enum Permission {
     PERMISSION_API_LIST_USERS = 5;
 
     // MISC
+    /// Any authenticated is ONLY non API users - this needs to be checked correctly!!
     PERMISSION_ANY_AUTHENTICATED = 6;
+    PERMISSION_ANY_API_AUTHENTICATED = 7;
 }

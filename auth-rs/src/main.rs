@@ -12,11 +12,12 @@ mod login_manager;
 mod password_login;
 mod permissions_checking;
 mod static_serve;
+mod update_user_service;
 
 use anyhow::{Context as _, Result};
 use app_config::AppConfiguration;
 use auth_middleware::RequireAuthMiddleware;
-use auth_service::{AuthServiceExt, AuthServiceImpl};
+use auth_service::AuthServiceImpl;
 use axum::routing::get;
 use connectrpc::Router as ConnectRouter;
 use std::sync::Arc;
@@ -29,6 +30,7 @@ use crate::{
     discord_login::DiscordLoginManager,
     jwt_signer::GLOBAL_JWT_SIGNER,
     jwt_verifier::GLOBAL_JWT_VERIFIER,
+    update_user_service::AuthUpdateUserServiceImpl,
 };
 
 use tracing::{debug, info};
@@ -65,6 +67,7 @@ async fn main() -> Result<()> {
     let mut app = axum::Router::new()
         .merge(discord_manager.router())
         .merge(login_manager.router());
+
     let service = Arc::new(AuthServiceImpl {
         subdomain: format!("auth.{}", cfg.tld),
         signer: &GLOBAL_JWT_SIGNER,
@@ -73,13 +76,21 @@ async fn main() -> Result<()> {
         password_login_manager: password_login_manager.clone(),
         api_login_manager: api_login_manager.clone(),
     });
-    let connect = service.register(ConnectRouter::new());
+
+    let update_service = Arc::new(AuthUpdateUserServiceImpl {
+        login_manager: login_manager.clone(),
+        password_login_manager: password_login_manager.clone(),
+    });
+
+    let connect_router = ConnectRouter::new()
+        .add_service(service)
+        .add_service(update_service);
 
     app = app.merge(static_serve::router().context("Failed to create static file router")?);
 
     app = app
         .route("/health", get(|| async { "OK" }))
-        .fallback_service(connect.into_axum_service())
+        .fallback_service(connect_router.into_axum_service())
         .layer(
             ServiceBuilder::new()
                 .layer(axum::middleware::from_extractor_with_state::<

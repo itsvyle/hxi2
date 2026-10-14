@@ -27,3 +27,10 @@ enum Attribute {
     ATTRIBUTE_PCSI = 3;
     ATTRIBUTE_BCPST = 4;
 }
+
+message UserIdentifier {
+    oneof user_identifier {
+        int64 user_id = 1;
+        string username = 2;
+    }
+}

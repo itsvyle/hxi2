@@ -13,7 +13,9 @@ pub enum Permission {
     PERMISSION_API_JWT = 4i32,
     PERMISSION_API_LIST_USERS = 5i32,
     /// MISC
+    /// / Any authenticated is ONLY non API users - this needs to be checked correctly!!
     PERMISSION_ANY_AUTHENTICATED = 6i32,
+    PERMISSION_ANY_API_AUTHENTICATED = 7i32,
 }
 impl Permission {
     ///Idiomatic alias for [`Self::PERMISSION_PERMISSION_UNSPECIFIED`]; `Debug` prints the variant name.
@@ -37,6 +39,9 @@ impl Permission {
     ///Idiomatic alias for [`Self::PERMISSION_ANY_AUTHENTICATED`]; `Debug` prints the variant name.
     #[allow(non_upper_case_globals)]
     pub const AnyAuthenticated: Self = Self::PERMISSION_ANY_AUTHENTICATED;
+    ///Idiomatic alias for [`Self::PERMISSION_ANY_API_AUTHENTICATED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const AnyApiAuthenticated: Self = Self::PERMISSION_ANY_API_AUTHENTICATED;
 }
 impl ::core::default::Default for Permission {
     fn default() -> Self {
@@ -139,6 +144,7 @@ impl ::buffa::Enumeration for Permission {
             4i32 => ::core::option::Option::Some(Self::PERMISSION_API_JWT),
             5i32 => ::core::option::Option::Some(Self::PERMISSION_API_LIST_USERS),
             6i32 => ::core::option::Option::Some(Self::PERMISSION_ANY_AUTHENTICATED),
+            7i32 => ::core::option::Option::Some(Self::PERMISSION_ANY_API_AUTHENTICATED),
             _ => ::core::option::Option::None,
         }
     }
@@ -156,6 +162,7 @@ impl ::buffa::Enumeration for Permission {
             Self::PERMISSION_API_JWT => "PERMISSION_API_JWT",
             Self::PERMISSION_API_LIST_USERS => "PERMISSION_API_LIST_USERS",
             Self::PERMISSION_ANY_AUTHENTICATED => "PERMISSION_ANY_AUTHENTICATED",
+            Self::PERMISSION_ANY_API_AUTHENTICATED => "PERMISSION_ANY_API_AUTHENTICATED",
         }
     }
     fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
@@ -179,6 +186,9 @@ impl ::buffa::Enumeration for Permission {
             "PERMISSION_ANY_AUTHENTICATED" => {
                 ::core::option::Option::Some(Self::PERMISSION_ANY_AUTHENTICATED)
             }
+            "PERMISSION_ANY_API_AUTHENTICATED" => {
+                ::core::option::Option::Some(Self::PERMISSION_ANY_API_AUTHENTICATED)
+            }
             _ => ::core::option::Option::None,
         }
     }
@@ -191,6 +201,7 @@ impl ::buffa::Enumeration for Permission {
             Self::PERMISSION_API_JWT,
             Self::PERMISSION_API_LIST_USERS,
             Self::PERMISSION_ANY_AUTHENTICATED,
+            Self::PERMISSION_ANY_API_AUTHENTICATED,
         ]
     }
 }

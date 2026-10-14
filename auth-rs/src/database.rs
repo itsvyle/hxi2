@@ -8,10 +8,10 @@ use hxi2_proto::{
 use rand::RngExt;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use sqlx::{FromRow, Row, Sqlite, sqlite::SqlitePool};
+use sqlx::{FromRow, QueryBuilder, Row, Sqlite, sqlite::SqlitePool};
 use tracing::{error, instrument};
 
-use crate::app_config;
+use crate::{app_config, database::DbError::Validation};
 
 const ONE_TIME_CODE_VALIDITY_DURATION_MINS: i64 = 10;
 
@@ -259,35 +259,90 @@ impl DatabaseManager {
         .bind(user.promotion)
         .bind(user.permissions)
         .bind(&user.username)
-        .bind(user.id)
         .bind(user.is_api)
         .bind(user.attributes)
+        .bind(user.id)
         .execute(&self.pool)
         .await?;
 
         Ok(())
     }
 
-    pub async fn get_db_user(&self, identifier: &DbUserIdentifier) -> Result<DbUser, DbError> {
-        let query = match identifier {
-            DbUserIdentifier::Id(_) => "SELECT * FROM users WHERE ID = ?",
-            DbUserIdentifier::Username(_) => "SELECT * FROM users WHERE username = ?",
-            DbUserIdentifier::DiscordId(_) => "SELECT * FROM users WHERE discord_id = ?",
-        };
-
-        let user = sqlx::query_as::<_, DbUser>(query);
-        let user = match identifier {
-            DbUserIdentifier::Id(id) => user.bind(id),
-            DbUserIdentifier::Username(username) => user.bind(username),
-            DbUserIdentifier::DiscordId(discord_id) => user.bind(discord_id),
-        };
-        let user = user.fetch_one(&self.pool).await.map_err(|e| {
-            if matches!(e, sqlx::Error::RowNotFound) {
-                DbError::NotFound
-            } else {
-                DbError::Sqlx(e)
+    fn add_user_identifier_clause(
+        &self,
+        query_builder: &mut QueryBuilder<Sqlite>,
+        identifier: &DbUserIdentifier,
+    ) {
+        match identifier {
+            DbUserIdentifier::Id(id) => {
+                query_builder.push("ID = ").push_bind(id);
             }
-        })?;
+            DbUserIdentifier::Username(username) => {
+                query_builder.push("username = ").push_bind(username);
+            }
+            DbUserIdentifier::DiscordId(discord_id) => {
+                query_builder.push("discord_id = ").push_bind(discord_id);
+                query_builder.push(" AND discord_id IS NOT NULL");
+            }
+        }
+    }
+
+    pub async fn update_username(
+        &self,
+        identifier: &DbUserIdentifier,
+        new_username: &str,
+    ) -> Result<(), DbError> {
+        if new_username.trim().is_empty() {
+            return Err(Validation("new_username cannot be empty".to_string()));
+        }
+        let mut query_builder: QueryBuilder<Sqlite> =
+            QueryBuilder::new("UPDATE users SET username = ");
+        query_builder.push_bind(new_username.trim());
+        query_builder.push(" WHERE ");
+
+        self.add_user_identifier_clause(&mut query_builder, identifier);
+
+        query_builder.build().execute(&self.pool).await?;
+
+        Ok(())
+    }
+
+    pub async fn update_discord_id(
+        &self,
+        identifier: &DbUserIdentifier,
+        new_discord_id: &str,
+    ) -> Result<(), DbError> {
+        if new_discord_id.trim().is_empty() {
+            return Err(Validation("new_discord_id cannot be empty".to_string()));
+        }
+        let mut query_builder: QueryBuilder<Sqlite> =
+            QueryBuilder::new("UPDATE users SET discord_id = ");
+        query_builder.push_bind(new_discord_id.trim());
+        query_builder.push(" WHERE ");
+
+        self.add_user_identifier_clause(&mut query_builder, identifier);
+
+        query_builder.build().execute(&self.pool).await?;
+
+        Ok(())
+    }
+
+    pub async fn get_db_user(&self, identifier: &DbUserIdentifier) -> Result<DbUser, DbError> {
+        let mut query_builder: QueryBuilder<Sqlite> =
+            QueryBuilder::new("SELECT * FROM users WHERE ");
+        self.add_user_identifier_clause(&mut query_builder, identifier);
+
+        let user = query_builder
+            .build_query_as::<DbUser>()
+            .fetch_one(&self.pool)
+            .await
+            .map_err(|e| {
+                if matches!(e, sqlx::Error::RowNotFound) {
+                    DbError::NotFound
+                } else {
+                    DbError::Sqlx(e)
+                }
+            })?;
         Ok(user)
     }
 
@@ -298,18 +353,13 @@ impl DatabaseManager {
         if let DbUserIdentifier::Id(id) = identifier {
             return Ok(*id);
         };
-        let query = match identifier {
-            DbUserIdentifier::Username(_) => "SELECT ID FROM users WHERE username = ?",
-            DbUserIdentifier::DiscordId(_) => "SELECT ID FROM users WHERE discord_id = ?",
-            _ => unreachable!(),
-        };
 
-        let user_id = sqlx::query_scalar::<_, i64>(query)
-            .bind(match identifier {
-                DbUserIdentifier::Username(username) => username,
-                DbUserIdentifier::DiscordId(discord_id) => discord_id,
-                _ => unreachable!(),
-            })
+        let mut query_builder: QueryBuilder<Sqlite> =
+            QueryBuilder::new("SELECT ID FROM users WHERE ");
+        self.add_user_identifier_clause(&mut query_builder, identifier);
+
+        let user_id = query_builder
+            .build_query_scalar::<i64>()
             .fetch_one(&self.pool)
             .await
             .map_err(|e| {

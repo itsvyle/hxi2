@@ -5,7 +5,6 @@ pub fn get_route_from_public_url(url: &str) -> Option<&'static str> {
     match url {
         "/auth.v2.AuthService/APILogin" => return Some("/auth.v2.AuthService/APILogin"),
 "/auth.v2.AuthService/AddAPIUser" => return Some("/auth.v2.AuthService/AddAPIUser"),
-"/auth.v2.AuthService/AddPassword" => return Some("/auth.v2.AuthService/AddPassword"),
 "/auth.v2.AuthService/CreateUser" => return Some("/auth.v2.AuthService/CreateUser"),
 "/api/login" | "/auth.v2.AuthService/DiscordLogin" => return Some("/auth.v2.AuthService/DiscordLogin"),
 "/api/discord_callback" | "/auth.v2.AuthService/DiscordLogin/api/discord_callback" => return Some("/auth.v2.AuthService/DiscordLogin/api/discord_callback"),
@@ -20,11 +19,14 @@ pub fn get_route_from_public_url(url: &str) -> Option<&'static str> {
 "/logout" | "/auth.v2.AuthService/Logout" => return Some("/auth.v2.AuthService/Logout"),
 "/auth.v2.AuthService/PasswordLogin" => return Some("/auth.v2.AuthService/PasswordLogin"),
 "/auth.v2.AuthService/RemoveAPIUser" => return Some("/auth.v2.AuthService/RemoveAPIUser"),
-"/auth.v2.AuthService/RemovePassword" => return Some("/auth.v2.AuthService/RemovePassword"),
 "/auth.v2.AuthService/RenewAPIUserToken" => return Some("/auth.v2.AuthService/RenewAPIUserToken"),
 "/auth.v2.AuthService/RenewJWT" => return Some("/auth.v2.AuthService/RenewJWT"),
 "/auth.v2.AuthService/RevokeAPIToken" => return Some("/auth.v2.AuthService/RevokeAPIToken"),
 "/auth.v2.AuthService/UpdateUser" => return Some("/auth.v2.AuthService/UpdateUser"),
+"/auth.v2.AuthUpdateUserService/AddPassword" => return Some("/auth.v2.AuthUpdateUserService/AddPassword"),
+"/auth.v2.AuthUpdateUserService/RemovePassword" => return Some("/auth.v2.AuthUpdateUserService/RemovePassword"),
+"/auth.v2.AuthUpdateUserService/UpdateDiscordID" => return Some("/auth.v2.AuthUpdateUserService/UpdateDiscordID"),
+"/auth.v2.AuthUpdateUserService/UpdateUsername" => return Some("/auth.v2.AuthUpdateUserService/UpdateUsername"),
 _ => None,
     }
 }
@@ -32,6 +34,7 @@ _ => None,
 
 use std::collections::BTreeMap;
 use hxi2_proto::proto::auth::v2::Permission;
+use hxi2_proto::proto::auth::v2::SmallData;
 
 #[derive(Debug, Clone)]
 pub struct MethodPermissions {
@@ -49,6 +52,7 @@ pub struct MethodPermissions {
 
 pub trait MethodPermissionsOptionExt {
     fn check_permissions(&self, user_permissions: i64) -> bool;
+    fn check_small_data_permissions(&self, small_data: Option<&SmallData>) -> bool;
 }
 
 impl MethodPermissionsOptionExt for MethodPermissions {
@@ -56,13 +60,23 @@ impl MethodPermissionsOptionExt for MethodPermissions {
         if self.is_public {
             return true;
         }
-        // take into account the case where the user is logged in, and the "Permission::PERMISSION_ANY_AUTHENTICATED" is set, which is a special case that allows any logged-in user to access the route
-        else if self.compiled_permissions_bitfield & 64 != 0
-            && user_permissions > 0
-        {
-            return true;
-        }
         (user_permissions & self.compiled_permissions_bitfield) != 0
+    }
+
+    fn check_small_data_permissions(&self, small_data: Option<&SmallData>) -> bool {
+        match self.check_permissions(small_data.map(|d| d.permissions).unwrap_or(0)) {
+            true => true,
+            false => {
+                if let Some(small_data) = small_data {
+                    if small_data.api_token_data.is_set() && (self.compiled_permissions_bitfield & (1 << Permission::PERMISSION_ANY_API_AUTHENTICATED as i64) != 0) {
+                        return true;
+                    } else if small_data.api_token_data.is_unset() && (self.compiled_permissions_bitfield & (1 << Permission::PERMISSION_ANY_AUTHENTICATED as i64) != 0) {
+                        return true;
+                    }
+                }
+                false
+            }
+        }
     }
 }
 
@@ -70,6 +84,12 @@ impl MethodPermissionsOptionExt for Option<&MethodPermissions> {
     fn check_permissions(&self, user_permissions: i64) -> bool {
         match self {
             Some(perm) => perm.check_permissions(user_permissions),
+            None => false,
+        }
+    }
+    fn check_small_data_permissions(&self, small_data: Option<&SmallData>) -> bool {
+        match self {
+            Some(perm) => perm.check_small_data_permissions(small_data),
             None => false,
         }
     }
@@ -86,26 +106,28 @@ impl CompiledPermissions {
         match route {
 				"/auth.v2.AuthService/APILogin" => return Some(&self.permissions[0].1),
 				"/auth.v2.AuthService/AddAPIUser" => return Some(&self.permissions[1].1),
-				"/auth.v2.AuthService/AddPassword" => return Some(&self.permissions[2].1),
-				"/auth.v2.AuthService/CreateUser" => return Some(&self.permissions[3].1),
-				"/auth.v2.AuthService/DiscordLogin" => return Some(&self.permissions[4].1),
-				"/auth.v2.AuthService/DiscordLogin/api/discord_callback" => return Some(&self.permissions[5].1),
-				"/auth.v2.AuthService/FrontendIndex" => return Some(&self.permissions[6].1),
-				"/auth.v2.AuthService/FrontendIndex/dist/loginv2.bundle.css" => return Some(&self.permissions[7].1),
-				"/auth.v2.AuthService/FrontendIndex/dist/loginv2.bundle.js" => return Some(&self.permissions[8].1),
-				"/auth.v2.AuthService/GetCSRFToken" => return Some(&self.permissions[9].1),
-				"/auth.v2.AuthService/GetDevToken" => return Some(&self.permissions[10].1),
-				"/auth.v2.AuthService/GetJWTPublicKey" => return Some(&self.permissions[11].1),
-				"/auth.v2.AuthService/ListAPIUsers" => return Some(&self.permissions[12].1),
-				"/auth.v2.AuthService/ListUsers" => return Some(&self.permissions[13].1),
-				"/auth.v2.AuthService/Logout" => return Some(&self.permissions[14].1),
-				"/auth.v2.AuthService/PasswordLogin" => return Some(&self.permissions[15].1),
-				"/auth.v2.AuthService/RemoveAPIUser" => return Some(&self.permissions[16].1),
-				"/auth.v2.AuthService/RemovePassword" => return Some(&self.permissions[17].1),
-				"/auth.v2.AuthService/RenewAPIUserToken" => return Some(&self.permissions[18].1),
-				"/auth.v2.AuthService/RenewJWT" => return Some(&self.permissions[19].1),
-				"/auth.v2.AuthService/RevokeAPIToken" => return Some(&self.permissions[20].1),
-				"/auth.v2.AuthService/UpdateUser" => return Some(&self.permissions[21].1),
+				"/auth.v2.AuthService/CreateUser" => return Some(&self.permissions[2].1),
+				"/auth.v2.AuthService/DiscordLogin" => return Some(&self.permissions[3].1),
+				"/auth.v2.AuthService/DiscordLogin/api/discord_callback" => return Some(&self.permissions[4].1),
+				"/auth.v2.AuthService/FrontendIndex" => return Some(&self.permissions[5].1),
+				"/auth.v2.AuthService/FrontendIndex/dist/loginv2.bundle.css" => return Some(&self.permissions[6].1),
+				"/auth.v2.AuthService/FrontendIndex/dist/loginv2.bundle.js" => return Some(&self.permissions[7].1),
+				"/auth.v2.AuthService/GetCSRFToken" => return Some(&self.permissions[8].1),
+				"/auth.v2.AuthService/GetDevToken" => return Some(&self.permissions[9].1),
+				"/auth.v2.AuthService/GetJWTPublicKey" => return Some(&self.permissions[10].1),
+				"/auth.v2.AuthService/ListAPIUsers" => return Some(&self.permissions[11].1),
+				"/auth.v2.AuthService/ListUsers" => return Some(&self.permissions[12].1),
+				"/auth.v2.AuthService/Logout" => return Some(&self.permissions[13].1),
+				"/auth.v2.AuthService/PasswordLogin" => return Some(&self.permissions[14].1),
+				"/auth.v2.AuthService/RemoveAPIUser" => return Some(&self.permissions[15].1),
+				"/auth.v2.AuthService/RenewAPIUserToken" => return Some(&self.permissions[16].1),
+				"/auth.v2.AuthService/RenewJWT" => return Some(&self.permissions[17].1),
+				"/auth.v2.AuthService/RevokeAPIToken" => return Some(&self.permissions[18].1),
+				"/auth.v2.AuthService/UpdateUser" => return Some(&self.permissions[19].1),
+				"/auth.v2.AuthUpdateUserService/AddPassword" => return Some(&self.permissions[20].1),
+				"/auth.v2.AuthUpdateUserService/RemovePassword" => return Some(&self.permissions[21].1),
+				"/auth.v2.AuthUpdateUserService/UpdateDiscordID" => return Some(&self.permissions[22].1),
+				"/auth.v2.AuthUpdateUserService/UpdateUsername" => return Some(&self.permissions[23].1),
             _ => None,
         }
     }
@@ -136,21 +158,6 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 is_public: false,
                 public_url: None,
                 compiled_permissions_bitfield: 2,
-                csrf_token_header: Some("X-CSRF-Token"),
-                csrf_token_cookie: Some("csrf_token"),
-                response_cors_headers: None,
-                enforce_csrf: false,
-                is_frontend: false,
-                frontend_static_file: None,
-            }),
-            ("/auth.v2.AuthService/AddPassword", MethodPermissions {
-                allow_roles: &[
-					Permission::PERMISSION_ADMIN,
-					Permission::PERMISSION_ANY_AUTHENTICATED,
-                ],
-                is_public: false,
-                public_url: None,
-                compiled_permissions_bitfield: 66,
                 csrf_token_header: Some("X-CSRF-Token"),
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
@@ -359,21 +366,6 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 is_frontend: false,
                 frontend_static_file: None,
             }),
-            ("/auth.v2.AuthService/RemovePassword", MethodPermissions {
-                allow_roles: &[
-					Permission::PERMISSION_ADMIN,
-					Permission::PERMISSION_ANY_AUTHENTICATED,
-                ],
-                is_public: false,
-                public_url: None,
-                compiled_permissions_bitfield: 66,
-                csrf_token_header: Some("X-CSRF-Token"),
-                csrf_token_cookie: Some("csrf_token"),
-                response_cors_headers: None,
-                enforce_csrf: false,
-                is_frontend: false,
-                frontend_static_file: None,
-            }),
             ("/auth.v2.AuthService/RenewAPIUserToken", MethodPermissions {
                 allow_roles: &[
 					Permission::PERMISSION_ADMIN,
@@ -431,6 +423,62 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,
                 enforce_csrf: false,
+                is_frontend: false,
+                frontend_static_file: None,
+            }),
+            ("/auth.v2.AuthUpdateUserService/AddPassword", MethodPermissions {
+                allow_roles: &[
+					Permission::PERMISSION_ANY_AUTHENTICATED,
+                ],
+                is_public: false,
+                public_url: None,
+                compiled_permissions_bitfield: 64,
+                csrf_token_header: Some("X-CSRF-Token"),
+                csrf_token_cookie: Some("csrf_token"),
+                response_cors_headers: None,
+                enforce_csrf: true,
+                is_frontend: false,
+                frontend_static_file: None,
+            }),
+            ("/auth.v2.AuthUpdateUserService/RemovePassword", MethodPermissions {
+                allow_roles: &[
+					Permission::PERMISSION_ANY_AUTHENTICATED,
+                ],
+                is_public: false,
+                public_url: None,
+                compiled_permissions_bitfield: 64,
+                csrf_token_header: Some("X-CSRF-Token"),
+                csrf_token_cookie: Some("csrf_token"),
+                response_cors_headers: None,
+                enforce_csrf: true,
+                is_frontend: false,
+                frontend_static_file: None,
+            }),
+            ("/auth.v2.AuthUpdateUserService/UpdateDiscordID", MethodPermissions {
+                allow_roles: &[
+					Permission::PERMISSION_ANY_AUTHENTICATED,
+                ],
+                is_public: false,
+                public_url: None,
+                compiled_permissions_bitfield: 64,
+                csrf_token_header: Some("X-CSRF-Token"),
+                csrf_token_cookie: Some("csrf_token"),
+                response_cors_headers: None,
+                enforce_csrf: true,
+                is_frontend: false,
+                frontend_static_file: None,
+            }),
+            ("/auth.v2.AuthUpdateUserService/UpdateUsername", MethodPermissions {
+                allow_roles: &[
+					Permission::PERMISSION_ANY_AUTHENTICATED,
+                ],
+                is_public: false,
+                public_url: None,
+                compiled_permissions_bitfield: 64,
+                csrf_token_header: Some("X-CSRF-Token"),
+                csrf_token_cookie: Some("csrf_token"),
+                response_cors_headers: None,
+                enforce_csrf: true,
                 is_frontend: false,
                 frontend_static_file: None,
             }),

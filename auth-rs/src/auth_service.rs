@@ -12,12 +12,12 @@ use connectrpc::{
 use http::header::SET_COOKIE;
 pub use hxi2_proto::connect::auth::v2::AuthServiceExt;
 use hxi2_proto::proto::auth::v2::{
-    APILoginRequest, APILoginResponse, AddAPIUserRequest, AddAPIUserResponse, AddPasswordRequest,
-    CreateUserRequest, CreateUserResponse, DBUser, GetCSRFTokenRequest, GetCSRFTokenResponse,
-    GetJWTPublicKeyRequest, GetJWTPublicKeyResponse, ListAPIUsersResponse, ListUsersRequest,
-    ListUsersResponse, PasswordLoginRequest, PasswordLoginResponse, Permission,
-    RemoveAPIUserRequest, RemovePasswordRequest, RenewAPIUserTokenRequest,
-    RenewAPIUserTokenResponse, RenewJWTRequest, RenewJWTResponse, RevokeAPITokenRequest, SmallData,
+    APILoginRequest, APILoginResponse, AddAPIUserRequest, AddAPIUserResponse, CreateUserRequest,
+    CreateUserResponse, DBUser, GetCSRFTokenRequest, GetCSRFTokenResponse, GetJWTPublicKeyRequest,
+    GetJWTPublicKeyResponse, ListAPIUsersResponse, ListUsersRequest, ListUsersResponse,
+    PasswordLoginRequest, PasswordLoginResponse, Permission, RemoveAPIUserRequest,
+    RenewAPIUserTokenRequest, RenewAPIUserTokenResponse, RenewJWTRequest, RenewJWTResponse,
+    RevokeAPITokenRequest, SmallData, UserIdentifierView,
 };
 use hxi2_proto::utils::compile_bitfield;
 use hxi2_proto::{
@@ -43,6 +43,58 @@ pub struct AuthServiceImpl {
     pub login_manager: Arc<LoginManager>,
     pub password_login_manager: Arc<PasswordLoginManager>,
     pub api_login_manager: Arc<APILoginManager>,
+}
+
+pub fn resolve_user_identifier_view(
+    proto_user_identifier: Option<&UserIdentifierView>,
+) -> Option<DbUserIdentifier> {
+    if let Some(user_identifier_) = proto_user_identifier
+        && let Some(ref user_identifier) = user_identifier_.user_identifier
+    {
+        use hxi2_proto::proto::auth::v2::user_identifier::UserIdentifierView;
+        match user_identifier {
+            UserIdentifierView::UserId(user_id) => Some(DbUserIdentifier::Id(*user_id)),
+            UserIdentifierView::Username(username) => {
+                Some(DbUserIdentifier::Username(username.to_string()))
+            }
+        }
+    } else {
+        None
+    }
+}
+
+/// This resolves a case where an admin could set the user_identifier field in the request, but a non-admin user cannot (they can only edit themselves)
+pub fn resolve_overridable_user_identifier_from_message(
+    user_identifier: &buffa::MessageFieldView<UserIdentifierView>,
+    current_user: &SmallData,
+) -> Result<DbUserIdentifier, ConnectError> {
+    if (current_user.permissions & (1 << Permission::PERMISSION_ADMIN as i64) != 0)
+        && user_identifier.is_set()
+    {
+        crate::auth_service::resolve_user_identifier_view(user_identifier.as_option())
+            .ok_or_else(|| ConnectError::invalid_argument("user_identifier is set, yet invalid"))
+    } else if user_identifier.is_set() {
+        Err(ConnectError::permission_denied(
+            "You must be an admin to set the user_identifier field in the request",
+        ))
+    } else {
+        Ok(DbUserIdentifier::Id(current_user.user_id))
+    }
+}
+
+pub fn resolve_current_user(ctx: &RequestContext) -> Result<&SmallData, ConnectError> {
+    let auth_state = ctx
+        .extensions()
+        .get::<ReqAuthState>()
+        .ok_or_else(|| ConnectError::internal("ReqAuthState not found in request extensions"))?;
+
+    let current_user = &auth_state
+        .claims
+        .as_ref()
+        .ok_or_else(|| ConnectError::internal("Claims not found in ReqAuthState"))?
+        .data;
+
+    Ok(current_user)
 }
 
 #[allow(unused)]
@@ -295,102 +347,6 @@ impl AuthService for AuthServiceImpl {
 
         Response::ok(return_user)
     }
-    async fn add_password(
-        &self,
-        ctx: RequestContext,
-        req: ServiceRequest<'_, AddPasswordRequest>,
-    ) -> ServiceResult<Empty> {
-        let auth_state = ctx.extensions().get::<ReqAuthState>().ok_or_else(|| {
-            ConnectError::permission_denied("ReqAuthState not found in request extensions")
-        })?;
-
-        let current_user = &auth_state
-            .claims
-            .as_ref()
-            .ok_or_else(|| ConnectError::permission_denied("Claims not found in ReqAuthState"))?
-            .data;
-
-        let user_identifier =
-            if (current_user.permissions & (1 << Permission::PERMISSION_ADMIN as i64) != 0)
-                && let Some(target_user_identifier) = req.user_identifier.as_ref()
-            {
-                use hxi2_proto::proto::auth::v2::add_password_request::UserIdentifierView;
-                match target_user_identifier {
-                    UserIdentifierView::UserId(user_id) => DbUserIdentifier::Id(*user_id),
-                    UserIdentifierView::Username(username) => {
-                        DbUserIdentifier::Username(username.to_string())
-                    }
-                }
-            } else if req.user_identifier.is_some() {
-                return Err(ConnectError::permission_denied(
-                    "You do not have permission to add a password for another user",
-                ));
-            } else {
-                DbUserIdentifier::Id(current_user.user_id)
-            };
-
-        let req = req.to_owned_message();
-
-        if req.password.trim().is_empty() {
-            return Err(ConnectError::invalid_argument(
-                "Password cannot be empty or whitespace",
-            ));
-        }
-
-        self.password_login_manager
-            .add_password(&user_identifier, &req.password)
-            .await
-            .obfuscate()
-            .to_connect_internal()?;
-
-        Response::ok(Empty {
-            ..Default::default()
-        })
-    }
-
-    async fn remove_password(
-        &self,
-        ctx: RequestContext,
-        req: ServiceRequest<'_, RemovePasswordRequest>,
-    ) -> ServiceResult<Empty> {
-        let auth_state = ctx.extensions().get::<ReqAuthState>().ok_or_else(|| {
-            ConnectError::permission_denied("ReqAuthState not found in request extensions")
-        })?;
-
-        let current_user = &auth_state
-            .claims
-            .as_ref()
-            .ok_or_else(|| ConnectError::permission_denied("Claims not found in ReqAuthState"))?
-            .data;
-
-        let user_identifier =
-            if (current_user.permissions & (1 << Permission::PERMISSION_ADMIN as i64) != 0)
-                && let Some(target_user_identifier) = req.user_identifier.as_ref()
-            {
-                use hxi2_proto::proto::auth::v2::remove_password_request::UserIdentifierView;
-                match target_user_identifier {
-                    UserIdentifierView::UserId(user_id) => DbUserIdentifier::Id(*user_id),
-                    UserIdentifierView::Username(username) => {
-                        DbUserIdentifier::Username(username.to_string())
-                    }
-                }
-            } else if req.user_identifier.is_some() {
-                return Err(ConnectError::permission_denied(
-                    "You do not have permission to remove a password for another user",
-                ));
-            } else {
-                DbUserIdentifier::Id(current_user.user_id)
-            };
-
-        self.password_login_manager
-            .remove_password(&user_identifier)
-            .await
-            .obfuscate()
-            .to_connect_internal()?;
-        Response::ok(Empty {
-            ..Default::default()
-        })
-    }
 
     // #[cfg_attr(debug_assertions, instrument(skip(self), level = "trace", ret))]
     async fn password_login(
@@ -533,22 +489,10 @@ impl AuthService for AuthServiceImpl {
     async fn renew_api_user_token(
         &self,
         _ctx: RequestContext,
-        _request: ServiceRequest<'_, RenewAPIUserTokenRequest>,
+        req: ServiceRequest<'_, RenewAPIUserTokenRequest>,
     ) -> ServiceResult<RenewAPIUserTokenResponse> {
-        let identifier = {
-            use hxi2_proto::proto::auth::v2::renew_api_user_token_request::UserIdentifierView;
-            match _request.user_identifier {
-                Some(UserIdentifierView::UserId(user_id)) => DbUserIdentifier::Id(user_id),
-                Some(UserIdentifierView::Username(username)) => {
-                    DbUserIdentifier::Username(username.to_string())
-                }
-                None => {
-                    return Err(ConnectError::invalid_argument(
-                        "user_identifier is required",
-                    ));
-                }
-            }
-        };
+        let identifier = resolve_user_identifier_view(req.user_identifier.as_option())
+            .ok_or_else(|| ConnectError::invalid_argument("user_identifier is required"))?;
 
         let token = self
             .api_login_manager
@@ -568,20 +512,8 @@ impl AuthService for AuthServiceImpl {
         _ctx: RequestContext,
         req: ServiceRequest<'_, APILoginRequest>,
     ) -> ServiceResult<APILoginResponse> {
-        let identifier = {
-            use hxi2_proto::proto::auth::v2::api_login_request::UserIdentifierView;
-            match req.user_identifier {
-                Some(UserIdentifierView::UserId(user_id)) => DbUserIdentifier::Id(user_id),
-                Some(UserIdentifierView::Username(username)) => {
-                    DbUserIdentifier::Username(username.to_string())
-                }
-                None => {
-                    return Err(ConnectError::invalid_argument(
-                        "user_identifier is required",
-                    ));
-                }
-            }
-        };
+        let identifier = resolve_user_identifier_view(req.user_identifier.as_option())
+            .ok_or_else(|| ConnectError::invalid_argument("user_identifier is required"))?;
 
         let res = self
             .api_login_manager
@@ -602,39 +534,10 @@ impl AuthService for AuthServiceImpl {
         ctx: RequestContext,
         req: ServiceRequest<'_, RevokeAPITokenRequest>,
     ) -> ServiceResult<Empty> {
-        let auth_state = ctx.extensions().get::<ReqAuthState>().ok_or_else(|| {
-            ConnectError::permission_denied("ReqAuthState not found in request extensions")
-        })?;
-
-        let current_user = &auth_state
-            .claims
-            .as_ref()
-            .ok_or_else(|| ConnectError::permission_denied("Claims not found in ReqAuthState"))?
-            .data;
+        let current_user = resolve_current_user(&ctx)?;
 
         let user_identifier =
-            if (current_user.permissions & (1 << Permission::PERMISSION_ADMIN as i64) != 0)
-                && let Some(target_user_identifier) = req.user_identifier.as_ref()
-            {
-                use hxi2_proto::proto::auth::v2::revoke_api_token_request::UserIdentifierView;
-                match target_user_identifier {
-                    UserIdentifierView::UserId(user_id) => DbUserIdentifier::Id(*user_id),
-                    UserIdentifierView::Username(username) => {
-                        DbUserIdentifier::Username(username.to_string())
-                    }
-                }
-            } else if req.user_identifier.is_some() {
-                return Err(ConnectError::permission_denied(
-                    "You do not have permission to remove a password for another user",
-                ));
-            } else {
-                if current_user.api_token_data.is_unset() {
-                    return Err(ConnectError::permission_denied(
-                        "Only API users can call this method on themselves",
-                    ));
-                }
-                DbUserIdentifier::Id(current_user.user_id)
-            };
+            resolve_overridable_user_identifier_from_message(&req.user_identifier, current_user)?;
 
         self.api_login_manager
             .delete_api_token(&user_identifier)
