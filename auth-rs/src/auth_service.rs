@@ -10,7 +10,6 @@ use connectrpc::{
     ConnectError, ErrorCode, RequestContext, Response, ServiceRequest, ServiceResult,
 };
 use http::header::SET_COOKIE;
-pub use hxi2_proto::connect::auth::v2::AuthServiceExt;
 use hxi2_proto::proto::auth::v2::{
     APILoginRequest, APILoginResponse, AddAPIUserRequest, AddAPIUserResponse, CreateUserRequest,
     CreateUserResponse, DBUser, GetCSRFTokenRequest, GetCSRFTokenResponse, GetJWTPublicKeyRequest,

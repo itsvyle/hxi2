@@ -110,6 +110,7 @@ where
         }
 
         if !is_public && let Some(ref c) = claims {
+            //
             if !c.data.is_set() {
                 return Err(to_http_error(
                     ConnectError::internal("claims data is not set"),

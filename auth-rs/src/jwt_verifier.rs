@@ -1,6 +1,5 @@
 use std::sync::LazyLock;
 
-use anyhow::{Context as _, Result};
 use hxi2_proto::proto::auth::v2::JwtClaims;
 use jsonwebtoken::{DecodingKey, Validation, decode};
 use tracing::instrument;
