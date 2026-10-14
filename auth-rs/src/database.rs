@@ -3,7 +3,7 @@ use buffa_types::Timestamp;
 use chrono::{DateTime, Duration, Utc};
 use hxi2_proto::{
     proto::auth::v2::{Attribute, Permission, list_api_users_response},
-    utils::retrieve_active_bitfields,
+    utils::{retrieve_active_bitfields, user_identifying::GenericUserIdentifier},
 };
 use rand::RngExt;
 use serde::{Deserialize, Serialize};
@@ -127,6 +127,16 @@ impl DbUserIdentifier {
         match self {
             DbUserIdentifier::Id(id) => Ok(*id),
             _ => db.resolve_user_identifier(self).await,
+        }
+    }
+}
+
+impl From<GenericUserIdentifier> for DbUserIdentifier {
+    fn from(generic: GenericUserIdentifier) -> Self {
+        match generic {
+            GenericUserIdentifier::UserId(id) => DbUserIdentifier::Id(id),
+            GenericUserIdentifier::Username(username) => DbUserIdentifier::Username(username),
+            GenericUserIdentifier::DiscordID(discord_id) => DbUserIdentifier::DiscordId(discord_id),
         }
     }
 }

@@ -32,5 +32,6 @@ message UserIdentifier {
     oneof user_identifier {
         int64 user_id = 1;
         string username = 2;
+        string discord_id = 3;
     }
 }

@@ -9,10 +9,11 @@ use hxi2_proto::{
     proto::auth::v2::{
         AddPasswordRequest, RemovePasswordRequest, UpdateDiscordIDRequest, UpdateUsernameRequest,
     },
+    utils::user_identifying::resolve_overridable_user_identifier_from_message,
 };
 
 use crate::{
-    auth_service::{resolve_current_user, resolve_overridable_user_identifier_from_message},
+    auth_service::resolve_current_user,
     connect_result::ToConnectError,
     database::DbError::{Duplicate, Validation},
     login_manager::LoginManager,
@@ -33,7 +34,8 @@ impl AuthUpdateUserService for AuthUpdateUserServiceImpl {
         let current_user = resolve_current_user(&ctx)?;
 
         let user_identifier =
-            resolve_overridable_user_identifier_from_message(&req.user_identifier, current_user)?;
+            resolve_overridable_user_identifier_from_message(&req.user_identifier, current_user)?
+                .into();
 
         let req = req.to_owned_message();
 
@@ -62,7 +64,8 @@ impl AuthUpdateUserService for AuthUpdateUserServiceImpl {
         let current_user = resolve_current_user(&ctx)?;
 
         let user_identifier =
-            resolve_overridable_user_identifier_from_message(&req.user_identifier, current_user)?;
+            resolve_overridable_user_identifier_from_message(&req.user_identifier, current_user)?
+                .into();
 
         self.password_login_manager
             .remove_password(&user_identifier)
@@ -82,7 +85,8 @@ impl AuthUpdateUserService for AuthUpdateUserServiceImpl {
         let current_user = resolve_current_user(&ctx)?;
 
         let user_identifier =
-            resolve_overridable_user_identifier_from_message(&req.user_identifier, current_user)?;
+            resolve_overridable_user_identifier_from_message(&req.user_identifier, current_user)?
+                .into();
 
         let db = crate::app_config::AppConfiguration::INSTANCE().db().await;
         match db.update_username(&user_identifier, req.new_username).await {
@@ -110,7 +114,8 @@ impl AuthUpdateUserService for AuthUpdateUserServiceImpl {
         let current_user = resolve_current_user(&ctx)?;
 
         let user_identifier =
-            resolve_overridable_user_identifier_from_message(&req.user_identifier, current_user)?;
+            resolve_overridable_user_identifier_from_message(&req.user_identifier, current_user)?
+                .into();
 
         let db = crate::app_config::AppConfiguration::INSTANCE().db().await;
         match db
