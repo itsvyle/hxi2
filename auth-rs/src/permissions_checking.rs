@@ -457,10 +457,11 @@ pub fn get_compiled_permissions() -> &'static CompiledPermissions {
             ("/auth.v2.AuthUpdateUserService/UpdateDiscordID", MethodPermissions {
                 allow_roles: &[
 					Permission::PERMISSION_ANY_AUTHENTICATED,
+					Permission::PERMISSION_ADMIN,
                 ],
                 is_public: false,
                 public_url: None,
-                compiled_permissions_bitfield: 64,
+                compiled_permissions_bitfield: 66,
                 csrf_token_header: Some("X-CSRF-Token"),
                 csrf_token_cookie: Some("csrf_token"),
                 response_cors_headers: None,

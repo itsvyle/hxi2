@@ -50,6 +50,7 @@ grpcui:
     grpcui -plaintext \
         -protoset ../generated-proto/hxi2.binpb \
         -H "Authorization: Bearer {{shell('just get_jwt')}}" \
+        -H "X-CSRF-Token: bypass" \
         "0.0.0.0:{{PORT}}"
 
 generate-csrf-token:

@@ -315,7 +315,7 @@
       "csrf_token_header": "X-CSRF-Token",
       "csrf_token_cookie": "csrf_token",
       "response_cors_headers": null,
-      "enforce_csrf": false,
+      "enforce_csrf": true,
       "is_frontend": false,
       "frontend_static_file": null
     },
@@ -329,7 +329,7 @@
       "csrf_token_header": "X-CSRF-Token",
       "csrf_token_cookie": "csrf_token",
       "response_cors_headers": null,
-      "enforce_csrf": false,
+      "enforce_csrf": true,
       "is_frontend": false,
       "frontend_static_file": null
     },

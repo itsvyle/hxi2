@@ -18,12 +18,8 @@ service AuthUpdateUserService {
     rpc UpdateDiscordID(UpdateDiscordIDRequest) returns (google.protobuf.Empty) {
         option (permission_level).allow_role = PERMISSION_ADMIN;
     }
-    rpc AddPassword(AddPasswordRequest) returns (google.protobuf.Empty) {
-        option (permission_level).enforce_csrf = false;
-    }
-    rpc RemovePassword(RemovePasswordRequest) returns (google.protobuf.Empty) { 
-        option (permission_level).enforce_csrf = false;
-    }
+    rpc AddPassword(AddPasswordRequest) returns (google.protobuf.Empty);
+    rpc RemovePassword(RemovePasswordRequest) returns (google.protobuf.Empty);
 }
 
 message UpdateUsernameRequest {

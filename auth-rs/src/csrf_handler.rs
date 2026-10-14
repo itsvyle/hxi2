@@ -10,7 +10,7 @@ use rand::{RngExt, distr::Alphanumeric};
 use sha2::Sha256;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::permissions_checking;
+use crate::{app_config, permissions_checking};
 
 type HmacSha256 = Hmac<Sha256>;
 
@@ -101,6 +101,10 @@ impl CsrfProtection {
             Some(t) => t,
             None => return err_forbidden("X-CSRF-Token header missing"),
         };
+
+        if app_config::AppConfiguration::INSTANCE().is_development() && header_token == "bypass" {
+            return next.run(req).await;
+        }
 
         // 3. Extract Cookie Value manually
         let cookie_token: String = match req
