@@ -44,6 +44,15 @@ pub fn router() -> anyhow::Result<Router> {
                     .join("+")
             );
 
+            if link_files.is_empty() {
+                error!(
+                    "No static file(s) not found in embedded assets: {} (for url {})",
+                    file_path,
+                    urls.join(", ")
+                );
+                continue;
+            }
+
             // TODO: add actually serving the compressed files... for now just do this!
             let link_files = &[link_files.first().unwrap()];
 
