@@ -25,5 +25,11 @@ compile-proto:
     buf generate --debug
     cd generated-proto/parse-perms && cargo run
 
+docker-compile-proto:
+    docker build -f ./Dockerfile.compile-proto -t hxi2-proto-builder .
+    docker run --rm \
+        -v "$(pwd):/app" \
+        hxi2-proto-builder
+
 grpcui url="0.0.0.0:8080":
     grpcui -plaintext -protoset ./generated-proto/hxi2.binpb {{url}}

@@ -1,0 +1,45 @@
+# ==========================================
+# Stage 1: Build Rust code generation plugins
+# ==========================================
+FROM rust:alpine AS rust-builder
+RUN apk add --no-cache musl-dev build-base
+
+RUN cargo install --locked \
+    connectrpc-codegen \
+    protoc-gen-buffa \
+    protoc-gen-buffa-packaging
+# ==========================================
+# Stage 2: Grab Buf binary from official image
+# ==========================================
+FROM bufbuild/buf:latest AS buf-image
+
+# ==========================================
+# Stage 3: Final Alpine Image Assembly
+# ==========================================
+FROM node:20-alpine AS final
+
+# Install minimal OS requirements for Rust-compiled binaries or native modules if needed
+RUN apk add --no-cache libgcc libstdc++ git
+
+# 1. Steal Buf binary from Stage 2
+COPY --from=buf-image /usr/local/bin/buf /usr/local/bin/buf
+
+# 2. Steal Rust plugin binaries from Stage 1 cargo bin directory
+COPY --from=rust-builder /usr/local/cargo/bin/protoc-gen-connect-rust /usr/local/bin/
+COPY --from=rust-builder /usr/local/cargo/bin/protoc-gen-buffa /usr/local/bin/
+COPY --from=rust-builder /usr/local/cargo/bin/protoc-gen-buffa-packaging /usr/local/bin/
+
+# 3. Enable pnpm via Node's corepack
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+COPY --from=ghcr.io/casey/just:latest /just /usr/local/bin/
+
+# Set working directory
+WORKDIR /app
+
+# Copy dependency manifests first to leverage Docker layer caching
+COPY generated-proto/js/package.json generated-proto/js/pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+COPY . .
+
