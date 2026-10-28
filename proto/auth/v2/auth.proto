@@ -27,6 +27,7 @@ service AuthService {
     }
 
     rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
+option idempotency_level = NO_SIDE_EFFECTS
         option (permission_level).allow_role = PERMISSION_API_LIST_USERS;
     }
 
